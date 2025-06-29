@@ -23,5 +23,5 @@ if __name__ == '__main__':
 
     generator = Generator(file_name)
     pre_vc, trans_vc, post_vc = generator.generate('SimpleLoop', 'loop(uint256)', 0, 'test')
-    print(pre_vc)
+    print(trans_vc)
  

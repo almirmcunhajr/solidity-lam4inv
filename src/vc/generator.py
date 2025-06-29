@@ -5,11 +5,30 @@ from slither.slither import Slither
 from slither.core.declarations import Contract, Function
 from slither.core.cfg.node import Constant, Node, Variable
 from slither.core.dominators.utils import compute_dominators
+from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
-from slither.slithir.operations import OperationWithLValue
+from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, lvalue
+from slither.slithir.operations.operation import Operation
 from utils.slither import preorder_traversal
 
 class Generator:
+    op_map = {
+        BinaryType.ADDITION: '+',
+        BinaryType.SUBTRACTION: '-',
+        BinaryType.MULTIPLICATION: '*',
+        BinaryType.DIVISION: 'div',
+        BinaryType.MODULO: 'mod',
+        BinaryType.LESS: '<',
+        BinaryType.GREATER: '>',
+        BinaryType.LESS_EQUAL: '<=',
+        BinaryType.GREATER_EQUAL: '>=',
+        BinaryType.EQUAL: '=',
+        BinaryType.NOT_EQUAL: 'distinct',
+        BinaryType.ANDAND: 'and',
+        BinaryType.OROR: 'or',
+        UnaryType.BANG: 'not'
+    }
+
     def __init__(self, file_path: str):
         self.slither = Slither(file_path, disable_plugins=["solc-ast-exporter"])
 
@@ -39,10 +58,14 @@ class Generator:
 
         smt_declarations = self._declare_smt_variables(ssa_vars)
         smt_inv_fun_definition = self._define_smt_inv_fun(loop_vars, inv)
-
-        pre_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
-        trans_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
-        post_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
+        smt_pre_fun_definition = self._define_smt_semantic_fun('pre-f', pre_path)
+        smt_trans_fun_definition = self._define_smt_semantic_fun('trans-f', trans_path)
+        smt_post_fun_definition = self._define_smt_semantic_fun('post-f', post_path)
+        
+        vc_base = [smt_declarations, smt_inv_fun_definition]
+        pre_vc = '\n'.join(vc_base + [smt_pre_fun_definition]) 
+        trans_vc = '\n'.join(vc_base + [smt_trans_fun_definition])
+        post_vc = '\n'.join(vc_base + [smt_post_fun_definition])
 
         return pre_vc, trans_vc, post_vc
 
@@ -127,6 +150,65 @@ class Generator:
 
         return sorted(list(loop_var_names)), entry_ssa_map, exit_ssa_map
 
+    def _define_smt_semantic_fun(self, name: str, path: list[Node]) -> str:
+        smt_exprs = self._path_to_smt_exprs(path)
+        body = '\n'.join([e for e in smt_exprs if e])
+        return f'''
+(define-fun {name} () Bool
+ (and
+{textwrap.indent(body, '    ')}
+ )
+)
+'''
+
+    def _path_to_smt_exprs(self, path: list[Node]) -> list[str]:
+        return [self._ir_to_smt(ir) for node in path for ir in node.irs_ssa]
+
+    def _ir_to_smt(self, ir: Operation) -> str:
+        if isinstance(ir, Binary):
+            return self._binary_to_smt(ir)
+        if isinstance(ir, Unary):
+            return self._unary_to_smt(ir)
+        if isinstance(ir, Assignment):
+            return self._assignment_to_smt(ir)
+        return ""
+
+    def _binary_to_smt(self, ir: Binary) -> str:
+        if ir.type not in self.op_map:
+            raise InvalidOpType()                    
+        if not isinstance(ir.variable_left, (Variable, Constant)):
+            raise InvalidRvalueType()
+        if not isinstance(ir.variable_right, (Variable, Constant)):
+            raise InvalidRvalueType()
+        op = self.op_map[ir.type]
+        left = self._var_to_smt(ir.variable_left)
+        right = self._var_to_smt(ir.variable_right)
+        if isinstance(ir, OperationWithLValue) and ir.lvalue:
+            lvalue = self._var_to_smt(ir.lvalue)
+            return f'(= {lvalue} ({op} {left} {right}))'
+        return f'({op} {left} {right})'
+
+    def _unary_to_smt(self, ir: Unary) -> str:
+        if ir.type not in self.op_map:
+            raise InvalidOpType()
+        if not isinstance(ir.rvalue, (Variable, Constant)):
+            raise InvalidRvalueType()
+        op = self.op_map[ir.type]
+        rvalue = self._var_to_smt(ir.rvalue)
+        if isinstance(ir, OperationWithLValue) and ir.lvalue:
+            lvalue = self._var_to_smt(ir.lvalue)
+            return f'(= {lvalue} ({op} {rvalue}))'
+        return f'({op} {rvalue})'
+
+    def _assignment_to_smt(self, ir: Assignment) -> str:
+        if not isinstance(ir.rvalue, (Variable, Constant)):
+            raise InvalidRvalueType()
+        if not ir.lvalue:
+            raise InvalidOpType()
+        lvalue = self._var_to_smt(ir.lvalue)
+        rvalue = self._var_to_smt(ir.rvalue)
+        return f'(= {lvalue} {rvalue})'
+
     def _get_base_name(self, var: Variable) -> str|None:
         if isinstance(var, Constant):
             return str(var.value)
@@ -144,11 +226,11 @@ class Generator:
 
     def _define_smt_inv_fun(self, loop_vars: list[str], inv: str) -> str:
         params = ' '.join([f'({var} Int)' for var in loop_vars])
-        return textwrap.dedent(f'''
-            (define-fun inv-f ({params}) Bool
-                {inv}
-            )
-            ''')
+        return f'''
+(define-fun inv-f ({params}) Bool
+{textwrap.indent(inv, '  ')}
+)
+'''
 
 class ContractNotFound(Exception):
     def __init__(self, contract_name: str):
@@ -163,6 +245,13 @@ class LoopNotFound(Exception):
         super().__init__(f'Loop {loop_index} not found')
 
 class NoneTypeVarName(Exception):
-    def __init__(self, *args: object) -> None:
+    def __init__(self, *args: object):
         super().__init__(*args)
    
+class InvalidOpType(Exception):
+    def __init__(self):
+        super().__init__(f'Invalid operation type')
+
+class InvalidRvalueType(Exception):
+    def __init__(self) -> None:
+        super().__init__('Invalid RVALUE type')
