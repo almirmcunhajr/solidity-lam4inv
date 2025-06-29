@@ -17,7 +17,7 @@ class Generator:
             if contract.name == contract_name:
                 return contract
 
-    def generate(self, contract_name: str, function_name: str, loop_index: int, inv: str) -> str:
+    def generate(self, contract_name: str, function_name: str, loop_index: int, inv: str) -> tuple[str, str, str]:
         contract = self._get_contract(contract_name)
         if contract is None:
             raise ContractNotFound(contract_name)
@@ -38,7 +38,11 @@ class Generator:
 
         smt_declarations = self._declare_smt_variables(ssa_vars)
 
-        return '\n'.join([smt_declarations])
+        pre_vc = '\n'.join([smt_declarations])
+        trans_vc = '\n'.join([smt_declarations])
+        post_vc = '\n'.join([smt_declarations])
+
+        return pre_vc, trans_vc, post_vc
 
     def _get_loop_nodes(self, function: Function) -> list[tuple[Node, Node]]:
         loops = []

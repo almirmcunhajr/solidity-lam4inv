@@ -22,6 +22,6 @@ if __name__ == '__main__':
         f.write(solidity_code)
 
     generator = Generator(file_name)
-    smt_str = generator.generate('SimpleLoop', 'loop(uint256)', 0, '')
-    print(smt_str)
+    pre_vc, trans_vc, post_vc = generator.generate('SimpleLoop', 'loop(uint256)', 0, '')
+    print(pre_vc)
  
