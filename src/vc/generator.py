@@ -37,10 +37,11 @@ class Generator:
         loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(trans_path, function, contract)
 
         smt_declarations = self._declare_smt_variables(ssa_vars)
+        smt_inv_fun_definition = self._define_smt_inv_fun(loop_vars, inv)
 
-        pre_vc = '\n'.join([smt_declarations])
-        trans_vc = '\n'.join([smt_declarations])
-        post_vc = '\n'.join([smt_declarations])
+        pre_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
+        trans_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
+        post_vc = '\n'.join([smt_declarations, smt_inv_fun_definition])
 
         return pre_vc, trans_vc, post_vc
 
@@ -139,6 +140,14 @@ class Generator:
         for var in ssa_vars:
             smt.append(f'(declare-const {var} Int)')
         return '\n'.join(smt)
+
+    def _define_smt_inv_fun(self, loop_vars: list[str], inv: str) -> str:
+        params = ' '.join([f'({var} Int)' for var in loop_vars])
+        return f'''
+(define-fun inv-f ({params}) Bool
+    {inv}
+)
+'''
 
 class ContractNotFound(Exception):
     def __init__(self, contract_name: str):
