@@ -6,6 +6,7 @@ from slither.core.cfg.node import Constant, Node, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.variables.variable import Variable
 from slither.slithir.operations import OperationWithLValue
+from utils.slither import preorder_traversal
 
 class Generator:
     def __init__(self, file_path: str):
@@ -16,7 +17,7 @@ class Generator:
             if contract.name == contract_name:
                 return contract
 
-    def generate(self, contract_name: str, function_name: str, loop_index: int, inv: str) -> tuple[str, str, str]:
+    def generate(self, contract_name: str, function_name: str, loop_index: int, inv: str) -> str:
         contract = self._get_contract(contract_name)
         if contract is None:
             raise ContractNotFound(contract_name)
@@ -32,8 +33,12 @@ class Generator:
 
         pre_path, trans_path, post_path = self._get_paths(function, cond_node, end_node)
 
-        ssa_vars = self._get_ssa_vars()
-        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(function, contract)
+        ssa_vars = self._get_ssa_vars(function)
+        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(trans_path, function, contract)
+
+        smt_declarations = self._declare_smt_variables(ssa_vars)
+
+        return '\n'.join([smt_declarations])
 
     def _get_loop_nodes(self, function: Function) -> list[tuple[Node, Node]]:
         loops = []
@@ -85,9 +90,10 @@ class Generator:
     def _get_loop_ssa_maps(self, trans_path: list[Node], function: Function, contract: Contract) -> tuple[list[str], dict[str,str], dict[str,str]]:
         loop_var_names: set[str] = {v.name for v in chain(function.parameters, function.returns) if v.name}
         loop_var_names.update({v.name for v in contract.state_variables if v.name})
-
+        
+        # Iterate in order to find the last assignment to a variable in the loop body and get its final SSA version and the corresponding entry SSA version
         exit_ssa_map: dict[str, str] = {}
-        exit_ssa_base_name = {}
+        entry_ssa_map: dict[str, str] = {}
         for node in trans_path:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue:
@@ -96,18 +102,12 @@ class Generator:
                         raise NoneTypeVarName()
                     loop_var_names.add(base_name)
                     exit_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
-                    exit_ssa_base_name[str(ir.lvalue)] = base_name
-
-        entry_ssa_map: dict[str, str] = {}
-        for node in trans_path:
-            for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and str(ir.lvalue) in exit_ssa_base_name:
-                    base_name = exit_ssa_base_name[str(ir.lvalue)]
                     if hasattr(ir, 'read') and ir.read:
                         for var in ir.read:
                             if self._get_base_name(var) == base_name:
                                 entry_ssa_map[base_name] = self._var_to_smt(var)
-
+        
+        # Handle variable that are only read within the loop body
         unmapped_vars = {v for v in loop_var_names if v not in entry_ssa_map}
         for node in trans_path:
             for ir in node.irs_ssa:
@@ -129,6 +129,12 @@ class Generator:
         if var.name:
             return var.name.split('_ssa')[0]
         return None
+    
+    def _declare_smt_variables(self, ssa_vars: list[str]) -> str:
+        smt = ['(set-logic LIA)']
+        for var in ssa_vars:
+            smt.append(f'(declare-const {var} Int)')
+        return '\n'.join(smt)
 
 class ContractNotFound(Exception):
     def __init__(self, contract_name: str):
@@ -145,3 +151,4 @@ class LoopNotFound(Exception):
 class NoneTypeVarName(Exception):
     def __init__(self, *args: object) -> None:
         super().__init__(*args)
+   
