@@ -1,4 +1,5 @@
 from typing import Optional
+import textwrap
 from itertools import chain
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
@@ -143,11 +144,11 @@ class Generator:
 
     def _define_smt_inv_fun(self, loop_vars: list[str], inv: str) -> str:
         params = ' '.join([f'({var} Int)' for var in loop_vars])
-        return f'''
-(define-fun inv-f ({params}) Bool
-    {inv}
-)
-'''
+        return textwrap.dedent(f'''
+            (define-fun inv-f ({params}) Bool
+                {inv}
+            )
+            ''')
 
 class ContractNotFound(Exception):
     def __init__(self, contract_name: str):
