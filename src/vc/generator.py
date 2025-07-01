@@ -69,11 +69,18 @@ class Generator:
         smt_pre_fun_definition = self._define_smt_semantic_fun('pre-f', pre_path)
         smt_trans_fun_definition = self._define_smt_semantic_fun('trans-f', trans_path)
         smt_post_fun_definition = self._define_smt_semantic_fun('post-f', post_path)
-        
+
+        entry_args = ' '.join(entry_ssa_map[v] for v in loop_vars)
+        exit_args = ' '.join(exit_ssa_map[v] for v in loop_vars)
+
+        pre_assert = f'(assert (=> (pre-f) (inv-f {entry_args})))'
+        trans_assert = f'(assert (=> (and (inv-f {entry_args}) (trans-f)) (inv-f {exit_args})))'
+        post_assert = f'(assert (=> (inv-f {exit_args}) (post-f)))'
+
         vc_base = [smt_declarations, smt_inv_fun_definition]
-        pre_vc = '\n'.join(vc_base + [smt_pre_fun_definition]) 
-        trans_vc = '\n'.join(vc_base + [smt_trans_fun_definition])
-        post_vc = '\n'.join(vc_base + [smt_post_fun_definition])
+        pre_vc = '\n'.join(vc_base + [smt_pre_fun_definition, pre_assert])
+        trans_vc = '\n'.join(vc_base + [smt_trans_fun_definition, trans_assert])
+        post_vc = '\n'.join(vc_base + [smt_post_fun_definition, post_assert])
 
         return pre_vc, trans_vc, post_vc
 
