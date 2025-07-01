@@ -165,25 +165,20 @@ class Generator:
                     loop_var_names.add(base_name)
 
                     reads = list(getattr(ir, "read", []) or [])
-                    entry_var = None
                     exit_var = None
                     for var in reads:
                         smt_name = self._var_to_smt(var)
-                        if smt_name in assigned_in_loop and exit_var is None:
+                        if smt_name in assigned_in_loop:
                             exit_var = smt_name
-                        else:
-                            entry_var = smt_name
+                            break
 
-                    # Fallbacks if we failed to classify the reads
-                    if entry_var is None and reads:
-                        entry_var = self._var_to_smt(reads[0])
                     if exit_var is None and len(reads) > 1:
                         exit_var = self._var_to_smt(reads[-1])
-                    if exit_var is None:
-                        exit_var = self._var_to_smt(ir.lvalue)
+                    if exit_var is None and reads:
+                        exit_var = self._var_to_smt(reads[0])
 
-                    entry_ssa_map[base_name] = entry_var if entry_var else self._var_to_smt(ir.lvalue)
-                    exit_ssa_map[base_name] = exit_var
+                    entry_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
+                    exit_ssa_map[base_name] = exit_var if exit_var else self._var_to_smt(ir.lvalue)
 
         # Ensure all loop variables have a mapping
         for var in loop_var_names:
