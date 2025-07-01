@@ -7,7 +7,15 @@ from slither.core.cfg.node import Constant, Node, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
-from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, lvalue
+from slither.slithir.operations import (
+    Assignment,
+    Binary,
+    BinaryType,
+    OperationWithLValue,
+    UnaryType,
+    Phi,
+    lvalue,
+)
 from slither.slithir.operations.operation import Operation
 from utils.slither import preorder_traversal
 
@@ -54,7 +62,7 @@ class Generator:
         pre_path, trans_path, post_path = self._get_paths(function, cond_node, end_node)
 
         ssa_vars = self._get_ssa_vars(function)
-        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(trans_path, function, contract)
+        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(function, contract)
 
         smt_declarations = self._declare_smt_variables(ssa_vars)
         smt_inv_fun_definition = self._define_smt_inv_fun(loop_vars, inv)
@@ -116,37 +124,37 @@ class Generator:
             return str(var.value)
         return str(var)
 
-    def _get_loop_ssa_maps(self, trans_path: list[Node], function: Function, contract: Contract) -> tuple[list[str], dict[str,str], dict[str,str]]:
+    def _get_loop_ssa_maps(self, function: Function, contract: Contract) -> tuple[list[str], dict[str, str], dict[str, str]]:
+        """Return loop variable names and their entry/exit SSA mappings using Phi nodes."""
+
         loop_var_names: set[str] = {v.name for v in chain(function.parameters, function.returns) if v.name}
         loop_var_names.update({v.name for v in contract.state_variables if v.name})
-        
-        # Iterate in order to find the last assignment to a variable in the loop body and get its final SSA version and the corresponding entry SSA version
-        exit_ssa_map: dict[str, str] = {}
+
         entry_ssa_map: dict[str, str] = {}
-        for node in trans_path:
-            for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue:
+        exit_ssa_map: dict[str, str] = {}
+
+        # Inspect Phi nodes in the function to build the maps
+        for node in function.nodes:
+            for ir in getattr(node, "irs_ssa", []):
+                if isinstance(ir, Phi) and ir.lvalue:
                     base_name = self._get_base_name(ir.lvalue)
                     if not base_name:
                         raise NoneTypeVarName()
+
                     loop_var_names.add(base_name)
-                    exit_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
-                    if hasattr(ir, 'read') and ir.read:
-                        for var in ir.read:
-                            if self._get_base_name(var) == base_name:
-                                entry_ssa_map[base_name] = self._var_to_smt(var)
-        
-        # Handle variable that are only read within the loop body
-        unmapped_vars = {v for v in loop_var_names if v not in entry_ssa_map}
-        for node in trans_path:
-            for ir in node.irs_ssa:
-                if hasattr(ir, 'read') and ir.read:
-                    for var in ir.read:
-                        base_name = self._get_base_name(var)
-                        if base_name and base_name in unmapped_vars:
-                            smt_ssa_name = self._var_to_smt(var)
-                            entry_ssa_map[base_name] = smt_ssa_name
-                            exit_ssa_map[base_name] = smt_ssa_name
+
+                    reads = getattr(ir, "read", []) or []
+                    if len(reads) >= 1:
+                        entry_ssa_map[base_name] = self._var_to_smt(reads[0])
+                    if len(reads) >= 2:
+                        exit_ssa_map[base_name] = self._var_to_smt(reads[1])
+                    else:
+                        exit_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
+
+        # Ensure all loop variables have a mapping
+        for var in loop_var_names:
+            entry_ssa_map.setdefault(var, var)
+            exit_ssa_map.setdefault(var, var)
 
         return sorted(list(loop_var_names)), entry_ssa_map, exit_ssa_map
 
