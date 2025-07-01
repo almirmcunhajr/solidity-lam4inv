@@ -7,15 +7,7 @@ from slither.core.cfg.node import Constant, Node, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
-from slither.slithir.operations import (
-    Assignment,
-    Binary,
-    BinaryType,
-    OperationWithLValue,
-    UnaryType,
-    Phi,
-    lvalue,
-)
+from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, lvalue
 from slither.slithir.operations.operation import Operation
 from utils.slither import preorder_traversal
 
@@ -124,64 +116,37 @@ class Generator:
             return str(var.value)
         return str(var)
 
-    def _get_loop_ssa_maps(
-        self,
-        trans_path: list[Node],
-        function: Function,
-        contract: Contract,
-    ) -> tuple[list[str], dict[str, str], dict[str, str]]:
-        """Return loop variable names and their entry/exit SSA mappings using Phi nodes."""
-
-        loop_var_names: set[str] = {
-            v.name for v in chain(function.parameters, function.returns) if v.name
-        }
+    def _get_loop_ssa_maps(self, trans_path: list[Node], function: Function, contract: Contract) -> tuple[list[str], dict[str,str], dict[str,str]]:
+        loop_var_names: set[str] = {v.name for v in chain(function.parameters, function.returns) if v.name}
         loop_var_names.update({v.name for v in contract.state_variables if v.name})
-
-        entry_ssa_map: dict[str, str] = {}
+        
+        # Iterate in order to find the last assignment to a variable in the loop body and get its final SSA version and the corresponding entry SSA version
         exit_ssa_map: dict[str, str] = {}
-
-        # Collect all SSA names assigned within the loop body
-        assigned_in_loop: set[str] = set()
+        entry_ssa_map: dict[str, str] = {}
         for node in trans_path:
-            for ir in getattr(node, "irs_ssa", []):
+            for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue:
-                    assigned_in_loop.add(self._var_to_smt(ir.lvalue))
-
-        # Inspect Phi nodes in the function to build the maps
-        for node in function.nodes:
-            for ir in getattr(node, "irs_ssa", []):
-                if isinstance(ir, Phi) and ir.lvalue:
                     base_name = self._get_base_name(ir.lvalue)
                     if not base_name:
                         raise NoneTypeVarName()
-
                     loop_var_names.add(base_name)
-
-                    reads = list(getattr(ir, "read", []) or [])
-                    entry_var = None
-                    exit_var = None
-                    for var in reads:
-                        smt_name = self._var_to_smt(var)
-                        if smt_name in assigned_in_loop and exit_var is None:
-                            exit_var = smt_name
-                        else:
-                            entry_var = smt_name
-
-                    # Fallbacks if we failed to classify the reads
-                    if entry_var is None and reads:
-                        entry_var = self._var_to_smt(reads[0])
-                    if exit_var is None and len(reads) > 1:
-                        exit_var = self._var_to_smt(reads[-1])
-                    if exit_var is None:
-                        exit_var = self._var_to_smt(ir.lvalue)
-
-                    entry_ssa_map[base_name] = entry_var if entry_var else self._var_to_smt(ir.lvalue)
-                    exit_ssa_map[base_name] = exit_var
-
-        # Ensure all loop variables have a mapping
-        for var in loop_var_names:
-            entry_ssa_map.setdefault(var, var)
-            exit_ssa_map.setdefault(var, var)
+                    exit_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
+                    if hasattr(ir, 'read') and ir.read:
+                        for var in ir.read:
+                            if self._get_base_name(var) == base_name:
+                                entry_ssa_map[base_name] = self._var_to_smt(var)
+        
+        # Handle variable that are only read within the loop body
+        unmapped_vars = {v for v in loop_var_names if v not in entry_ssa_map}
+        for node in trans_path:
+            for ir in node.irs_ssa:
+                if hasattr(ir, 'read') and ir.read:
+                    for var in ir.read:
+                        base_name = self._get_base_name(var)
+                        if base_name and base_name in unmapped_vars:
+                            smt_ssa_name = self._var_to_smt(var)
+                            entry_ssa_map[base_name] = smt_ssa_name
+                            exit_ssa_map[base_name] = smt_ssa_name
 
         return sorted(list(loop_var_names)), entry_ssa_map, exit_ssa_map
 
