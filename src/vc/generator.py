@@ -62,7 +62,7 @@ class Generator:
         pre_path, trans_path, post_path = self._get_paths(function, cond_node, end_node)
 
         ssa_vars = self._get_ssa_vars(function)
-        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(function, contract)
+        loop_vars, entry_ssa_map, exit_ssa_map = self._get_loop_ssa_maps(trans_path, function, contract)
 
         smt_declarations = self._declare_smt_variables(ssa_vars)
         smt_inv_fun_definition = self._define_smt_inv_fun(loop_vars, inv)
@@ -124,7 +124,12 @@ class Generator:
             return str(var.value)
         return str(var)
 
-    def _get_loop_ssa_maps(self, function: Function, contract: Contract) -> tuple[list[str], dict[str, str], dict[str, str]]:
+    def _get_loop_ssa_maps(
+        self,
+        trans_path: list[Node],
+        function: Function,
+        contract: Contract,
+    ) -> tuple[list[str], dict[str, str], dict[str, str]]:
         """Return loop variable names and their entry/exit SSA mappings using Phi nodes."""
 
         loop_var_names: set[str] = {v.name for v in chain(function.parameters, function.returns) if v.name}
@@ -132,6 +137,8 @@ class Generator:
 
         entry_ssa_map: dict[str, str] = {}
         exit_ssa_map: dict[str, str] = {}
+
+        trans_nodes = set(trans_path)
 
         # Inspect Phi nodes in the function to build the maps
         for node in function.nodes:
@@ -144,12 +151,22 @@ class Generator:
                     loop_var_names.add(base_name)
 
                     reads = getattr(ir, "read", []) or []
-                    if len(reads) >= 1:
-                        entry_ssa_map[base_name] = self._var_to_smt(reads[0])
-                    if len(reads) >= 2:
-                        exit_ssa_map[base_name] = self._var_to_smt(reads[1])
+                    nodes = list(getattr(ir, "nodes", []))
+
+                    if len(reads) == len(nodes):
+                        for src_node, var in zip(nodes, reads):
+                            smt_name = self._var_to_smt(var)
+                            if src_node in trans_nodes:
+                                exit_ssa_map[base_name] = smt_name
+                            else:
+                                entry_ssa_map[base_name] = smt_name
                     else:
-                        exit_ssa_map[base_name] = self._var_to_smt(ir.lvalue)
+                        if len(reads) >= 1:
+                            entry_ssa_map.setdefault(base_name, self._var_to_smt(reads[0]))
+                        if len(reads) >= 2:
+                            exit_ssa_map.setdefault(base_name, self._var_to_smt(reads[1]))
+                        elif len(reads) == 1:
+                            exit_ssa_map.setdefault(base_name, self._var_to_smt(ir.lvalue))
 
         # Ensure all loop variables have a mapping
         for var in loop_var_names:
