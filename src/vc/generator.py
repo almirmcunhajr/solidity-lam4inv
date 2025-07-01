@@ -132,13 +132,20 @@ class Generator:
     ) -> tuple[list[str], dict[str, str], dict[str, str]]:
         """Return loop variable names and their entry/exit SSA mappings using Phi nodes."""
 
-        loop_var_names: set[str] = {v.name for v in chain(function.parameters, function.returns) if v.name}
+        loop_var_names: set[str] = {
+            v.name for v in chain(function.parameters, function.returns) if v.name
+        }
         loop_var_names.update({v.name for v in contract.state_variables if v.name})
 
         entry_ssa_map: dict[str, str] = {}
         exit_ssa_map: dict[str, str] = {}
 
-        trans_nodes = set(trans_path)
+        # Collect all SSA names assigned within the loop body
+        assigned_in_loop: set[str] = set()
+        for node in trans_path:
+            for ir in getattr(node, "irs_ssa", []):
+                if isinstance(ir, OperationWithLValue) and ir.lvalue:
+                    assigned_in_loop.add(self._var_to_smt(ir.lvalue))
 
         # Inspect Phi nodes in the function to build the maps
         for node in function.nodes:
@@ -150,23 +157,26 @@ class Generator:
 
                     loop_var_names.add(base_name)
 
-                    reads = getattr(ir, "read", []) or []
-                    nodes = list(getattr(ir, "nodes", []))
+                    reads = list(getattr(ir, "read", []) or [])
+                    entry_var = None
+                    exit_var = None
+                    for var in reads:
+                        smt_name = self._var_to_smt(var)
+                        if smt_name in assigned_in_loop and exit_var is None:
+                            exit_var = smt_name
+                        else:
+                            entry_var = smt_name
 
-                    if len(reads) == len(nodes):
-                        for src_node, var in zip(nodes, reads):
-                            smt_name = self._var_to_smt(var)
-                            if src_node in trans_nodes:
-                                exit_ssa_map[base_name] = smt_name
-                            else:
-                                entry_ssa_map[base_name] = smt_name
-                    else:
-                        if len(reads) >= 1:
-                            entry_ssa_map.setdefault(base_name, self._var_to_smt(reads[0]))
-                        if len(reads) >= 2:
-                            exit_ssa_map.setdefault(base_name, self._var_to_smt(reads[1]))
-                        elif len(reads) == 1:
-                            exit_ssa_map.setdefault(base_name, self._var_to_smt(ir.lvalue))
+                    # Fallbacks if we failed to classify the reads
+                    if entry_var is None and reads:
+                        entry_var = self._var_to_smt(reads[0])
+                    if exit_var is None and len(reads) > 1:
+                        exit_var = self._var_to_smt(reads[-1])
+                    if exit_var is None:
+                        exit_var = self._var_to_smt(ir.lvalue)
+
+                    entry_ssa_map[base_name] = entry_var if entry_var else self._var_to_smt(ir.lvalue)
+                    exit_ssa_map[base_name] = exit_var
 
         # Ensure all loop variables have a mapping
         for var in loop_var_names:
