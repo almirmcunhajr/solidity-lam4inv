@@ -17,18 +17,3 @@ def reaches_node(origin_node: Node, dest_node: Node) -> bool:
             stack.extend(node.sons)
     return False
                
-def preorder_traversal(origin_node: Node, backward: bool = False) -> list[Node]:
-    path, visited, stack = [], set(), [origin_node]
-    while stack:
-        node = stack.pop()
-        visited.add(node)
-        path.append(node)
-
-        preds = node.sons
-        if backward:
-            preds = node.fathers
-        for pred in preds:
-            if pred not in visited:
-                stack.append(pred)
-    return path
-                

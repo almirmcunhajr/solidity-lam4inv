@@ -9,7 +9,6 @@ from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
 from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, lvalue
 from slither.slithir.operations.operation import Operation
-from utils.slither import preorder_traversal
 
 class Generator:
     op_map = {
@@ -103,7 +102,16 @@ class Generator:
         pre_path = sorted(list(pre_path), key=lambda n: n.node_id)
 
         # Get all nodes in the loop body using backward traversal
-        trans_path = set(preorder_traversal(loop_end_node, backward=True))
+        trans_path = set()
+        stack = [loop_end_node]
+        while stack:
+            node = stack.pop()
+            if node in trans_path or node in pre_path:
+                continue
+            trans_path.add(node)
+            if node == loop_cond_node:
+                continue
+            stack.extend(node.fathers)
 
         # The post-path is everything else
         post_path = {n for n in function.nodes if n not in pre_path and n not in trans_path}
