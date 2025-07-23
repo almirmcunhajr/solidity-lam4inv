@@ -1,6 +1,5 @@
 import os
 from typing import Optional
-import textwrap
 from itertools import chain
 
 from slither.slither import Slither
@@ -9,7 +8,7 @@ from slither.core.cfg.node import Constant, Node, Phi, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
-from slither.slithir.operations import Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall, condition
+from slither.slithir.operations import Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall
 
 from jinja2 import Template
 
