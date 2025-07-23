@@ -55,7 +55,6 @@ class Generator:
         loop_header, loop_latch = loops[loop_index]
 
         pre_path, trans_path, post_path = self._get_paths(function, loop_header, loop_latch)
- 
 
         loop_state_vars = self._get_loop_state_vars(loop_header)
         
@@ -155,7 +154,6 @@ class Generator:
             conditions.append(f'( = {intermediate_var} {self._get_base_name(intermediate_var)}! )')
         
         return conditions
-
 
     def _get_pre_conditions(self, pre_path: list[Node]) -> list[str]:
         guards = set()
