@@ -1,0 +1,18 @@
+[project]
+name = "solidity-lam4inv"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "Almir Cunha",email = "almir.cunha@incognia.com"}
+]
+readme = "README.md"
+requires-python = ">=3.8,<3.12.0 || >3.12.0,<4"
+dependencies = [
+    "slither-analyzer (>=0.11.3,<0.12.0)",
+    "jinja2 (>=3.1.6,<4.0.0)"
+]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
