@@ -73,10 +73,13 @@ contract Contract {{
                         irs.append(ir)
             
             formula = '\n'.join([f'( = {ir.lvalue} {self._op_to_smt(ir)} )' for ir in irs[:-1]])
-            if formula != '':
-                formula += '\n'
-            formula = f'{formula}{self._op_to_smt(irs[-1])}'
-            return formula
+            if len(irs) > 1:
+                return f"""( and
+    {formula}
+    {self._op_to_smt(irs[-1])}
+)
+            """
+            return self._op_to_smt(irs[0])
         except Exception as e:
             raise InvalidCodeFormulaError(str(e))
         
@@ -96,5 +99,5 @@ contract Contract {{
 
 if __name__ == '__main__':
     translator = SoliditySMTLIB2Translator()
-    formula = translator.translate_expression('x >= y + z')
+    formula = translator.translate_expression('x >= y')
     print(formula)
