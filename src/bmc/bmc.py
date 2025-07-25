@@ -7,5 +7,5 @@ class InvalidCodeError(Exception):
 
 class BMC(ABC):
     @abstractmethod
-    def verify(self, code: str, logger: logging.Logger) -> bool:
+    def verify(self, code: str, fmt: str, logger: logging.Logger) -> bool:
         pass

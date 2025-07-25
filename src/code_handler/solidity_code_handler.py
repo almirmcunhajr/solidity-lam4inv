@@ -12,6 +12,9 @@ class SolidityCodeHandler(CodeHandler):
 
     def get_language(self) -> Language:
         return self.language
+
+    def get_format(self) -> str:
+        return 'sol'
     
     def get_assert_format(self) -> str:
         return 'assert(...);'

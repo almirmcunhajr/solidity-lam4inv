@@ -15,6 +15,10 @@ class CodeHandler(ABC):
         pass
 
     @abstractmethod
+    def get_format(self) -> str:
+        pass
+
+    @abstractmethod
     def get_assert_format(self) -> str:
         pass
 
