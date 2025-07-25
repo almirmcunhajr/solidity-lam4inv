@@ -50,12 +50,4 @@ class SolidityCodeHandler(CodeHandler):
 
             code += f'{line}\n'
             
-        if '#include <assert.h>' not in code:
-            code = f'#include <assert.h>\n{code}'
-
-        if '#include <stdlib.h>' not in code:
-            code = f'#include <stdlib.h>\n{code}'
-
-        code = code.replace('unknown()','rand()%2==0')
-
         return code
