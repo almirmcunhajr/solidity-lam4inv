@@ -97,6 +97,70 @@ contract Contract {{
         repl = r'((\1) && (\2)) || (!(\1) && (\3))' # https://en.wikipedia.org/wiki/Conditioned_disjunction
         return re.sub(pattern, repl, expression)
 
+class SolidityFormulaHandler(FormulaHandler):
+    def __init__(self):
+        self.smtlib2_translator = SoliditySMTLIB2Translator()
+
+    def extract_formula(self, expression: str) -> str:
+        match = re.search(r'assert\s*\((.*)\)', expression)
+        if not match:
+            raise InvalidCodeFormulaError(f'Solidity assertion "{expression}" does not match the expected format')
+        
+        formula = match.group(1).strip()
+        return formula
+    
+    def negate_formula(self, formula: str) -> str:
+        return f"!({formula})"
+
+    def join_formulas(self, formulas: list[str], form: FormulaForm) -> str:
+        if form == FormulaForm.DNF:
+            return ' || '.join(f'({formula})' for formula in formulas)
+        if form == FormulaForm.CNF:
+            return ' && '.join(f'({formula})' for formula in formulas)
+        
+    def _is_balanced_parentheses(self, expr: str) -> bool:
+        balance = 0
+        for char in expr:
+            if char == '(':
+                balance += 1
+            elif char == ')':
+                balance -= 1
+                if balance < 0:
+                    return False
+        return balance == 0
+    
+    def to_smt_lib2(self, formula: str) -> str:
+        return self.smtlib2_translator.translate_expression(formula)
+
+    def get_form(self, formula: str) -> FormulaForm|None:
+        smtlib2_formula = self.to_smt_lib2(formula)
+        and_index = smtlib2_formula.find('and')
+        or_index = smtlib2_formula.find('or')
+        if and_index == -1 and or_index == -1:
+            return
+        if and_index == -1:
+            return FormulaForm.DNF
+        if or_index == -1:
+            return FormulaForm.CNF
+        return FormulaForm.CNF if and_index < or_index else FormulaForm.DNF
+
+    def extract_predicates(self, formula: str) -> list[str]:
+        form = self.get_form(formula)
+        operator = '||' if form == FormulaForm.DNF else '&&'
+        predicates = []
+        bracket_count = 0
+        start = 0
+        for i in range(len(formula)):
+            if formula[i] == '(':
+                bracket_count += 1
+            elif formula[i] == ')':
+                bracket_count -= 1
+            elif bracket_count == 0 and formula[i:i + len(operator)] == operator:
+                predicates.append(formula[start:i].strip())
+                start = i + len(operator)
+        predicates.append(formula[start:].strip())
+        return predicates
+
 if __name__ == '__main__':
     translator = SoliditySMTLIB2Translator()
     formula = translator.translate_expression('x >= y')

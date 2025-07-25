@@ -16,6 +16,6 @@ contract LoopExample {
         }
 
         // post-condition
-        require(x >= y, "Assertion failed: x < y");
+        assert(x >= y);
     }
 }
