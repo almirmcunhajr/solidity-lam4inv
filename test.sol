@@ -10,7 +10,7 @@ contract LoopExample {
         y = 0;
 
         // loop body
-        while (y < x + 100000) {
+        while (y < 100000) {
             x = x + y;
             y = y + 1;
         }

@@ -17,7 +17,7 @@ class Z3Solver(Solver):
             decl = z3.parse_smt2_string(formula)
         except z3.Z3Exception:
             raise InvalidSMTLIB2FormulaError(formula)
-        
+
         self.solver.add(decl)
         try:
             res = run_with_timeout(self.solver.check, timeout=self.timeout)

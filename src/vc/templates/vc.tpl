@@ -50,7 +50,7 @@
 			( inv-f {{ base_parameters }} )
 			( trans-f {{ base_parameters }} {{ state_parameters }} )
 		)
-		( inv-f {{ base_parameters }})
+		( inv-f {% for var in base_vars %}{{var[0]}}! {% endfor %})
 	)
 ))
 {%- endif %}
