@@ -13,9 +13,9 @@ class ESBMC(BMC):
         self.max_k_step = max_k_step
         pass
 
-    def verify(self, code: str, fmt: str, logger: logging.Logger) -> bool:
+    def verify(self, code: str, logger: logging.Logger) -> bool:
         tmp_dir = tempfile.mkdtemp()
-        tmp_file = os.path.join(tmp_dir, f"main.{fmt}")
+        tmp_file = os.path.join(tmp_dir, "main.c")
         with open(tmp_file, "w") as f:
             f.write(code)
         
