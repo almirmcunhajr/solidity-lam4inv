@@ -36,7 +36,7 @@ class SolidityCodeHandler(CodeHandler):
         for line in self.code.splitlines():
             if 'while' in line:
                 loop_scope_balance = 1
-                code += f'   {assertion}\n{line}\n       {assertion}\n'
+                code += f'{assertion}\n{line}\n{assertion}\n'
                 continue
 
             if loop_scope_balance and '{' in line:
@@ -45,7 +45,7 @@ class SolidityCodeHandler(CodeHandler):
                 loop_scope_balance -= 1
 
             if loop_scope_balance == 0:
-                code += f'  }}\n  {assertion}\n}}'
+                code += f'}}\n{assertion}\n}}}}'
                 break
 
             code += f'{line}\n'
