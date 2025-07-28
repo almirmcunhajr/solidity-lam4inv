@@ -1,5 +1,3 @@
-import io
-import os
 import time
 import logging
 import math
@@ -91,7 +89,7 @@ class Runner:
     def _get_presence_penalty(self) -> float:
         return math.tanh(self._fail_history_hit * self.presence_penalty_scale)
     
-    def _predicate_filtering(self, candidates: list[str]) -> str:
+    def _predicate_filtering(self, candidates: list[str]) -> Optional[str]:
         verify = False
         for candidate in candidates:
             self._logger.info(f'Filtering predicates for candidate {candidate}')
@@ -114,9 +112,9 @@ class Runner:
             if counter_example is None:
                 return f'assert({formula})'
 
-        return ""
+        return None
     
-    def _verify_candidates(self, candidates: list[str]) -> tuple[str, list[tuple[str, CounterExample]]]:
+    def _verify_candidates(self, candidates: list[str]) -> tuple[Optional[str], list[tuple[str, CounterExample]]]:
         fails = []
         for candidate in candidates:
             self._logger.info(f'Verifying candidate: {candidate}')
@@ -139,7 +137,7 @@ class Runner:
             self._logger.info(f'Adding candidate to fail history: {candidate}')
             self._fail_history[candidate] = counter_example
         
-        return "", fails
+        return None, fails
 
     def run(self) -> str:
         start_time = time.time()
