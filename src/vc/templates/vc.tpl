@@ -8,11 +8,11 @@
 (declare-const {{var}} Int)
 {%- endfor %}
 
-( define-fun inv-f( {% for var in base_vars %}( {{var}} int ){% endfor %} ) bool
-{{inv}}
+( define-fun inv-f( {% for var in base_vars %}( {{var}} Int ){% endfor %} ) bool
+  {{inv}}
 )
 {% if pre_conditions %}
-( define-fun pre-f ( {% for var in base_vars + state_vars %}( {{var}} int ){% endfor %} ) bool
+( define-fun pre-f ( {% for var in base_vars + state_vars %}( {{var}} Int ){% endfor %} ) bool
   ( and
     {%- for pre_condition in pre_conditions %}
     {{ pre_condition }}
@@ -29,7 +29,7 @@
 {%- endif %}
 
 {%- if trans_unchaged_state_conditions and trans_execution_conditions %}
-( define-fun trans-f ( {% for var in base_vars + state_vars %}( {{var}} int ){% endfor %} ) Bool
+( define-fun trans-f ( {% for var in base_vars + state_vars %}( {{var}} Int ){% endfor %} ) Bool
   ( or
     ( and
       {%- for condition in trans_unchaged_state_conditions %}
@@ -56,7 +56,7 @@
 {%- endif %}
 
 {%- if post_conditions and guard_conditions and loop_conditions %}
-( define-fun post-f ( {% for var in base_vars + state_vars %}( {{var}} int ){% endfor %} ) Bool
+( define-fun post-f ( {% for var in base_vars + state_vars %}( {{var}} Int ){% endfor %} ) Bool
   ( or
     ( not
       ( and
