@@ -3,10 +3,10 @@ from dataclasses import dataclass
 
 @dataclass
 class Config:
-    esbmc_bin_path: str
+    solc_bin_path: str
     deepseek_api_url: str
 
 config = Config(
-    esbmc_bin_path="esbmc",
+    solc_bin_path="solc",
     deepseek_api_url="https://api.deepseek.com"
 )

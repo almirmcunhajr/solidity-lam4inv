@@ -6,7 +6,7 @@ from typing import Optional
 from bmc.bmc import BMC, InvalidCodeError
 from utils.utils import run_command_with_timeout
 
-class ESBMC(BMC):
+class Solc(BMC):
     def __init__(self, bin_path: str, timeout: float, max_k_step: Optional[int] = None):
         self.bin_path = bin_path
         self.timeout = timeout
@@ -15,22 +15,22 @@ class ESBMC(BMC):
 
     def verify(self, code: str, logger: logging.Logger) -> bool:
         tmp_dir = tempfile.mkdtemp()
-        tmp_file = os.path.join(tmp_dir, "main.c")
+        tmp_file = os.path.join(tmp_dir, "main.sol")
         with open(tmp_file, "w") as f:
             f.write(code)
         
-        cmd = [self.bin_path, tmp_file, '--floatbv', '--k-induction']
+        cmd = [self.bin_path, tmp_file, '--model-checker-engine', 'bmc']
         if self.max_k_step:
-            cmd.extend(['--max-k-step', str(self.max_k_step)])
+            cmd.extend(['--model-checker-bmc-loop-iterations', str(self.max_k_step)])
+        if self.timeout:
+            cmd.extend(['--model-checker-timeout', str(self.timeout*1000)])
         try:
             _, stderr = run_command_with_timeout(cmd, self.timeout)
-            if 'VERIFICATION FAILED' in stderr:
+            if 'Assertion violation' in stderr:
                 return False
-            if 'VERIFICATION UNKNOWN' in stderr: 
-                return True
-            if 'VERIFICATION SUCCESSFUL' in stderr:
+            if 'proved safe!' in stderr: 
                 return True
             raise InvalidCodeError(stderr)
         except TimeoutError:
-            logger.error("ESBMC timed out")
+            logger.error("BMC checker timed out")
             return False

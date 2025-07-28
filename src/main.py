@@ -13,7 +13,7 @@ from generator.generator import Generator
 from code_handler.solidity_code_handler import SolidityCodeHandler
 from code_handler.solidity_formula_handler import SolidityFormulaHandler
 from vc.solidity_generator import SolidityGenerator
-from bmc.esbmc import ESBMC
+from bmc.solc import Solc
 from bmc.bmc import BMC
 from predicate_filtering.predicate_filtering import PredicateFiltering
 
@@ -38,7 +38,7 @@ def get_solidity_vc_generator(code_file_path: str) -> SolidityGenerator:
 def get_solidity_formula_handler() -> SolidityFormulaHandler:
     return SolidityFormulaHandler()
 
-def run_experiment(
+def run(
         code_file_path: str,
         z3_solver: Z3Solver, 
         pipeline: list[tuple[LLM, float]],
@@ -105,9 +105,9 @@ def main():
 
     pipeline = [(get_llm(model), threshold) for model, threshold in args.pipeline]
     z3_solver = Z3Solver(args.smt_timeout)
-    esbmc = ESBMC(config.esbmc_bin_path, args.bmc_timeout, args.bmc_max_steps)
+    solc = Solc(config.solc_bin_path, args.bmc_timeout, args.bmc_max_steps)
 
-    run_experiment( args.file, z3_solver, pipeline, esbmc, args.max_chat_interactions, args.log_level)
+    run( args.file, z3_solver, pipeline, solc, args.max_chat_interactions, args.log_level)
 
 if __name__ == "__main__":
     main()
