@@ -198,6 +198,6 @@ class Runner:
             
     def reset(self):
         self._predicate_filtering_verify_set = {}
-        self._curr_pipeline_step_index = 0
-        self._curr_pipeline_step_activation_time = 0
+        self._curr_pipeline_step_index = None
+        self._curr_pipeline_step_activation_time = None
         self._reset_generator()
