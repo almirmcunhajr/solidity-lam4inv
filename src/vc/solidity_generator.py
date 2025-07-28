@@ -4,13 +4,14 @@ from itertools import chain
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
-from slither.core.cfg.node import Constant, Node, Phi, Variable
+from slither.core.cfg.node import Constant, Node, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
-from slither.slithir.operations import Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall
+from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall
 
 from jinja2 import Template
+from z3 import is_is_int
 
 from vc.generator import Generator
 
@@ -214,7 +215,10 @@ class SolidityGenerator(Generator):
         for node in nodes:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and isinstance(ir, Variable) and not isinstance(ir.lvalue, Constant) and ir.lvalue:
-                    vars.add((str(ir.lvalue), str(ir.type)))
+                    if isinstance(ir.lvalue, TemporaryVariable) and ir.type == Assignment:
+                        vars.add((str(ir.lvalue), 'bool'))
+                        continue
+                    vars.add((str(ir.lvalue), str(ir.lvalue.type)))
                 if hasattr(ir, 'read') and ir.read:
                     for var in ir.read:
                         if not isinstance(var, Constant):

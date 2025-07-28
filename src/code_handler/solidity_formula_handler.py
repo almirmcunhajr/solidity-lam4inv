@@ -2,8 +2,9 @@ import re
 import tempfile
 from typing import Optional
 
-from slither.core.cfg.node import OperationWithLValue
+from slither.core.cfg.node import OperationWithLValue, TemporaryVariable
 from slither.core.declarations import Contract
+from slither.slithir.convert import Assignment
 
 from code_handler.formula_handler import FormulaHandler, FormulaForm, InvalidCodeFormulaError
 
@@ -28,13 +29,25 @@ class SoliditySMTLIB2Translator:
         UnaryType.BANG: 'not'
     }
 
-    def _op_to_smt(self, ir) -> str:
+    def _op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> str:
         if isinstance(ir, Binary):
-            return f'( {self.op_map[ir.type]} {ir.read[0]} {ir.read[1]} )'
+            reads = [str(ir.read[0]), str(ir.read[1])]
+            if isinstance(ir.read[0], TemporaryVariable):
+                reads[0] = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            if isinstance(ir.read[1], TemporaryVariable):
+                reads[1] = self._op_to_smt(tmp_irs[str(ir.read[1])], tmp_irs)
+            return f'( {self.op_map[ir.type]} {reads[0]} {reads[1]} )'
         if isinstance(ir, Unary):
-            return f'( {self.op_map[ir.type]} {ir.read[0]} )'
-        return f'{ir.read[0]}'
+            read = ir.read[0]
+            if isinstance(ir.read[0], TemporaryVariable):
+                read = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            return f'( {self.op_map[ir.type]} {read} )'
+        if isinstance(ir, Assignment):
+            if isinstance(ir.read[0], TemporaryVariable):
+                return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            return f'({ir.read[0]})'
 
+        raise Exception('Invaid operation')
 
     def _get_contract(self, slither: Slither, contract_name: str) -> Optional[Contract]:
         for contract in slither.contracts:
@@ -61,25 +74,24 @@ contract Contract {{
             slither = Slither(tmp.name, disable_plugins=["solc-ast-exporter"])
             contract = self._get_contract(slither, 'Contract')
             if contract is None:
-                return ""
+                raise Exception()
             function = contract.get_function_from_full_name('constructor()')
             if function is None:
-                return ""
+                raise Exception()
 
-            irs = []
+            tmp_irs = {}
+            _res_ir = None
             for node in function.nodes:
-                for ir in node.irs[:-1]:
+                for ir in node.irs:
                     if isinstance(ir, OperationWithLValue) and ir.lvalue:
-                        irs.append(ir)
-            
-            formula = '\n'.join([f'    ( = {ir.lvalue} {self._op_to_smt(ir)} )' for ir in irs[:-1]])
-            if len(irs) > 1:
-                return f"""( and
-{formula}
-    {self._op_to_smt(irs[-1])}
-)
-            """
-            return self._op_to_smt(irs[0])
+                        if isinstance(ir.lvalue, TemporaryVariable):
+                            tmp_irs[str(ir.lvalue)] = ir
+                        if str(ir.lvalue) == '_res':
+                            _res_ir = ir
+            if _res_ir is not None:
+                return self._op_to_smt(_res_ir, tmp_irs)
+
+            raise Exception()
         except Exception as e:
             raise InvalidCodeFormulaError(str(e))
         
