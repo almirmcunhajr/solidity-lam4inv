@@ -72,10 +72,10 @@ contract Contract {{
                     if isinstance(ir, OperationWithLValue) and ir.lvalue:
                         irs.append(ir)
             
-            formula = '\n'.join([f'( = {ir.lvalue} {self._op_to_smt(ir)} )' for ir in irs[:-1]])
+            formula = '\n'.join([f'    ( = {ir.lvalue} {self._op_to_smt(ir)} )' for ir in irs[:-1]])
             if len(irs) > 1:
                 return f"""( and
-    {formula}
+{formula}
     {self._op_to_smt(irs[-1])}
 )
             """
@@ -86,11 +86,11 @@ contract Contract {{
     def _get_variables_declarations(self, expression: str) -> str:
         keywords = {'true', 'false'}
         pattern = r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
-        variables = [
+        variables = {
                 token for token in re.findall(pattern, expression)
                 if token not in keywords
-        ]
-        return ''.join([f'uint256 {var};' for var in variables])
+        }
+        return ''.join([f'uint256 {var};' for var in list(variables)])
         
     def _rewrite_ternary(self, expression: str) -> str:
         pattern = r'([^?]+)\s*\?\s*([^:]+)\s*:\s*(.+)'

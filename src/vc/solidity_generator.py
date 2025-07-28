@@ -1,9 +1,9 @@
 import os
-from typing import Optional
 from itertools import chain
 
+from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
-from slither.core.declarations import Contract, Function, contract
+from slither.core.declarations import Contract, Function
 from slither.core.cfg.node import Constant, Node, Phi, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
@@ -32,8 +32,15 @@ class SolidityGenerator(Generator):
         UnaryType.BANG: 'not'
     }
 
+    _type_map = {
+        "bool": "Bool"
+    }
+
     def __init__(self, file_path: str):
         self.slither = Slither(file_path, disable_plugins=["solc-ast-exporter"])
+
+        for t in Int+Uint:
+            self._type_map[t] = "Int"
 
     def generate(self, inv: str) -> tuple[str, str, str]:
         if len(self.slither.contracts) == 0:
@@ -67,16 +74,29 @@ class SolidityGenerator(Generator):
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
 
+        base_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in base_vars])
+        state_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in state_vars])
+        base_parameters = ' '.join([var[0] for var in base_vars])
+        state_parameters = ' '.join([var[0] for var in state_vars])
+
         template = Template(tpl_data)
         pre_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
+            base_parameters_def=base_parameters_def,
+            state_parameters_def=state_parameters_def,
+            base_parameters=base_parameters,
+            state_parameters=state_parameters,
             inv=inv,
             pre_conditions=pre_conditions,
         )
         trans_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
+            base_parameters_def=base_parameters_def,
+            state_parameters_def=state_parameters_def,
+            base_parameters=base_parameters,
+            state_parameters=state_parameters,
             inv=inv,
             trans_unchaged_state_conditions=trans_unchaged_state_conditions,
             trans_execution_conditions=trans_execution_conditions,
@@ -84,6 +104,10 @@ class SolidityGenerator(Generator):
         post_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
+            base_parameters_def=base_parameters_def,
+            state_parameters_def=state_parameters_def,
+            base_parameters=base_parameters,
+            state_parameters=state_parameters,
             inv=inv,
             loop_conditions=loop_conditions,
             guard_conditions=guard_conditions,
@@ -178,22 +202,23 @@ class SolidityGenerator(Generator):
     def _get_base_name(self, var: Variable) -> str:
         return str(var).split('_')[0]
 
-    def _get_declarations_vars(self, function: Function, contract: Contract) -> tuple[list[str], list[str]]:
-        state_vars = self._get_lvalue_ops_vars(function.nodes) 
-        base_vars = [str(var) for var in chain(function.variables, contract.variables)]
+
+    def _get_declarations_vars(self, function: Function, contract: Contract) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+        state_vars = [(var[0], self._type_map[var[1]]) for var in self._get_lvalue_ops_vars(function.nodes)]
+        base_vars = [(str(var), self._type_map[str(var.type)]) for var in chain(function.variables, contract.variables)]
 
         return base_vars, state_vars
 
-    def _get_lvalue_ops_vars(self, nodes: list[Node]) -> list[str]:
+    def _get_lvalue_ops_vars(self, nodes: list[Node]) -> list[tuple[str, str]]:
         vars = set()
         for node in nodes:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir.lvalue, Constant):
-                    vars.add(str(ir.lvalue))
+                if isinstance(ir, OperationWithLValue) and isinstance(ir, Variable) and not isinstance(ir.lvalue, Constant) and ir.lvalue:
+                    vars.add((str(ir.lvalue), str(ir.type)))
                 if hasattr(ir, 'read') and ir.read:
                     for var in ir.read:
                         if not isinstance(var, Constant):
-                            vars.add(str(var))
+                            vars.add((str(var), str(var.type)))
         return sorted(list(vars))
         
     def _get_loop_state_vars(self, loop_header: Node) -> list[tuple[Variable, Variable]]:
@@ -256,7 +281,7 @@ class LoopNotFound(Exception):
 
 if __name__ == '__main__':
     test_file_name = "test.sol"
-
+    
     generator = SolidityGenerator(test_file_name)
     pre_vc, trans_vc, post_vc = generator.generate('test')
 
