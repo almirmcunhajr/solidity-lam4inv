@@ -12,7 +12,7 @@
 {{ inv | indent(2, true) }}
 )
 {% if pre_conditions %}
-( define-fun pre-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) bool
+( define-fun pre-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
   ( and
     {%- for pre_condition in pre_conditions %}
     {{ pre_condition }}
