@@ -204,12 +204,7 @@ class SolidityGenerator(Generator):
 
 
     def _get_declarations_vars(self, function: Function, contract: Contract) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
-        state_vars = []
-        for var in self._get_lvalue_ops_vars(function.nodes):
-            if 'TMP_' in var[0]:
-                state_vars.append((var[0], 'Bool'))
-                continue
-            state_vars.append((var[0], self._type_map[var[1]]))
+        state_vars = [(var[0], self._type_map[var[1]]) for var in self._get_lvalue_ops_vars(function.nodes)]
         base_vars = [(str(var), self._type_map[str(var.type)]) for var in chain(function.variables, contract.variables)]
 
         return base_vars, state_vars
