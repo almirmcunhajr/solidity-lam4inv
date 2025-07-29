@@ -54,6 +54,7 @@
 		( inv-f {{ base_parameters }} )
 	)
 ))
+(check-sat)
 {%- endif %}
 
 {%- if trans_unchaged_state_conditions and trans_execution_conditions %}
@@ -81,6 +82,7 @@
 		( inv-f {% for var in base_vars %}{{var[0]}}! {% endfor %})
 	)
 ))
+(check-sat)
 {%- endif %}
 
 {%- if post_conditions and guard_conditions and loop_conditions %}
@@ -114,4 +116,5 @@
 		( post-f {{ base_parameters }} {{ state_parameters }} )
 	)
 ))
+(check-sat)
 {%- endif %}
