@@ -47,7 +47,8 @@ class Runner:
         console_log_handler.setFormatter(formatter)
         
         self._logger.addHandler(console_log_handler)
-
+        
+        self._fail_history = {}
         self.reset()
 
     def _log_solution(self, solution: Optional[str], llm: Optional[LLM], start_time: float, predicate_filtering: bool):
@@ -159,7 +160,7 @@ class Runner:
             chat_options.presence_penalty = self._get_presence_penalty()
             
             self._logger.info(f'Generating loop invariants candidates with model {llm} and presence penalty {chat_options.presence_penalty}')
-            candidates = self.generator.generate(feedback=self._last_fails, llm=llm, chat_options=chat_options)
+            candidates = self.generator.generate(feedback=self._last_fails, fail_history=self._fail_history, llm=llm, chat_options=chat_options)
             self._logger.info(f'Generated {len(candidates)} candidates')
             
             try:
@@ -191,7 +192,6 @@ class Runner:
     
     def _reset_generator(self):
         self._logger.info(f'Resetting generator')
-        self._fail_history = {}
         self._fail_history_hit = 0
         self._last_fails: list[tuple[str, CounterExample]] = []
         self.generator.reset()

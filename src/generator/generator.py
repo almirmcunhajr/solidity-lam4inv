@@ -14,8 +14,8 @@ class Generator:
     def get_messages(self):
         return self._chat.messages
 
-    def _get_base_llm_message(self) -> str:
-        return f"""{self.code_handler.get_code()}
+    def _get_base_llm_message(self, fail_history: dict[str, CounterExample] = None) -> str:
+        message = f"""{self.code_handler.get_code()}
 Print loop invariants as valid {self.code_handler.get_language().value} assertions that help prove the assertion.
 
 In order to get a correct answer, You may want to consider both the situation of not entering the loop and the situation of jumping out of the loop.
@@ -23,8 +23,15 @@ In order to get a correct answer, You may want to consider both the situation of
 If some of the preconditions are also loop invariant, you need to add them to your answer as well.
 
 Use boolean operators if necessary. Don't explain. Your answer should contain only '{self.code_handler.get_assert_format()}' lines.
+
+Your responses will be verified.
 """
-    
+        if fail_history:
+            message += f"""The following candidates already failed verification as they break some properties of a correct loop invariant, and you should not respond with them:
+{self._format_feedback(list(fail_history.items()))}
+"""
+        return message
+
     def _format_feedback(self, fails: list[tuple[str, CounterExample]]) -> str:
         fails_prompt = ""
         for (candidate, counter_example) in fails:
@@ -51,11 +58,11 @@ Use boolean operators if necessary. Don't explain. Your answer should contain on
             expressions.append(match)
         return expressions
 
-    def generate(self, llm: LLM, feedback: Optional[list[tuple[str, CounterExample]]] = None, chat_options: Optional[ChatOptions] = None) -> list[str]:
+    def generate(self, llm: LLM, feedback: Optional[list[tuple[str, CounterExample]]] = None, fail_history: dict[str, CounterExample] = None, chat_options: Optional[ChatOptions] = None) -> list[str]:
         if feedback:
             message = self._get_feedback_llm_message(feedback)
         else:
-            message = self._get_base_llm_message()
+            message = self._get_base_llm_message(fail_history)
         self._chat.add_user_message(message)
 
         response = llm.chat(self._chat, chat_options)
