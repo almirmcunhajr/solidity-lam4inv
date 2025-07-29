@@ -29,7 +29,7 @@
 {%- endif %}
 
 {%- if trans_unchaged_state_conditions and trans_execution_conditions %}
-( define-fun trans-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
+( define-fun trans-f ( {{ base_parameters_def }} {{ primed_parameters_def }} {{ state_parameters_def }} ) Bool
   ( or
     ( and
       {%- for condition in trans_unchaged_state_conditions %}
@@ -48,7 +48,7 @@
 	( =>
 		( and
 			( inv-f {{ base_parameters }} )
-			( trans-f {{ base_parameters }} {{ state_parameters }} )
+			( trans-f {{ base_parameters }} {{ primed_parameters }} {{ state_parameters }} )
 		)
 		( inv-f {% for var in base_vars %}{{var[0]}}! {% endfor %})
 	)

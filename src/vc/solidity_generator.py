@@ -76,8 +76,10 @@ class SolidityGenerator(Generator):
             tpl_data = tpl_file.read()
 
         base_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in base_vars])
+        primed_parameters_def = ' '.join([f'({var[0]}! {var[1]})' for var in base_vars])
         state_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in state_vars])
         base_parameters = ' '.join([var[0] for var in base_vars])
+        primed_parameters = ' '.join([f'{var[0]}!' for var in base_vars]) 
         state_parameters = ' '.join([var[0] for var in state_vars])
 
         template = Template(tpl_data)
@@ -85,8 +87,10 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             base_parameters_def=base_parameters_def,
+            primed_parameters_def=primed_parameters_def,
             state_parameters_def=state_parameters_def,
             base_parameters=base_parameters,
+            primed_parameters=primed_parameters,
             state_parameters=state_parameters,
             inv=inv,
             pre_conditions=pre_conditions,
@@ -95,8 +99,10 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             base_parameters_def=base_parameters_def,
+            primed_parameters_def=primed_parameters_def,
             state_parameters_def=state_parameters_def,
             base_parameters=base_parameters,
+            primed_parameters=primed_parameters,
             state_parameters=state_parameters,
             inv=inv,
             trans_unchaged_state_conditions=trans_unchaged_state_conditions,
@@ -106,8 +112,10 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             base_parameters_def=base_parameters_def,
+            primed_parameters_def=primed_parameters_def,
             state_parameters_def=state_parameters_def,
             base_parameters=base_parameters,
+            primed_parameters=primed_parameters,
             state_parameters=state_parameters,
             inv=inv,
             loop_conditions=loop_conditions,
@@ -224,12 +232,12 @@ class SolidityGenerator(Generator):
                         if not isinstance(var, Constant):
                             vars.add((str(var), str(var.type)))
         return sorted(list(vars))
-        
+
     def _get_loop_state_vars(self, loop_header: Node) -> list[tuple[Variable, Variable]]:
         state_vars = []
         for ir in loop_header.irs_ssa:
             if isinstance(ir, Phi):
-                state_vars.append((ir.lvalue, ir.read[-1]))
+                state_vars.append((ir.lvalue, max(ir.read, key=lambda v: str(v))))
         return state_vars
 
     def _get_loop_nodes(self, function: Function) -> list[tuple[Node, Node]]:
