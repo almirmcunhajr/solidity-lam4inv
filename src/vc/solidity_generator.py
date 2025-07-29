@@ -11,7 +11,6 @@ from slither.slithir.variables.variable import Variable
 from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall
 
 from jinja2 import Template
-from z3 import is_is_int
 
 from vc.generator import Generator
 
@@ -59,51 +58,33 @@ class SolidityGenerator(Generator):
             raise LoopNotFound()
         loop_header, loop_latch = loops[0]
 
+        tmp_irs = self._get_tmp_irs(function) 
         pre_path, trans_path, post_path = self._get_paths(function, loop_header, loop_latch)
 
         loop_state_vars = self._get_loop_state_vars(loop_header)
         
-        loop_conditions = self._get_loop_conditions(loop_header)
+        loop_conditions = self._get_loop_conditions(loop_header, tmp_irs)
         guard_conditions = self._get_guard_conditions(loop_state_vars)
-        pre_conditions = self._get_pre_conditions(pre_path)
+        pre_conditions = self._get_pre_conditions(pre_path, tmp_irs)
         trans_unchaged_state_conditions = self._get_trans_unchaged_state_conditions(loop_state_vars)
-        trans_execution_conditions = self._get_trans_execution_conditions(loop_state_vars, loop_conditions, trans_path)
-        post_conditions = self._get_post_conditions(post_path)
+        trans_execution_conditions = self._get_trans_execution_conditions(loop_state_vars, loop_conditions, trans_path, tmp_irs)
+        post_conditions = self._get_post_conditions(post_path, tmp_irs)
 
         base_vars, state_vars = self._get_declarations_vars(function, contract)
         
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
 
-        base_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in base_vars])
-        primed_parameters_def = ' '.join([f'({var[0]}! {var[1]})' for var in base_vars])
-        state_parameters_def = ' '.join([f'({var[0]} {var[1]})' for var in state_vars])
-        base_parameters = ' '.join([var[0] for var in base_vars])
-        primed_parameters = ' '.join([f'{var[0]}!' for var in base_vars]) 
-        state_parameters = ' '.join([var[0] for var in state_vars])
-
         template = Template(tpl_data)
         pre_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
-            base_parameters_def=base_parameters_def,
-            primed_parameters_def=primed_parameters_def,
-            state_parameters_def=state_parameters_def,
-            base_parameters=base_parameters,
-            primed_parameters=primed_parameters,
-            state_parameters=state_parameters,
             inv=inv,
             pre_conditions=pre_conditions,
         )
         trans_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
-            base_parameters_def=base_parameters_def,
-            primed_parameters_def=primed_parameters_def,
-            state_parameters_def=state_parameters_def,
-            base_parameters=base_parameters,
-            primed_parameters=primed_parameters,
-            state_parameters=state_parameters,
             inv=inv,
             trans_unchaged_state_conditions=trans_unchaged_state_conditions,
             trans_execution_conditions=trans_execution_conditions,
@@ -111,12 +92,6 @@ class SolidityGenerator(Generator):
         post_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
-            base_parameters_def=base_parameters_def,
-            primed_parameters_def=primed_parameters_def,
-            state_parameters_def=state_parameters_def,
-            base_parameters=base_parameters,
-            primed_parameters=primed_parameters,
-            state_parameters=state_parameters,
             inv=inv,
             loop_conditions=loop_conditions,
             guard_conditions=guard_conditions,
@@ -125,7 +100,20 @@ class SolidityGenerator(Generator):
 
         return pre_vc, trans_vc, post_vc
 
-    def _get_post_conditions(self, post_path: list[Node]):
+    def _get_tmp_irs(self, function) -> dict[str, OperationWithLValue]:
+        tmp_irs = {}
+        for node in function.nodes:
+            for ir in node.irs_ssa:
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and isinstance(ir.lvalue, TemporaryVariable):
+                    tmp_irs[str(ir.lvalue)] = ir
+        return tmp_irs
+
+    def _is_tmp_assignment(self, ir: OperationWithLValue) -> bool:
+        if ir.lvalue is None:
+            return False
+        return isinstance(ir.lvalue, TemporaryVariable)
+
+    def _get_post_conditions(self, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
         solidity_call_param = None
         for node in post_path[1:]:
             for ir in node.irs_ssa:
@@ -136,10 +124,10 @@ class SolidityGenerator(Generator):
         for node in post_path[1:]:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue == solidity_call_param:
-                    conditions.append(self._op_to_smt(ir))
+                    conditions.append(self._op_to_smt(ir, tmp_irs))
                     continue
-                if isinstance(ir, OperationWithLValue) and not isinstance(ir, SolidityCall):
-                    conditions.append(self._lvalue_op_to_smt(ir))
+                if isinstance(ir, OperationWithLValue) and not isinstance(ir, SolidityCall) and not self._is_tmp_assignment(ir):
+                    conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
                     continue
 
         return conditions
@@ -151,7 +139,7 @@ class SolidityGenerator(Generator):
             conditions.append(f'( = {curr_var} {self._get_base_name(curr_var)}! )')
         return conditions
 
-    def _get_loop_conditions(self, loop_header: Node) -> list[str]:
+    def _get_loop_conditions(self, loop_header: Node, tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
         conditions_irs = []
         for ir in loop_header.irs_ssa:
             if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
@@ -159,9 +147,9 @@ class SolidityGenerator(Generator):
 
         conditions = []
         for ir in conditions_irs[:-1]:
-            conditions.append(self._lvalue_op_to_smt(ir))
+            conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
         last_condition_ir = conditions_irs[-1]
-        conditions.append(self._op_to_smt(last_condition_ir))
+        conditions.append(self._op_to_smt(last_condition_ir, tmp_irs))
 
         return conditions
 
@@ -171,42 +159,55 @@ class SolidityGenerator(Generator):
             conditions.append(f'( = {curr_var} {self._get_base_name(curr_var)} )')
         return conditions
     
-    def _get_trans_execution_conditions(self, loop_state_vars: list[tuple[Variable, Variable]], loop_conditions: list[str], trans_path: list[Node]) -> list[str]:
+    def _get_trans_execution_conditions(self, loop_state_vars: list[tuple[Variable, Variable]], loop_conditions: list[str], trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
         conditions = self._get_guard_conditions(loop_state_vars)
         conditions.extend(loop_conditions)
 
         for node in trans_path[1:]:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue:
-                    conditions.append(self._lvalue_op_to_smt(ir))
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_tmp_assignment(ir):
+                    conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
 
         for _, intermediate_var in loop_state_vars:
             conditions.append(f'( = {intermediate_var} {self._get_base_name(intermediate_var)}! )')
         
         return conditions
 
-    def _get_pre_conditions(self, pre_path: list[Node]) -> list[str]:
+    def _get_pre_conditions(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
         guards = set()
         pre_conditions = []
         for node in pre_path:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue:
                     guards.add(f'( = {ir.lvalue} {self._get_base_name(ir.lvalue)} )')
-                    pre_conditions.append(self._lvalue_op_to_smt(ir)) 
+                    pre_conditions.append(self._lvalue_op_to_smt(ir, tmp_irs)) 
         
         pre_conditions = list(guards) + pre_conditions 
 
         return pre_conditions
 
-    def _lvalue_op_to_smt(self, ir: OperationWithLValue) -> str:
-        return f'( = {ir.lvalue} {self._op_to_smt(ir)} )'
+    def _lvalue_op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> str:
+        return f'( = {ir.lvalue} {self._op_to_smt(ir, tmp_irs)} )'
 
-    def _op_to_smt(self, ir) -> str:
+    def _op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> str:
         if isinstance(ir, Binary):
-            return f'( {self.op_map[ir.type]} {ir.read[0]} {ir.read[1]} )'
+            reads = [str(ir.read[0]), str(ir.read[1])]
+            if isinstance(ir.read[0], TemporaryVariable):
+                reads[0] = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            if isinstance(ir.read[1], TemporaryVariable):
+                reads[1] = self._op_to_smt(tmp_irs[str(ir.read[1])], tmp_irs)
+            return f'( {self.op_map[ir.type]} {reads[0]} {reads[1]} )'
         if isinstance(ir, Unary):
-            return f'( {self.op_map[ir.type]} {ir.read[0]} )'
-        return f'{ir.read[0]}'
+            read = ir.read[0]
+            if isinstance(ir.read[0], TemporaryVariable):
+                read = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            return f'( {self.op_map[ir.type]} {read} )'
+        if isinstance(ir, Assignment):
+            if isinstance(ir.read[0], TemporaryVariable):
+                return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            return ir.read[0]
+
+        raise Exception('Invaid operation')
 
     def _get_base_name(self, var: Variable) -> str:
         return str(var).split('_')[0]
@@ -223,13 +224,11 @@ class SolidityGenerator(Generator):
         for node in nodes:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and isinstance(ir, Variable) and not isinstance(ir.lvalue, Constant) and ir.lvalue:
-                    if isinstance(ir.lvalue, TemporaryVariable) and ir.type == Assignment:
-                        vars.add((str(ir.lvalue), 'bool'))
-                        continue
-                    vars.add((str(ir.lvalue), str(ir.lvalue.type)))
+                    if not isinstance(ir.lvalue, TemporaryVariable):
+                        vars.add((str(ir.lvalue), str(ir.lvalue.type)))
                 if hasattr(ir, 'read') and ir.read:
                     for var in ir.read:
-                        if not isinstance(var, Constant):
+                        if not isinstance(var, Constant) and not isinstance(var, TemporaryVariable):
                             vars.add((str(var), str(var.type)))
         return sorted(list(vars))
 

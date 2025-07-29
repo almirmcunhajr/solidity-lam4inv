@@ -1,5 +1,33 @@
 (set-logic LIA)
 
+{%- set base_parameters_def_list = [] -%}
+{%- for var in base_vars -%}
+  {%- set _ = base_parameters_def_list.append('({} {})'.format(var[0], var[1])) -%}
+{%- endfor -%}
+{%- set base_parameters_def = base_parameters_def_list | join(' ') -%}
+
+{%- set primed_parameters_def_list = [] -%}
+{%- for var in base_vars -%}
+  {%- set _ = primed_parameters_def_list.append('({}! {})'.format(var[0], var[1])) -%}
+{%- endfor -%}
+{%- set primed_parameters_def = primed_parameters_def_list | join(' ') -%}
+
+{%- set state_parameters_def_list = [] -%}
+{%- for var in state_vars -%}
+  {%- set _ = state_parameters_def_list.append('({} {})'.format(var[0], var[1])) -%}
+{%- endfor -%}
+{%- set state_parameters_def = state_parameters_def_list | join(' ') -%}
+
+{%- set base_parameters = base_vars | map(attribute=0) | join(' ') -%}
+
+{%- set primed_parameters_list = [] -%}
+{%- for var in base_vars -%}
+  {%- set _ = primed_parameters_list.append(var[0] ~ '!') -%}
+{%- endfor -%}
+{%- set primed_parameters = primed_parameters_list | join(' ') -%}
+
+{%- set state_parameters = state_vars | map(attribute=0) | join(' ') -%}
+
 {%- for var in base_vars %}
 (declare-const {{var[0]}} {{var[1]}})
 (declare-const {{var[0]}}! {{var[1]}})
