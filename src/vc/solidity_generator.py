@@ -63,11 +63,11 @@ class SolidityGenerator(Generator):
 
         loop_state_vars = self._get_loop_state_vars(loop_header)
         
-        loop_conditions = self._get_loop_conditions(loop_header, tmp_irs)
+        loop_condition_smt_expression = self._get_conditional_node_smt_expression(loop_header, tmp_irs)
         guard_conditions = self._get_guard_conditions(loop_state_vars)
         pre_conditions = self._get_pre_conditions(pre_path, tmp_irs)
         trans_unchaged_state_conditions = self._get_trans_unchaged_state_conditions(loop_state_vars)
-        trans_execution_conditions = self._get_trans_execution_conditions(loop_state_vars, loop_conditions, trans_path, tmp_irs)
+        trans_execution_conditions = self._get_trans_execution_conditions(loop_state_vars, loop_condition_smt_expression, trans_path, tmp_irs)
         post_conditions = self._get_post_conditions(post_path, tmp_irs)
 
         base_vars, state_vars = self._get_declarations_vars(function, contract)
@@ -93,7 +93,7 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             inv=inv,
-            loop_conditions=loop_conditions,
+            loop_condition_expression=loop_condition_smt_expression,
             guard_conditions=guard_conditions,
             post_conditions=post_conditions,
         )
@@ -139,19 +139,13 @@ class SolidityGenerator(Generator):
             conditions.append(f'( = {curr_var} {self._get_base_name(curr_var)}! )')
         return conditions
 
-    def _get_loop_conditions(self, loop_header: Node, tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
+    def _get_conditional_node_smt_expression(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> str:
         conditions_irs = []
-        for ir in loop_header.irs_ssa:
+        for ir in node.irs_ssa:
             if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
                 conditions_irs.append(ir)
 
-        conditions = []
-        for ir in conditions_irs[:-1]:
-            conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
-        last_condition_ir = conditions_irs[-1]
-        conditions.append(self._op_to_smt(last_condition_ir, tmp_irs))
-
-        return conditions
+        return self._op_to_smt(conditions_irs[-1], tmp_irs)
 
     def _get_guard_conditions(self, loop_state_vars: list[tuple[Variable, Variable]]) -> list[str]:
         conditions = []
@@ -159,9 +153,9 @@ class SolidityGenerator(Generator):
             conditions.append(f'( = {curr_var} {self._get_base_name(curr_var)} )')
         return conditions
     
-    def _get_trans_execution_conditions(self, loop_state_vars: list[tuple[Variable, Variable]], loop_conditions: list[str], trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
+    def _get_trans_execution_conditions(self, loop_state_vars: list[tuple[Variable, Variable]], loop_condition_smt_expression: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
         conditions = self._get_guard_conditions(loop_state_vars)
-        conditions.extend(loop_conditions)
+        conditions.append(loop_condition_smt_expression)
 
         for node in trans_path[1:]:
             for ir in node.irs_ssa:

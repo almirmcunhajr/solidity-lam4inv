@@ -85,7 +85,7 @@
 (check-sat)
 {%- endif %}
 
-{%- if post_conditions and guard_conditions and loop_conditions %}
+{%- if post_conditions and guard_conditions %}
 ( define-fun post-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
   ( or
     ( not
@@ -97,10 +97,7 @@
     )
     ( not
       ( and
-        {%- for condition in loop_conditions[:-1] %}
-        {{ condition }}
-        {%- endfor %}
-        ( not {{loop_conditions[-1]}} )
+        ( not {{loop_condition_expression}} )
         {%- for condition in post_conditions[:-1] %}
         {{ condition }}
         {%- endfor %}
