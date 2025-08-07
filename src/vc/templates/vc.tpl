@@ -57,14 +57,9 @@
 (check-sat)
 {%- endif %}
 
-{%- if trans_unchaged_state_conditions and trans_execution_conditions %}
+{%- if trans_execution_conditions %}
 ( define-fun trans-f ( {{ base_parameters_def }} {{ primed_parameters_def }} {{ state_parameters_def }} ) Bool
   ( or
-    ( and
-      {%- for condition in trans_unchaged_state_conditions %}
-      {{ condition }}
-      {%- endfor %}
-    )
     ( and
       {%- for condition in trans_execution_conditions %}
       {{ condition }}
@@ -85,16 +80,9 @@
 (check-sat)
 {%- endif %}
 
-{%- if post_conditions and guard_conditions %}
+{%- if post_conditions %}
 ( define-fun post-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
   ( or
-    ( not
-      ( and
-        {%- for condition in guard_conditions %}
-        {{condition}}
-        {%- endfor %}
-      )
-    )
     ( not
       ( and
         ( not {{loop_condition_expression}} )
