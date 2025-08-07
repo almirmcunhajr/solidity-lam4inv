@@ -4,7 +4,7 @@ from itertools import chain
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
-from slither.core.cfg.node import Constant, Node, Phi, TemporaryVariable, Variable
+from slither.core.cfg.node import Constant, Node, NodeType, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
@@ -137,22 +137,39 @@ class SolidityGenerator(Generator):
 
         return self._op_to_smt(conditions_irs[-1], tmp_irs)
 
-    def _get_trans_execution_smt_conditions(self, loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
-        conditions = [loop_smt_condition]
-
-        for node in trans_path[1:]:
+    def _get_execution_smt_conditions(self, node: Node, tmp_irs: dict[str, OperationWithLValue], execution_smt_conditions: list[list[str]] = [[]]) -> list[list[str]]:
+        if not node.is_conditional():
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_tmp_assignment(ir):
-                    conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_tmp_assignment(ir) and not isinstance(ir, Phi):
+                    execution_smt_conditions[-1].append(self._lvalue_op_to_smt(ir, tmp_irs))
+            if node.sons[0] not in node.dominators:
+                return self._get_execution_smt_conditions(node.sons[0], tmp_irs, execution_smt_conditions)
+            return execution_smt_conditions
+        
+        conditions = execution_smt_conditions[-1].copy()
+        if node.son_true:
+            execution_smt_conditions[-1].append(self._conditional_node_to_smt(node, tmp_irs))
+            self._get_execution_smt_conditions(node.son_true, tmp_irs, execution_smt_conditions)
+        if node.son_false:
+            execution_smt_conditions.append(conditions)
+            execution_smt_conditions[-1].append(f'( not {self._conditional_node_to_smt(node, tmp_irs)} )')
+            self._get_execution_smt_conditions(node.son_false, tmp_irs, execution_smt_conditions)
 
-        return conditions
+        return execution_smt_conditions
+
+    def _get_trans_execution_smt_conditions(self, loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[list[str]]:
+        execution_smt_conditions = self._get_execution_smt_conditions(trans_path[1], tmp_irs)
+        for conditions in execution_smt_conditions:
+            conditions.insert(0, loop_smt_condition)
+
+        return execution_smt_conditions
 
     def _get_smt_pre_conditions(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
         guards = set()
         pre_conditions = []
         for node in pre_path:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue:
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, Phi):
                     guards.add(f'( = {ir.lvalue} {self._get_base_name(ir.lvalue)} )')
                     pre_conditions.append(self._lvalue_op_to_smt(ir, tmp_irs)) 
         

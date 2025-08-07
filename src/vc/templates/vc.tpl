@@ -60,11 +60,13 @@
 {%- if trans_execution_conditions %}
 ( define-fun trans-f ( {{ base_parameters_def }} {{ primed_parameters_def }} {{ state_parameters_def }} ) Bool
   ( or
+    {%- for conditions in trans_execution_conditions %}
     ( and
-      {%- for condition in trans_execution_conditions %}
+      {%- for condition in conditions %}
       {{ condition }}
       {%- endfor %}
     )
+    {%- endfor %}
   )
 )
 
