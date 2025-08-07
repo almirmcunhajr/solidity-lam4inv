@@ -127,6 +127,9 @@ class SolidityGenerator(Generator):
         return conditions
 
     def _conditional_node_to_smt(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> str:
+        if not node.is_conditional():
+            raise Exception(f'Node is not conditional {node}')
+
         conditions_irs = []
         for ir in node.irs_ssa:
             if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
@@ -178,7 +181,7 @@ class SolidityGenerator(Generator):
                 return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
             return ir.read[0]
 
-        raise Exception('Invaid operation')
+        raise Exception(f'Invalid operation {ir}')
 
     def _get_base_name(self, var: Variable) -> str:
         return str(var).split('_')[0]
