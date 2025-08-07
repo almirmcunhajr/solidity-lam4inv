@@ -61,9 +61,9 @@ class SolidityGenerator(Generator):
         tmp_irs = self._get_tmp_irs(function) 
         pre_path, trans_path, post_path = self._get_paths(function, loop_header, loop_latch)
 
-        loop_condition_smt_expression = self._get_conditional_node_smt_expression(loop_header, tmp_irs)
+        loop_smt_condition = self._conditional_node_to_smt(loop_header, tmp_irs)
         smt_pre_conditions = self._get_smt_pre_conditions(pre_path, tmp_irs)
-        trans_execution_smt_conditions = self._get_trans_execution_smt_conditions(loop_condition_smt_expression, trans_path, tmp_irs)
+        trans_execution_smt_conditions = self._get_trans_execution_smt_conditions(loop_smt_condition, trans_path, tmp_irs)
         smt_post_conditions = self._get_smt_post_conditions(post_path, tmp_irs)
 
         base_vars, state_vars = self._get_declarations_vars(function, contract)
@@ -88,7 +88,7 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             inv=inv,
-            loop_condition_expression=loop_condition_smt_expression,
+            loop_condition=loop_smt_condition,
             post_conditions=smt_post_conditions,
         )
 
@@ -126,7 +126,7 @@ class SolidityGenerator(Generator):
 
         return conditions
 
-    def _get_conditional_node_smt_expression(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> str:
+    def _conditional_node_to_smt(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> str:
         conditions_irs = []
         for ir in node.irs_ssa:
             if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
@@ -134,8 +134,8 @@ class SolidityGenerator(Generator):
 
         return self._op_to_smt(conditions_irs[-1], tmp_irs)
 
-    def _get_trans_execution_smt_conditions(self, loop_condition_smt_expression: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
-        conditions = [loop_condition_smt_expression]
+    def _get_trans_execution_smt_conditions(self, loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
+        conditions = [loop_smt_condition]
 
         for node in trans_path[1:]:
             for ir in node.irs_ssa:

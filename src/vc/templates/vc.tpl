@@ -85,7 +85,7 @@
   ( or
     ( not
       ( and
-        ( not {{loop_condition_expression}} )
+        ( not {{loop_condition}} )
         {%- for condition in post_conditions[:-1] %}
         {{ condition }}
         {%- endfor %}
