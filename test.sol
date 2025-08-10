@@ -14,6 +14,8 @@ contract LoopExample {
         d2 = 1;
         d3 = 1;
         x1 = 1;
+        x2 = 0;
+        x3 = 0;
 
         while (x1 > 0) {
             if (x2 > 0) {
@@ -22,8 +24,6 @@ contract LoopExample {
                     x2 = x2 - d2;
                     x3 = x3 - d3;
                 }
-            } else {
-                break;
             }
         }
 

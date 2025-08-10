@@ -58,16 +58,16 @@ class SolidityGenerator(Generator):
             raise LoopNotFound()
         loop_header, loop_latch = loops[0]
 
+        base_vars, state_vars = self._get_declarations_vars(function, contract)
+
         tmp_irs = self._get_tmp_irs(function) 
         pre_path, trans_path, post_path = self._get_paths(function, loop_header, loop_latch)
 
         loop_smt_condition = self._conditional_node_to_smt(loop_header, tmp_irs)
         smt_pre_conditions = self._get_smt_pre_conditions(pre_path, tmp_irs)
-        trans_execution_smt_conditions = self._get_trans_execution_smt_conditions(loop_smt_condition, trans_path, tmp_irs)
+        trans_execution_smt_conditions = self._get_trans_execution_smt_conditions(base_vars, loop_smt_condition, trans_path, tmp_irs)
         smt_post_conditions = self._get_smt_post_conditions(post_path, tmp_irs)
 
-        base_vars, state_vars = self._get_declarations_vars(function, contract)
-        
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
 
@@ -137,30 +137,57 @@ class SolidityGenerator(Generator):
 
         return self._op_to_smt(conditions_irs[-1], tmp_irs)
 
-    def _get_execution_smt_conditions(self, node: Node, tmp_irs: dict[str, OperationWithLValue], execution_smt_conditions: list[list[str]] = [[]]) -> list[list[str]]:
+    def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], ir: OperationWithLValue):
+        if not ir.lvalue or not ir.read:
+            raise Exception('Invalid operation {ir}')
+        vars = [ir.lvalue]
+        vars.extend([var for var in ir.read if not isinstance(var, TemporaryVariable)])
+        for var in vars:
+            var_base_name = self._get_base_name(var)
+            if var_ssa_bounds[var_base_name][1] < str(var):
+                var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(var))
+
+    def _add_bounds_checks(self, conditions: list[str], var_ssa_bounds: dict[str, tuple[str, str]]):
+        for var, bounds in var_ssa_bounds.items():
+            conditions.append(f'(= {bounds[0]} {var} )')
+            conditions.append(f'(= {bounds[1]} {var}! )')
+
+    def _get_execution_smt_conditions(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], execution_smt_conditions: list[list[str]] = [[]]) -> list[list[str]]:
         if not node.is_conditional():
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_tmp_assignment(ir) and not isinstance(ir, Phi):
+                    self._update_var_ssa_bounds(var_ssa_bounds, ir)
                     execution_smt_conditions[-1].append(self._lvalue_op_to_smt(ir, tmp_irs))
             if node.sons[0] not in node.dominators:
-                return self._get_execution_smt_conditions(node.sons[0], tmp_irs, execution_smt_conditions)
+                return self._get_execution_smt_conditions(node.sons[0], tmp_irs, var_ssa_bounds, execution_smt_conditions)
+            self._add_bounds_checks(execution_smt_conditions[-1], var_ssa_bounds)
             return execution_smt_conditions
         
         conditions = execution_smt_conditions[-1].copy()
         if node.son_true:
             execution_smt_conditions[-1].append(self._conditional_node_to_smt(node, tmp_irs))
-            self._get_execution_smt_conditions(node.son_true, tmp_irs, execution_smt_conditions)
+            self._get_execution_smt_conditions(node.son_true, tmp_irs, var_ssa_bounds.copy(), execution_smt_conditions)
         if node.son_false:
             execution_smt_conditions.append(conditions)
             execution_smt_conditions[-1].append(f'( not {self._conditional_node_to_smt(node, tmp_irs)} )')
-            self._get_execution_smt_conditions(node.son_false, tmp_irs, execution_smt_conditions)
+            self._get_execution_smt_conditions(node.son_false, tmp_irs, var_ssa_bounds.copy(), execution_smt_conditions)
 
         return execution_smt_conditions
 
-    def _get_trans_execution_smt_conditions(self, loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[list[str]]:
-        execution_smt_conditions = self._get_execution_smt_conditions(trans_path[1], tmp_irs)
+    def _get_trans_execution_smt_conditions(self, base_declarations: list[tuple[str, str]], loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[list[str]]:
+        var_ssa_bounds = {}
+        for declaration in base_declarations:
+            var_name = declaration[0]
+            var_ssa_bounds[var_name] = (f'{var_name}_1', f'{var_name}_1')
+        execution_smt_conditions = self._get_execution_smt_conditions(trans_path[1], tmp_irs, var_ssa_bounds)
         for conditions in execution_smt_conditions:
             conditions.insert(0, loop_smt_condition)
+        
+        execution_smt_conditions.append([])
+        for declaration in base_declarations:
+            var_name = declaration[0]
+            execution_smt_conditions[-1].append(f'( = {var_name}_1 {var_name} )')
+            execution_smt_conditions[-1].append(f'( = {var_name}_1 {var_name}! )')
 
         return execution_smt_conditions
 
@@ -202,7 +229,6 @@ class SolidityGenerator(Generator):
 
     def _get_base_name(self, var: Variable) -> str:
         return str(var).split('_')[0]
-
 
     def _get_declarations_vars(self, function: Function, contract: Contract) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         state_vars = [(var[0], self._type_map[var[1]]) for var in self._get_lvalue_ops_vars(function.nodes)]
