@@ -84,13 +84,13 @@ class SolidityGenerator(Generator):
         loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
 
         # Get the reachability verification condition op
-        reachability_op = self._get_reachability_op(pre_path, tmp_irs)
+        reachability_op = self._get_pre_op(pre_path, tmp_irs)
 
         # Get the inductive verification condition op
-        inductive_op = self._get_inductive_op(loop_condition_op, trans_path, tmp_irs)
+        inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
 
         # Get the provability verification condition op
-        provability_op = self._get_provability_op(loop_condition_op, post_path, tmp_irs)
+        provability_op = self._get_post_op(loop_condition_op, post_path, tmp_irs)
 
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
@@ -148,8 +148,8 @@ class SolidityGenerator(Generator):
             return False
         return isinstance(ir.lvalue, TemporaryVariable)
 
-    def _get_provability_op(self, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
-        """ Generate the verification condition operation to check that the invariant holds after the loop_condition_op
+    def _get_post_op(self, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
+        """ Generate the operation to check loop invariant post condition
 
         This assumes that the post loop path contains only if statements and a single assert call.
 
@@ -159,7 +159,7 @@ class SolidityGenerator(Generator):
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
 
         Returns:
-            Op: An Op object representing the provability condition
+            Op: An Op object to check the loop invariant post condition
         """
 
         assertion_op = And(Not(loop_condition_op))
@@ -288,14 +288,14 @@ class SolidityGenerator(Generator):
 
         return root_op
 
-    def _get_inductive_op(self, loop_condition_op: Op|str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
-        """ Generate the verification condition operation for the loop transition
+    def _get_trans_op(self, loop_condition_op: Op|str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
+        """ Generate the operation to check the invariant in the loop transition
 
         Args:
             loop_condition_op (str): The loop condition operation
 
         Returns:
-            Op: An Op object representing the transition condition
+            Op: An Op object to check the invariant in the loop transition
         """
 
         branch_op = And()
@@ -318,14 +318,14 @@ class SolidityGenerator(Generator):
 
         return root_op
 
-    def _get_reachability_op(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Op:
-        """ Generate the verification condition operation for to check reachability 
+    def _get_pre_op(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Op:
+        """ Generate the operation to check the loop invariant pre-conditions
 
         Args:
             pre_path (list[Node]): The list of nodes in the pre loop path 
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
         Returns:
-            Op: An Op object representing the reachability condition
+            Op: An Op object to check the loop invariant pre-conditions
         """
         
         guards = set()
