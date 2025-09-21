@@ -151,6 +151,8 @@ class SolidityGenerator(Generator):
     def _get_provability_op(self, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
         """ Generate the verification condition operation to check that the invariant holds after the loop_condition_op
 
+        This assumes that the post loop path contains only if statements and a single assert call.
+
         Args:
             loop_condition_op (str): The loop condition operation
             post_path (list[Node]): The list of nodes in the post loop path
