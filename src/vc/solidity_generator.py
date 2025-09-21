@@ -4,7 +4,7 @@ from itertools import chain
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
-from slither.core.cfg.node import Constant, Node, NodeType, Phi, TemporaryVariable, Variable
+from slither.core.cfg.node import Constant, Node, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
@@ -13,23 +13,24 @@ from slither.slithir.operations import Assignment, Binary, BinaryType, Operation
 from jinja2 import Template
 
 from vc.generator import Generator
+from vc.smt import *
 
 class SolidityGenerator(Generator):
     op_map = {
-        BinaryType.ADDITION: '+',
-        BinaryType.SUBTRACTION: '-',
-        BinaryType.MULTIPLICATION: '*',
-        BinaryType.DIVISION: 'div',
-        BinaryType.MODULO: 'mod',
-        BinaryType.LESS: '<',
-        BinaryType.GREATER: '>',
-        BinaryType.LESS_EQUAL: '<=',
-        BinaryType.GREATER_EQUAL: '>=',
-        BinaryType.EQUAL: '=',
-        BinaryType.NOT_EQUAL: 'distinct',
-        BinaryType.ANDAND: 'and',
-        BinaryType.OROR: 'or',
-        UnaryType.BANG: 'not'
+        BinaryType.ADDITION: Addition,
+        BinaryType.SUBTRACTION: Subtraction,
+        BinaryType.MULTIPLICATION: Multiplication,
+        BinaryType.DIVISION: Division,
+        BinaryType.MODULO: Modulo,
+        BinaryType.LESS: Less,
+        BinaryType.GREATER: Greater,
+        BinaryType.LESS_EQUAL: LessEqual,
+        BinaryType.GREATER_EQUAL: GreaterEqual,
+        BinaryType.EQUAL: Equal,
+        BinaryType.NOT_EQUAL: NotEqual,
+        BinaryType.ANDAND: And,
+        BinaryType.OROR: Or,
+        UnaryType.BANG: Not
     }
 
     def __init__(self, file_path: str):
@@ -65,30 +66,31 @@ class SolidityGenerator(Generator):
         compute_dominators(function.nodes)
 
         # Get the first loop header and latch
-        loops = self._get_loop_nodes(function)
+        loops = self._get_solidity_loop_nodes(function)
         if len(loops) == 0:
             raise LoopNotFound()
         loop_header, loop_latch = loops[0]
 
         # Get all state variables and base variables in the function and contract
-        base_vars, state_vars = self._get_declarations_vars(function, contract)
+        base_vars, state_vars = self._get_solidity_vars(function, contract)
 
         # Get all temporary IR operations in the function
-        tmp_irs = self._get_tmp_irs(function) 
+        tmp_irs = self._get_solidity_tmp_irs(function) 
 
         # Get the execution paths
-        pre_path, trans_path, post_path = self._get_paths(function, loop_header, loop_latch)
+        pre_path, trans_path, post_path = self._get_solidity_paths(function, loop_header, loop_latch)
 
-        # Get the loop condition in SMT-LIB2 format
-        loop_smt_condition = self._conditional_node_to_smt(loop_header, tmp_irs)
+        # Get the loop condition operation
+        loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
 
-        # Get the pre-condition in SMT-LIB2 format
-        smt_pre_conditions = self._get_smt_pre_conditions(pre_path, tmp_irs)
+        # Get the reachability verification condition op
+        reachability_op = self._get_reachability_op(pre_path, tmp_irs)
 
-        # Get the transition execution conditions in SMT-LIB2 format
-        trans_execution_smt_conditions = self._get_trans_execution_smt_conditions(base_vars, loop_smt_condition, trans_path, tmp_irs)
+        # Get the inductive verification condition op
+        inductive_op = self._get_inductive_op(loop_condition_op, trans_path, tmp_irs)
 
-        smt_post_conditions = self._get_smt_post_conditions(post_path, tmp_irs)
+        # Get the provability verification condition op
+        provability_op = self._get_provability_op(loop_condition_op, post_path, tmp_irs)
 
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
@@ -98,25 +100,24 @@ class SolidityGenerator(Generator):
             base_vars=base_vars,
             state_vars=state_vars,
             inv=inv,
-            pre_conditions=smt_pre_conditions,
+            reachability_vc=str(reachability_op),
         )
         trans_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
             inv=inv,
-            trans_execution_conditions=trans_execution_smt_conditions,
+            inductive_vc=str(inductive_op),
         )
         post_vc = template.render(
             base_vars=base_vars,
             state_vars=state_vars,
             inv=inv,
-            loop_condition=loop_smt_condition,
-            post_conditions=smt_post_conditions,
+            provability_vc=str(provability_op),
         )
 
         return pre_vc, trans_vc, post_vc
 
-    def _get_tmp_irs(self, function) -> dict[str, OperationWithLValue]:
+    def _get_solidity_tmp_irs(self, function) -> dict[str, OperationWithLValue]:
         """Returns a mapping of temporary variable names to their corresponding IR operations in the functions
 
         Args:
@@ -133,7 +134,7 @@ class SolidityGenerator(Generator):
                     tmp_irs[str(ir.lvalue)] = ir
         return tmp_irs
 
-    def _is_tmp_assignment(self, ir: OperationWithLValue) -> bool:
+    def _is_solidity_tmp_assignment(self, ir: OperationWithLValue) -> bool:
         """ Checks if the given IR operation is an assignment to a temporary variable
 
         Args:
@@ -147,37 +148,43 @@ class SolidityGenerator(Generator):
             return False
         return isinstance(ir.lvalue, TemporaryVariable)
 
-    def _get_smt_post_conditions(self, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
-        solidity_call_param = None
-        for node in post_path[1:]:
-            for ir in node.irs_ssa:
-                if isinstance(ir, SolidityCall):
-                    solidity_call_param = ir.arguments[0]
-        
-        conditions = []
-        for node in post_path[1:]:
-            for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue == solidity_call_param:
-                    conditions.append(self._op_to_smt(ir, tmp_irs))
-                    continue
-                if isinstance(ir, OperationWithLValue) and not isinstance(ir, SolidityCall) and not self._is_tmp_assignment(ir):
-                    conditions.append(self._lvalue_op_to_smt(ir, tmp_irs))
-                    continue
+    def _get_provability_op(self, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
+        """ Generate the verification condition operation to check that the invariant holds after the loop_condition_op
 
-        return conditions
+        Args:
+            loop_condition_op (str): The loop condition operation
+            post_path (list[Node]): The list of nodes in the post loop path
+            tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
 
-    def _conditional_node_to_smt(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> str:
-        """ Converts the condition of a conditional node to SMT-LIB2 format
+        Returns:
+            Op: An Op object representing the provability condition
+        """
+
+        assertion_op = And(Not(loop_condition_op))
+        root_op = Or(Not(assertion_op))
+        for node in post_path[1:]:
+            if node.contains_if():
+                assertion_op.append(self._solidity_conditional_node_to_op(node, tmp_irs))
+                continue
+            for ir in node.irs_ssa:
+                if  isinstance(ir, SolidityCall) and ir.function.name == "assert(bool)":
+                    post_condition_ir = tmp_irs[str(ir.arguments[0])]
+                    assertion_op.append(Not(self._solidity_op_to_op(post_condition_ir, tmp_irs)))
+                    break
+
+        return root_op
+
+    def _solidity_conditional_node_to_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue]) -> Op|str:
+        """ Converts a Solidity conditional node to an operation
 
         Args:
             node (Node): The conditional node to convert
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
-            
         Raises:
             Exception: If the node is not conditional
 
         Returns:
-            str: The condition in SMT-LIB2 format
+            Op|str: The operation representing the condition of the node
         """
 
         if not node.is_conditional():
@@ -188,7 +195,7 @@ class SolidityGenerator(Generator):
             if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
                 conditions_irs.append(ir)
 
-        return self._op_to_smt(conditions_irs[-1], tmp_irs)
+        return self._solidity_op_to_op(conditions_irs[-1], tmp_irs)
 
     def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]):
         """ Updates the SSA bounds for the variables involved in the given IR operations
@@ -215,9 +222,8 @@ class SolidityGenerator(Generator):
             raise Exception('Invalid operation {ir}')
         vars = [ir.lvalue]
         get_read_vars(ir, vars)
-        print(vars)
         for var in vars:
-            var_base_name = self._get_base_name(var)
+            var_base_name = self._get_solidity_var_base_name(var)
             if var_base_name not in var_ssa_bounds:
                 var_ssa_bounds[var_base_name] = (str(var), str(var))
                 continue
@@ -226,7 +232,7 @@ class SolidityGenerator(Generator):
             if var_ssa_bounds[var_base_name][1] < str(var):
                 var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(var))
 
-    def _add_bounds_checks(self, conditions: list[str], var_ssa_bounds: dict[str, tuple[str, str]]):
+    def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, tuple[str, str]]):
         """ Adds bounds checks for all variables in the SSA bounds mapping to the given conditions list
 
         Args:
@@ -235,107 +241,106 @@ class SolidityGenerator(Generator):
         """
         
         for var, bounds in var_ssa_bounds.items():
-            conditions.append(f'(= {bounds[0]} {var} )')
-            conditions.append(f'(= {bounds[1]} {var}! )')
+            op.append(Equal(bounds[0], var))
+            op.append(Equal(bounds[1], f'{var}!'))
 
-    def _get_execution_smt_conditions(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], execution_smt_conditions: list[list[str]] = [[]]) -> list[list[str]]:
-        """ Recursively generates SMT-LIB2 execution conditions from the given node
+    def _compute_inductive_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], root_op: Or, branch_op: And) -> Or:
+        """ Recursively computes the execution conditions for the loop transition path
 
         Args:
-            node (Node): The current node to process
+            node (Node): The current node in the transition path
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
-            var_ssa_bounds (dict[str, tuple[str, str]]): A mapping of variable base names to their SSA bounds
-            execution_smt_conditions (list[list[str]], optional): The list of execution conditions being built. Defaults to [[]].
+            var_ssa_bounds (dict[str, tuple[str, str]]): a mapping of variable base names to their SSA bounds
+            root_op (Or): The root operation for the transition path
+            branch_op (And): The current branch operation being constructed
 
         Returns:
-            list[list[str]]: A list of execution conditions in SMT-LIB2 format
+            Or: The root operation representing all execution conditions for the transition path
         """
-        if not node.is_conditional():
+
+        if not node.contains_if():
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_tmp_assignment(ir) and not isinstance(ir, Phi):
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir) and not isinstance(ir, Phi):
                     # Update the SSA bounds for the variables involved in the operation
                     self._update_var_ssa_bounds(var_ssa_bounds, ir, tmp_irs)
                     # Add the operation to the current execution condition
-                    execution_smt_conditions[-1].append(self._lvalue_op_to_smt(ir, tmp_irs))
+                    branch_op.append(self._solidity_lvalue_op_to_smt(ir, tmp_irs))
 
             # Continue to the next node if it does not dominate the current node (to avoid cycles)
             if len(node.sons) > 0 and node.sons[0] not in node.dominators:
-                return self._get_execution_smt_conditions(node.sons[0], tmp_irs, var_ssa_bounds, execution_smt_conditions)
+                return self._compute_inductive_op(node.sons[0], tmp_irs, var_ssa_bounds, root_op, branch_op)
 
             # If the node is a leaf, add bounds checks and return
-            self._add_bounds_checks(execution_smt_conditions[-1], var_ssa_bounds)
-            return execution_smt_conditions
+            self._add_bounds_checks(branch_op, var_ssa_bounds)
+            return root_op
         
-        # If the node is conditional, create two branches
-        conditions = execution_smt_conditions[-1].copy()
+        # If the node is conditional, bifurcate
+        new_branch_op = And(*branch_op.args.copy())
+        root_op.append(new_branch_op)
         if node.son_true:
-            execution_smt_conditions[-1].append(self._conditional_node_to_smt(node, tmp_irs))
-            self._get_execution_smt_conditions(node.son_true, tmp_irs, var_ssa_bounds.copy(), execution_smt_conditions)
+            branch_op.append(self._solidity_conditional_node_to_op(node, tmp_irs))
+            self._compute_inductive_op(node.son_true, tmp_irs, var_ssa_bounds.copy(), root_op, branch_op)
         if node.son_false:
-            execution_smt_conditions.append(conditions)
-            execution_smt_conditions[-1].append(f'( not {self._conditional_node_to_smt(node, tmp_irs)} )')
-            self._get_execution_smt_conditions(node.son_false, tmp_irs, var_ssa_bounds.copy(), execution_smt_conditions)
+            new_branch_op.append(Not(self._solidity_conditional_node_to_op(node, tmp_irs)))
+            self._compute_inductive_op(node.son_false, tmp_irs, var_ssa_bounds.copy(), root_op, new_branch_op)
 
-        return execution_smt_conditions
+        return root_op
 
-    def _get_trans_execution_smt_conditions(self, base_declarations: list[tuple[str, str]], loop_smt_condition: str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[list[str]]:
-        """ Generates SMT-LIB2 execution conditions for the transition path
+    def _get_inductive_op(self, loop_condition_op: Op|str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
+        """ Generate the verification condition operation for the loop transition
 
         Args:
-            base_declarations (list[tuple[str, str]]): A list of tuples where each tuple contains the base variable name and type
-            loop_smt_condition (str): The loop condition in SMT-LIB2 format
-            trans_path (list[Node]): The list of nodes in the transition path
-            tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
+            loop_condition_op (str): The loop condition operation
 
         Returns:
-            list[list[str]]: A list of execution conditions in SMT-LIB2 format
+            Op: An Op object representing the transition condition
         """
 
+        branch_op = And()
+        root_op = Or(branch_op)
         var_ssa_bounds: dict[str, tuple[str, str]] = {}
-        execution_smt_conditions = self._get_execution_smt_conditions(trans_path[1], tmp_irs, var_ssa_bounds)
+        self._compute_inductive_op(trans_path[1], tmp_irs, var_ssa_bounds, root_op, branch_op)
 
         # Add the loop condition to the beginning of each execution condition
-        for conditions in execution_smt_conditions:
-            conditions.insert(0, loop_smt_condition)
-        
+        for branch_op in root_op:
+            if not isinstance(branch_op, And):
+                raise Exception(f'Invalid branch operation {branch_op}')
+            branch_op.insert(0, loop_condition_op)
+
         # Add the execution condition that represents the case where the loop body is not executed
-        execution_smt_conditions.append([])
+        branch_op = And()
+        root_op.append(branch_op)
         for var in var_ssa_bounds:
-            execution_smt_conditions[-1].append(f'( = {var_ssa_bounds[var][0]} {var} )')
-            execution_smt_conditions[-1].append(f'( = {var_ssa_bounds[var][0]} {var}! )')
+            branch_op.append(Equal(var_ssa_bounds[var][0], var))
+            branch_op.append(Equal(var_ssa_bounds[var][0], f'{var}!'))
 
-        return execution_smt_conditions
+        return root_op
 
-    def _get_smt_pre_conditions(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> list[str]:
-        """Generates SMT-LIB2 pre-conditions from the pre-path nodes
-
-        The pre-conditions formula is constructed by:
-        1. Adding guards that equate each state variable to its corresponding base variable
-        2. Adding conditions for each IR operation with an LValue in the pre-path nodes
+    def _get_reachability_op(self, pre_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Op:
+        """ Generate the verification condition operation for to check reachability 
 
         Args:
-            pre_path (list[Node]): The list of nodes in the pre-path
+            pre_path (list[Node]): The list of nodes in the pre loop path 
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
-
         Returns:
-            list[str]: A list of pre-conditions in SMT-LIB2 format
+            Op: An Op object representing the reachability condition
         """
-
+        
         guards = set()
         pre_conditions = []
         for node in pre_path:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, Phi):
                     # The guard transports the value of the base variable to the state variable
-                    guards.add(f'( = {ir.lvalue} {self._get_base_name(ir.lvalue)} )')
+                    guards.add(Equal(str(ir.lvalue), self._get_solidity_var_base_name(ir.lvalue)))
 
-                    pre_conditions.append(self._lvalue_op_to_smt(ir, tmp_irs)) 
+                    pre_conditions.append(self._solidity_lvalue_op_to_smt(ir, tmp_irs)) 
         
         pre_conditions = list(guards) + pre_conditions 
 
-        return pre_conditions
+        return And(*pre_conditions)
 
-    def _lvalue_op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> str:
+    def _solidity_lvalue_op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> Equal:
         """ Converts an IR operation with an LValue to SMT-LIB2 format
 
         Args:
@@ -346,14 +351,14 @@ class SolidityGenerator(Generator):
             Exception: If the operation is invalid or unsupported
 
         Returns:
-            str: The operation in SMT-LIB2 format
+            Equal: An Equal object representing the operation in SMT-LIB2 format
 
         """
 
-        return f'( = {ir.lvalue} {self._op_to_smt(ir, tmp_irs)} )'
+        return Equal(str(ir.lvalue), self._solidity_op_to_op(ir, tmp_irs))
 
-    def _op_to_smt(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> str:
-        """ Converts an IR operation to SMT-LIB2 format
+    def _solidity_op_to_op(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> Op|str:
+        """ Converts a Solidity IR operation to an Op object
 
         Args:
             ir (OperationWithLValue): The IR operation to convert
@@ -363,32 +368,32 @@ class SolidityGenerator(Generator):
             Exception: If the operation is invalid or unsupported
 
         Returns:
-            str: The operation in SMT-LIB2 format
+            Op|str: The corresponding Op object or string representation of the operation
         """
 
         if isinstance(ir, Binary):
-            reads = [str(ir.read[0]), str(ir.read[1])]
+            reads:list[str|Op] = [str(ir.read[0]), str(ir.read[1])]
             
             # If one of the reads is a temporary variable, recursively resolve it
             if isinstance(ir.read[0], TemporaryVariable):
-                reads[0] = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+                reads[0] = self._solidity_op_to_op(tmp_irs[str(ir.read[0])], tmp_irs)
             if isinstance(ir.read[1], TemporaryVariable):
-                reads[1] = self._op_to_smt(tmp_irs[str(ir.read[1])], tmp_irs)
-
-            return f'( {self.op_map[ir.type]} {reads[0]} {reads[1]} )'
+                reads[1] = self._solidity_op_to_op(tmp_irs[str(ir.read[1])], tmp_irs)
+            
+            return self.op_map[ir.type](reads[0], reads[1])
         if isinstance(ir, Unary):
             read = ir.read[0]
             if isinstance(ir.read[0], TemporaryVariable):
-                read = self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
-            return f'( {self.op_map[ir.type]} {read} )'
+                read = self._solidity_op_to_op(tmp_irs[str(ir.read[0])], tmp_irs)
+            return self.op_map[ir.type](read)
         if isinstance(ir, Assignment):
             if isinstance(ir.read[0], TemporaryVariable):
-                return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
-            return ir.read[0]
+                return self._solidity_op_to_op(tmp_irs[str(ir.read[0])], tmp_irs)
+            return str(ir.read[0])
 
         raise Exception(f'Invalid operation {ir}')
 
-    def _get_base_name(self, var: Variable) -> str:
+    def _get_solidity_var_base_name(self, var: Variable) -> str:
         """ Returns the base name of a variable by removing its SSA suffix
 
         Args:
@@ -400,7 +405,7 @@ class SolidityGenerator(Generator):
 
         return str(var).split('_')[0]
 
-    def _get_declarations_vars(self, function: Function, contract: Contract) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
+    def _get_solidity_vars(self, function: Function, contract: Contract) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         """Finds all state variables (SSA) and base variables (non-SSA) in the function and contract
 
         Args:
@@ -413,12 +418,12 @@ class SolidityGenerator(Generator):
                 - The second list contains tuples of state variable names and types
         """
 
-        state_vars = [(var[0], self._type_map[var[1]]) for var in self._get_lvalue_ops_vars(function.nodes)]
+        state_vars = [(var[0], self._type_map[var[1]]) for var in self._get_solidity_lvalue_ops_vars(function.nodes)]
         base_vars = [(str(var), self._type_map[str(var.type)]) for var in chain(function.variables, contract.variables)]
 
         return base_vars, state_vars
 
-    def _get_lvalue_ops_vars(self, nodes: list[Node]) -> list[tuple[str, str]]:
+    def _get_solidity_lvalue_ops_vars(self, nodes: list[Node]) -> list[tuple[str, str]]:
         """Finds all SSA variables that are assigned a value or read in the given nodes
 
         Args:
@@ -440,7 +445,7 @@ class SolidityGenerator(Generator):
                             vars.add((str(var), str(var.type)))
         return sorted(list(vars))
 
-    def _get_loop_nodes(self, function: Function) -> list[tuple[Node, Node]]:
+    def _get_solidity_loop_nodes(self, function: Function) -> list[tuple[Node, Node]]:
         """Finds all loops in the function
         
         Identifies loops by looking for back edges in the control flow graph (CFG) of the function. For every edge (v -> u) in the CFG, if u dominates v, then (v -> u) is a back edge, and u is a loop header.
@@ -459,7 +464,7 @@ class SolidityGenerator(Generator):
                     loops.append((u, v))
         return loops
 
-    def _get_paths(self, function: Function, loop_header: Node, loop_latch: Node) -> tuple[list[Node], list[Node], list[Node]]:
+    def _get_solidity_paths(self, function: Function, loop_header: Node, loop_latch: Node) -> tuple[list[Node], list[Node], list[Node]]:
         """Divides the function's nodes into three paths: pre-path, transition path, and post-path
 
         Retrieves the nodes in the pre-path (nodes that dominate the loop header), transition path (nodes in the loop body), and post-path (all other nodes).

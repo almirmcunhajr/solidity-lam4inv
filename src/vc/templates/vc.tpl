@@ -39,13 +39,10 @@
 ( define-fun inv-f( {{ base_parameters_def }} ) bool
 {{ inv | indent(2, true) }}
 )
-{% if pre_conditions %}
+
+{%- if reachability_vc %}
 ( define-fun pre-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
-  ( and
-    {%- for pre_condition in pre_conditions %}
-    {{ pre_condition }}
-    {%- endfor %}
-  )
+{{ reachability_vc | indent(2, true) }}
 )
 
 ( assert ( not
@@ -57,17 +54,9 @@
 (check-sat)
 {%- endif %}
 
-{%- if trans_execution_conditions %}
+{%- if inductive_vc %}
 ( define-fun trans-f ( {{ base_parameters_def }} {{ primed_parameters_def }} {{ state_parameters_def }} ) Bool
-  ( or
-    {%- for conditions in trans_execution_conditions %}
-    ( and
-      {%- for condition in conditions %}
-      {{ condition }}
-      {%- endfor %}
-    )
-    {%- endfor %}
-  )
+{{ inductive_vc | indent(2, true) }}
 )
 
 ( assert ( not
@@ -82,19 +71,9 @@
 (check-sat)
 {%- endif %}
 
-{%- if post_conditions %}
+{%- if provability_vc %}
 ( define-fun post-f ( {{ base_parameters_def }} {{ state_parameters_def }} ) Bool
-  ( or
-    ( not
-      ( and
-        ( not {{loop_condition}} )
-        {%- for condition in post_conditions[:-1] %}
-        {{ condition }}
-        {%- endfor %}
-        ( not {{post_conditions[-1]}} )
-      )
-    )
-  )
+{{ provability_vc | indent(2, true) }}
 )
 
 ( assert ( not

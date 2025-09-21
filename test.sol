@@ -2,21 +2,27 @@
 pragma solidity ^0.8.0;
 
 contract LoopExample {
+    int i;
+    int j;
     int x;
     int y;
 
-    constructor() {
+    constructor(int _x, int _y) {
         // pre-conditions
-        x = 1;
+        x = 0;
         y = 0;
+        i = x;
+        j = y;
 
         // loop body
-        while (y < 100000) {
-            x = x + y;
-            y = y + 1;
+        while (x != 0) {
+            x = x - 1;
+            y = y - 1;
         }
 
         // post-condition
-        assert(x >= y);
+        if (y != 0) {
+            assert(i != j);
+        }
     }
 }
