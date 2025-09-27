@@ -199,6 +199,23 @@ class SolidityGenerator(Generator):
 
         return self._solidity_op_to_op(conditions_irs[-1], tmp_irs)
 
+    def get_read_vars(self, ir: OperationWithLValue, vars: list[Variable], tmp_irs: dict[str, OperationWithLValue]):
+        """ Recursively retrieves all variables read by the given IR operation, including those read by temporary variables
+        Args:
+            ir (OperationWithLValue): The IR operation to analyze
+            vars (list[Variable]): The list to populate with read variables
+            tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
+        """
+
+        if not ir.read:
+            return
+        for var in ir.read:
+            if  not isinstance(var, TemporaryVariable) and not isinstance(var, Constant):
+                vars.append(var)
+                continue
+            if isinstance(var, TemporaryVariable):
+                self.get_read_vars(tmp_irs[str(var)], vars, tmp_irs)
+
     def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]):
         """ Updates the SSA bounds for the variables involved in the given IR operations
 
@@ -209,21 +226,11 @@ class SolidityGenerator(Generator):
         Raises:
             Exception: If the operation is invalid
         """
-
-        def get_read_vars(ir: OperationWithLValue, vars: list[Variable]):
-            if not ir.read:
-                return
-            for var in ir.read:
-                if  not isinstance(var, TemporaryVariable) and not isinstance(var, Constant):
-                    vars.append(var)
-                    continue
-                if isinstance(var, TemporaryVariable):
-                    get_read_vars(tmp_irs[str(var)], vars)
-
+        
         if not ir.lvalue or not ir.read:
             raise Exception('Invalid operation {ir}')
         vars = [ir.lvalue]
-        get_read_vars(ir, vars)
+        self.get_read_vars(ir, vars, tmp_irs)
         for var in vars:
             var_base_name = self._get_solidity_var_base_name(var)
             if var_base_name not in var_ssa_bounds:
@@ -233,6 +240,25 @@ class SolidityGenerator(Generator):
                 var_ssa_bounds[var_base_name] = (str(var), var_ssa_bounds[var_base_name][1])
             if var_ssa_bounds[var_base_name][1] < str(var):
                 var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(var))
+
+    def _init_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
+        """ Initializes the SSA bounds for all variables in the given path
+
+        Args:
+            var_ssa_bounds (dict[str, tuple[str, str]]): a mapping of variable base names to their SSA bounds
+            path (list[Node]): The list of nodes in the path
+            tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
+        """
+
+        for node in path:
+            for ir in node.irs_ssa:
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir) and not isinstance(ir, Phi):
+                    vars = [ir.lvalue]
+                    self.get_read_vars(ir, vars, tmp_irs)
+                    for var in vars:
+                        var_base_name = self._get_solidity_var_base_name(var)
+                        if var_base_name not in var_ssa_bounds:
+                            var_ssa_bounds[var_base_name] = (str(var), str(var))
 
     def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, tuple[str, str]]):
         """ Adds bounds checks for all variables in the SSA bounds mapping to the given conditions list
@@ -246,7 +272,16 @@ class SolidityGenerator(Generator):
             op.append(Equal(bounds[0], var))
             op.append(Equal(bounds[1], f'{var}!'))
 
-    def _compute_inductive_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], root_op: Or, branch_op: And) -> Or:
+    def _merge_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], branch_bounds: dict[str, tuple[str, str]]):
+        for var, (lb, ub) in branch_bounds.items():
+            if var in var_ssa_bounds:
+                old_lb, old_ub = var_ssa_bounds[var]
+                var_ssa_bounds[var] = (min(lb, old_lb), max(ub, old_ub))
+                continue
+
+            var_ssa_bounds[var] = (lb, ub)
+
+    def _compute_trans_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], root_op: Or, branch_op: And):
         """ Recursively computes the execution conditions for the loop transition path
 
         Args:
@@ -270,23 +305,28 @@ class SolidityGenerator(Generator):
 
             # Continue to the next node if it does not dominate the current node (to avoid cycles)
             if len(node.sons) > 0 and node.sons[0] not in node.dominators:
-                return self._compute_inductive_op(node.sons[0], tmp_irs, var_ssa_bounds, root_op, branch_op)
-
+                return self._compute_trans_op(node.sons[0], tmp_irs, var_ssa_bounds, root_op, branch_op)
+            
             # If the node is a leaf, add bounds checks and return
             self._add_bounds_checks(branch_op, var_ssa_bounds)
-            return root_op
-        
+            return
+
         # If the node is conditional, bifurcate
         new_branch_op = And(*branch_op.args.copy())
         root_op.append(new_branch_op)
+        
+        true_branch_var_ssa_bounds = var_ssa_bounds.copy()
+        false_branch_var_ssa_bounds = var_ssa_bounds.copy()
+
         if node.son_true:
             branch_op.append(self._solidity_conditional_node_to_op(node, tmp_irs))
-            self._compute_inductive_op(node.son_true, tmp_irs, var_ssa_bounds.copy(), root_op, branch_op)
+            self._compute_trans_op(node.son_true, tmp_irs, true_branch_var_ssa_bounds, root_op, branch_op)
         if node.son_false:
             new_branch_op.append(Not(self._solidity_conditional_node_to_op(node, tmp_irs)))
-            self._compute_inductive_op(node.son_false, tmp_irs, var_ssa_bounds.copy(), root_op, new_branch_op)
+            self._compute_trans_op(node.son_false, tmp_irs, false_branch_var_ssa_bounds, root_op, new_branch_op)
 
-        return root_op
+        self._merge_ssa_bounds(var_ssa_bounds, true_branch_var_ssa_bounds)
+        self._merge_ssa_bounds(var_ssa_bounds, false_branch_var_ssa_bounds)
 
     def _get_trans_op(self, loop_condition_op: Op|str, trans_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
         """ Generate the operation to check the invariant in the loop transition
@@ -301,7 +341,8 @@ class SolidityGenerator(Generator):
         branch_op = And()
         root_op = Or(branch_op)
         var_ssa_bounds: dict[str, tuple[str, str]] = {}
-        self._compute_inductive_op(trans_path[1], tmp_irs, var_ssa_bounds, root_op, branch_op)
+        self._init_var_ssa_bounds(var_ssa_bounds, trans_path, tmp_irs)
+        self._compute_trans_op(trans_path[1], tmp_irs, var_ssa_bounds, root_op, branch_op)
 
         # Add the loop condition to the beginning of each execution condition
         for branch_op in root_op:
