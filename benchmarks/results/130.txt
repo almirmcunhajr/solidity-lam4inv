@@ -1,0 +1,53 @@
+2025-09-28 13:05:09,361 - runner - INFO - Resetting generator
+2025-09-28 13:05:09,361 - runner - INFO - Executing predicate filtering for preconditions
+2025-09-28 13:05:09,361 - runner - INFO - Filtering predicates for candidate assert(d1 == 1)
+2025-09-28 13:05:10,054 - runner - INFO - Addind predicate d1 == 1 to verify set
+2025-09-28 13:05:10,054 - runner - INFO - Filtering predicates for candidate assert(d2 == 1)
+2025-09-28 13:05:10,719 - runner - INFO - Addind predicate d2 == 1 to verify set
+2025-09-28 13:05:10,719 - runner - INFO - Filtering predicates for candidate assert(d3 == 1)
+2025-09-28 13:05:11,407 - runner - INFO - Addind predicate d3 == 1 to verify set
+2025-09-28 13:05:11,407 - runner - INFO - Filtering predicates for candidate assert(x1 == 1)
+2025-09-28 13:05:12,132 - runner - INFO - Predicate filtering verify set: ['d1 == 1', 'd2 == 1', 'd3 == 1']
+2025-09-28 13:05:12,315 - runner - INFO - Verifying formula: ( and ( and ( = d1 1 ) ( = d2 1 ) ) ( = d3 1 ) )
+2025-09-28 13:05:12,315 - runner - INFO - For candidate: assert((d1 == 1) && (d2 == 1) && (d3 == 1))
+2025-09-28 13:05:12,356 - runner - INFO - Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+2025-09-28 13:06:02,556 - runner - INFO - Generated 6 candidates
+2025-09-28 13:06:02,557 - runner - INFO - Verifying generated candidates
+2025-09-28 13:06:02,557 - runner - INFO - Verifying candidate: assert(d1 == 1);
+2025-09-28 13:06:02,789 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:02,789 - runner - INFO - Adding candidate to fail history: assert(d1 == 1);
+2025-09-28 13:06:02,789 - runner - INFO - Verifying candidate: assert(d2 == 1);
+2025-09-28 13:06:02,990 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:02,990 - runner - INFO - Adding candidate to fail history: assert(d2 == 1);
+2025-09-28 13:06:02,990 - runner - INFO - Verifying candidate: assert(d3 == 1);
+2025-09-28 13:06:03,186 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:03,186 - runner - INFO - Adding candidate to fail history: assert(d3 == 1);
+2025-09-28 13:06:03,186 - runner - INFO - Verifying candidate: assert((x1 == 0) || (x1 == 1));
+2025-09-28 13:06:03,371 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:03,371 - runner - INFO - Adding candidate to fail history: assert((x1 == 0) || (x1 == 1));
+2025-09-28 13:06:03,371 - runner - INFO - Verifying candidate: assert((x1 > 0) || (x2 >= 0));
+2025-09-28 13:06:03,561 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:03,561 - runner - INFO - Adding candidate to fail history: assert((x1 > 0) || (x2 >= 0));
+2025-09-28 13:06:03,561 - runner - INFO - Verifying candidate: assert((x1 > 0) || (x3 >= 0));
+2025-09-28 13:06:03,752 - runner - INFO - Candidate failed verification
+2025-09-28 13:06:03,753 - runner - INFO - Adding candidate to fail history: assert((x1 > 0) || (x3 >= 0));
+2025-09-28 13:06:03,753 - runner - INFO - Executing predicate filtering
+2025-09-28 13:06:03,753 - runner - INFO - Filtering predicates for candidate assert(d1 == 1);
+2025-09-28 13:06:04,403 - runner - INFO - Filtering predicates for candidate assert(d2 == 1);
+2025-09-28 13:06:05,078 - runner - INFO - Filtering predicates for candidate assert(d3 == 1);
+2025-09-28 13:06:05,750 - runner - INFO - Filtering predicates for candidate assert((x1 == 0) || (x1 == 1));
+2025-09-28 13:06:07,172 - runner - INFO - Addind predicate ((x1 == 0)) || ((x1 == 1)) to verify set
+2025-09-28 13:06:07,172 - runner - INFO - Filtering predicates for candidate assert((x1 > 0) || (x2 >= 0));
+2025-09-28 13:06:08,664 - runner - INFO - Addind predicate ((x1 > 0)) || ((x2 >= 0)) to verify set
+2025-09-28 13:06:08,664 - runner - INFO - Filtering predicates for candidate assert((x1 > 0) || (x3 >= 0));
+2025-09-28 13:06:10,137 - runner - INFO - Addind predicate ((x1 > 0)) || ((x3 >= 0)) to verify set
+2025-09-28 13:06:10,138 - runner - INFO - Predicate filtering verify set: ['d1 == 1', 'd2 == 1', 'd3 == 1', '((x1 == 0)) || ((x1 == 1))', '((x1 > 0)) || ((x2 >= 0))', '((x1 > 0)) || ((x3 >= 0))']
+2025-09-28 13:06:10,331 - runner - INFO - Verifying formula: ( and ( and ( and ( and ( and ( = d1 1 ) ( = d2 1 ) ) ( = d3 1 ) ) ( or ( = x1 0 ) ( = x1 1 ) ) ) ( or ( > x1 0 ) ( >= x2 0 ) ) ) ( or ( > x1 0 ) ( >= x3 0 ) ) )
+2025-09-28 13:06:10,332 - runner - INFO - For candidate: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (((x1 == 0)) || ((x1 == 1))) && (((x1 > 0)) || ((x2 >= 0))) && (((x1 > 0)) || ((x3 >= 0))))
+2025-09-28 13:06:10,353 - runner - INFO - Predicate filtering found solution: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (((x1 == 0)) || ((x1 == 1))) && (((x1 > 0)) || ((x2 >= 0))) && (((x1 > 0)) || ((x3 >= 0))))
+2025-09-28 13:06:10,353 - runner - INFO - # Result
+2025-09-28 13:06:10,353 - runner - INFO - Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (((x1 == 0)) || ((x1 == 1))) && (((x1 > 0)) || ((x2 >= 0))) && (((x1 > 0)) || ((x3 >= 0))))
+2025-09-28 13:06:10,353 - runner - INFO - 6 counter examples were generated for the model proposals, with 0 repeated fails
+2025-09-28 13:06:10,353 - runner - INFO - The model runtime was 57.99689817428589 seconds
+2025-09-28 13:06:10,353 - runner - INFO - The total runtime was 60.99168515205383 seconds
+2025-09-28 13:06:10,353 - runner - INFO - Resetting generator

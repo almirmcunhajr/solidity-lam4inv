@@ -25,7 +25,8 @@ class Runner:
         code_handler: CodeHandler,
         presence_penalty_scale: float,
         max_chat_interactions = 0,
-        log_level:str = str(logging.INFO)
+        log_level:str = str(logging.INFO),
+        output_path: Optional[str] = None
     ):
         self.inv_smt_solver = inv_smt_solver
         self.predicate_filtering = predicate_filtering
@@ -47,6 +48,12 @@ class Runner:
         console_log_handler.setFormatter(formatter)
         
         self._logger.addHandler(console_log_handler)
+
+        if output_path is not None:
+            file_log_handler = logging.FileHandler(output_path)
+            file_log_handler.setLevel(logging.DEBUG)
+            file_log_handler.setFormatter(formatter)
+            self._logger.addHandler(file_log_handler)
 
         self.reset()
 
