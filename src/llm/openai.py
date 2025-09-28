@@ -9,13 +9,9 @@ class OpenAIModel(Enum):
     pass
 
 class ChatGPTModel(OpenAIModel):
-    GPT_3_5_TURBO = "gpt-3.5-turbo"
-    GPT_4 = "gpt-4"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_4O = "gpt-4o"
-    GPT_4O_MINI = "gpt-4o-mini"
-    O1_MINI = "o1-mini"
-    O3_MINI = "o3-mini"
+    GPT_5="gpt-5"
+    GPT_5_MINI="gpt-5-mini"
+    GPT_5_NANO="gpt-5-nano"
 
 class DeepseekModel(OpenAIModel):
     DEEPSEEK_R1 = "deepseek-reasoner"
@@ -24,10 +20,7 @@ class OpenAI(LLM):
     def __init__(self, model: OpenAIModel, api_key: Optional[str] = None, base_url: Optional[str] = None):
         self.model = model
         self.client = OpenAIClient(api_key=api_key, base_url=base_url)
-        self._unsupported_params : dict[OpenAIModel, list[str]] = {
-            ChatGPTModel.O1_MINI: ["presence_penalty"],
-            ChatGPTModel.O3_MINI: ["presence_penalty"],
-        }
+        self._unsupported_params : dict[OpenAIModel, list[str]] = {}
 
     def _get_messages(self, chat: Chat) -> list:
         return [
