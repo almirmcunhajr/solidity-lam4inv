@@ -4,7 +4,7 @@ from itertools import chain
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
-from slither.core.cfg.node import Constant, Node, Phi, TemporaryVariable, Variable
+from slither.core.cfg.node import Constant, Node, Operation, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
@@ -90,7 +90,7 @@ class SolidityGenerator(Generator):
         inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
 
         # Get the provability verification condition op
-        provability_op = self._get_post_op(loop_condition_op, post_path, tmp_irs)
+        provability_op = self._get_post_op(loop_header, loop_condition_op, post_path, tmp_irs)
 
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
@@ -148,12 +148,13 @@ class SolidityGenerator(Generator):
             return False
         return isinstance(ir.lvalue, TemporaryVariable)
 
-    def _get_post_op(self, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
-        """ Generate the operation to check loop invariant post condition
+    def _get_post_op(self, loop_header: Node, loop_condition_op: Op|str, post_path: list[Node], tmp_irs: dict[str, OperationWithLValue]) -> Or:
+        """Generate the SMT operation that represents the loop invariant post-condition. 
 
-        This assumes that the post loop path contains only if statements and a single assert call.
+        This ensures that after the loop terminates, the invariant still holds.
 
         Args:
+            loop_header (Node): The loop header node
             loop_condition_op (str): The loop condition operation
             post_path (list[Node]): The list of nodes in the post loop path
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
@@ -162,17 +163,32 @@ class SolidityGenerator(Generator):
             Op: An Op object to check the loop invariant post condition
         """
 
+        # The invariant must hold if the loop exits. Negating the loop condition expresses that we are at loop exit.
         assertion_op = And(Not(loop_condition_op))
-        root_op = Or(Not(assertion_op))
         for node in post_path[1:]:
+             # If there are extra conditions in the post-path (e.g. if-statements, asserts), we append them to the assertion.
             if node.contains_if():
                 assertion_op.append(self._solidity_conditional_node_to_op(node, tmp_irs))
                 continue
             for ir in node.irs_ssa:
+                # If the node contains an assert, we capture its IR and negate it.
                 if  isinstance(ir, SolidityCall) and ir.function.name == "assert(bool)":
                     post_condition_ir = tmp_irs[str(ir.arguments[0])]
                     assertion_op.append(Not(self._solidity_op_to_op(post_condition_ir, tmp_irs)))
                     break
+
+        # Root operator is the OR of possible violations of the post-condition.
+        root_op = Or(Not(assertion_op))
+
+        # Ensures that variables are not trivially unchanged
+        triviality_op = And()
+        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
+        self._init_var_ssa_bounds(vars_ssa_bounds, [loop_header]+post_path, tmp_irs)
+        for var in vars_ssa_bounds:
+            triviality_op.append(Equal(vars_ssa_bounds[var][0], var))
+
+        # Negating this ensures we don't accept "stuttering" executions where all variables are identical before and after.
+        root_op.append(Not(triviality_op))
 
         return root_op
 
@@ -199,7 +215,7 @@ class SolidityGenerator(Generator):
 
         return self._solidity_op_to_op(conditions_irs[-1], tmp_irs)
 
-    def get_read_vars(self, ir: OperationWithLValue, vars: list[Variable], tmp_irs: dict[str, OperationWithLValue]):
+    def set_read_vars(self, ir: Operation, vars: list[Variable], tmp_irs: dict[str, OperationWithLValue]):
         """ Recursively retrieves all variables read by the given IR operation, including those read by temporary variables
         Args:
             ir (OperationWithLValue): The IR operation to analyze
@@ -214,7 +230,7 @@ class SolidityGenerator(Generator):
                 vars.append(var)
                 continue
             if isinstance(var, TemporaryVariable):
-                self.get_read_vars(tmp_irs[str(var)], vars, tmp_irs)
+                self.set_read_vars(tmp_irs[str(var)], vars, tmp_irs)
 
     def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]):
         """ Updates the SSA bounds for the variables involved in the given IR operations
@@ -230,7 +246,7 @@ class SolidityGenerator(Generator):
         if not ir.lvalue or not ir.read:
             raise Exception('Invalid operation {ir}')
         vars = [ir.lvalue]
-        self.get_read_vars(ir, vars, tmp_irs)
+        self.set_read_vars(ir, vars, tmp_irs)
         for var in vars:
             var_base_name = self._get_solidity_var_base_name(var)
             if var_base_name not in var_ssa_bounds:
@@ -250,15 +266,17 @@ class SolidityGenerator(Generator):
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
         """
 
+        vars = []
         for node in path:
             for ir in node.irs_ssa:
                 if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir) and not isinstance(ir, Phi):
-                    vars = [ir.lvalue]
-                    self.get_read_vars(ir, vars, tmp_irs)
-                    for var in vars:
-                        var_base_name = self._get_solidity_var_base_name(var)
-                        if var_base_name not in var_ssa_bounds:
-                            var_ssa_bounds[var_base_name] = (str(var), str(var))
+                    vars.append(ir.lvalue)
+                self.set_read_vars(ir, vars, tmp_irs)
+                
+        for var in vars:
+            var_base_name = self._get_solidity_var_base_name(var)
+            if var_base_name not in var_ssa_bounds:
+                var_ssa_bounds[var_base_name] = (str(var), str(var))
 
     def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, tuple[str, str]]):
         """ Adds bounds checks for all variables in the SSA bounds mapping to the given conditions list
