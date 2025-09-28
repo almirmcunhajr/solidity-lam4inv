@@ -9,13 +9,11 @@ contract LoopExample {
     int x2;
     int x3;
 
-    constructor() {
+    constructor(int x2, int x3) {
         d1 = 1;
         d2 = 1;
         d3 = 1;
         x1 = 1;
-        x2 = 0;
-        x3 = 0;
 
         while (x1 > 0) {
             if (x2 > 0) {

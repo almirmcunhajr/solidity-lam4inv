@@ -387,15 +387,21 @@ class SolidityGenerator(Generator):
             Op: An Op object to check the loop invariant pre-conditions
         """
         
-        guards = set()
         pre_conditions = []
         for node in pre_path:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, Phi):
-                    # The guard transports the value of the base variable to the state variable
-                    guards.add(Equal(str(ir.lvalue), self._get_solidity_var_base_name(ir.lvalue)))
-
+                if isinstance(ir, SolidityCall) and ir.function.name == "require(bool,string)":
+                    ir = tmp_irs[str(ir.arguments[0])]
+                    pre_conditions.append(self._solidity_op_to_op(ir, tmp_irs))
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, Phi) and not self._is_solidity_tmp_assignment(ir):
                     pre_conditions.append(self._solidity_lvalue_op_to_smt(ir, tmp_irs)) 
+
+        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
+        self._init_var_ssa_bounds(vars_ssa_bounds, pre_path, tmp_irs)
+        guards = set()
+        for var in vars_ssa_bounds:
+            # The guard transports the value of the base variable to the state variable
+            guards.add(Equal(vars_ssa_bounds[var][0], var))
         
         pre_conditions = list(guards) + pre_conditions 
 
@@ -418,7 +424,7 @@ class SolidityGenerator(Generator):
 
         return Equal(str(ir.lvalue), self._solidity_op_to_op(ir, tmp_irs))
 
-    def _solidity_op_to_op(self, ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]) -> Op|str:
+    def _solidity_op_to_op(self, ir: Operation, tmp_irs: dict[str, OperationWithLValue]) -> Op|str:
         """ Converts a Solidity IR operation to an Op object
 
         Args:
