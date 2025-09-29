@@ -53,7 +53,6 @@ def run(
         log_level: str,
         output_path: Optional[str] = None
 ):
-    
     runner = Runner(
         inv_smt_solver=z3_inv_smt_solver, 
         predicate_filtering=predicate_filtering, 

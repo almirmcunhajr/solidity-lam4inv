@@ -1,10 +1,11 @@
 import os
+import sys
 from itertools import chain
 
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.declarations import Contract, Function
-from slither.core.cfg.node import Constant, Node, Operation, Phi, TemporaryVariable, Variable
+from slither.core.cfg.node import Constant, InternalCall, Node, Operation, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
 from slither.slithir.convert import Unary
 from slither.slithir.variables.variable import Variable
@@ -164,7 +165,9 @@ class SolidityGenerator(Generator):
         """
 
         # The invariant must hold if the loop exits. Negating the loop condition expresses that we are at loop exit.
-        assertion_op = And(Not(loop_condition_op))
+        assertion_op = And()
+        if loop_condition_op != "":
+            assertion_op = And(Not(loop_condition_op))
         for node in post_path[1:]:
              # If there are extra conditions in the post-path (e.g. if-statements, asserts), we append them to the assertion.
             if node.contains_if():
@@ -210,9 +213,11 @@ class SolidityGenerator(Generator):
 
         conditions_irs = []
         for ir in node.irs_ssa:
-            if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue:
+            if not isinstance(ir, Phi) and isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, InternalCall):
                 conditions_irs.append(ir)
-
+                
+        if len(conditions_irs) == 0:
+            return ""
         return self._solidity_op_to_op(conditions_irs[-1], tmp_irs)
 
     def set_read_vars(self, ir: Operation, vars: list[Variable], tmp_irs: dict[str, OperationWithLValue]):
@@ -366,7 +371,8 @@ class SolidityGenerator(Generator):
         for branch_op in root_op:
             if not isinstance(branch_op, And):
                 raise Exception(f'Invalid branch operation {branch_op}')
-            branch_op.insert(0, loop_condition_op)
+            if loop_condition_op != "": 
+                branch_op.insert(0, loop_condition_op)
 
         # Add the execution condition that represents the case where the loop body is not executed
         branch_op = And()
@@ -590,7 +596,11 @@ class LoopNotFound(Exception):
         super().__init__(f'No loop found')
 
 if __name__ == '__main__':
-    test_file_name = "test.sol"
+    args = sys.argv
+    if len(args) < 2:
+        print(f'Usage: {args[0]} <solidity-file>')
+        sys.exit(1)
+    test_file_name = args[1]
     
     generator = SolidityGenerator(test_file_name)
     pre_vc, trans_vc, post_vc = generator.generate('test')
