@@ -1,0 +1,29 @@
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.20;
+
+contract LoopExample {
+    constructor(int c) {
+        c = 0;
+        while (unknown()) {
+            if (unknown()) {
+                if (c != 40) {
+                    c = c + 1;
+                }
+            } else {
+                if (c == 40) {
+                    c = 1;
+                }
+            }
+        }
+        if (c < 0) {
+            if (c > 40) {
+                assert(c == 40);
+            }
+        }
+    }
+
+    function unknown() internal view returns (bool) {
+        uint rand = uint(keccak256(abi.encodePacked(block.timestamp, block.prevrandao, block.number)));
+        return rand % 2 == 0;
+    }
+}
