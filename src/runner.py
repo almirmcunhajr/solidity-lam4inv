@@ -39,6 +39,7 @@ class Runner:
         self.max_chat_interactions = max_chat_interactions
         
         self._logger = logger.getChild(self.__class__.__name__)
+        self._logger.handlers.clear()
 
         if output_path is not None:
             file_log_handler = logging.FileHandler(output_path)
