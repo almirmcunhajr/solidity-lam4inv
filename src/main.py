@@ -1,4 +1,5 @@
 import argparse
+import logging
 import os
 import re
 from typing import Optional
@@ -35,8 +36,8 @@ def get_solidity_code_handler(code_file_path: str) -> SolidityCodeHandler:
         code = f.read()
     return SolidityCodeHandler(code)
 
-def get_solidity_vc_generator(code_file_path: str) -> SolidityGenerator:
-    generator = SolidityGenerator(code_file_path)
+def get_solidity_vc_generator(code_file_path: str, logger: logging.Logger) -> SolidityGenerator:
+    generator = SolidityGenerator(code_file_path, logger)
     return generator
 
 def get_solidity_formula_handler() -> SolidityFormulaHandler:
@@ -50,7 +51,7 @@ def run(
         predicate_filtering: PredicateFiltering,
         pipeline: list[tuple[LLM, float]],
         max_chat_interactions: int,
-        log_level: str,
+        logger: logging.Logger,
         output_path: Optional[str] = None
 ):
     runner = Runner(
@@ -61,12 +62,14 @@ def run(
         formula_handler=formula_handler,
         code_handler=code_handler, 
         presence_penalty_scale=0.2,
+        logger=logger,
         max_chat_interactions=max_chat_interactions,
-        log_level=log_level,
         output_path=output_path
     )
     
     invariant = runner.run()
+
+    runner.reset()
 
     return invariant
 
@@ -76,18 +79,18 @@ def run_benchmark(
         pipeline: list[tuple[LLM, float]],
         bmc: BMC,
         max_chat_interactions: int,
-        log_level: str,
-        benchmark_index: int
+        benchmark_index: int,
+        logger: logging.Logger
 ):
 
     code_file_path = f"benchmarks/code/{benchmark_index}.sol"
     result_file_path = f"benchmarks/results/{benchmark_index}.txt"
 
     code_handler = get_solidity_code_handler(code_file_path)
-    vc_generator = get_solidity_vc_generator(code_file_path)
-    z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator)
+    vc_generator = get_solidity_vc_generator(code_file_path, logger)
+    z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator, logger)
     generator = Generator(code_handler)
-    predicate_filtering = PredicateFiltering(code_handler, formula_handler, bmc)
+    predicate_filtering = PredicateFiltering(code_handler, formula_handler, bmc, logger)
 
     print(f"Running benchmark for benchmark {benchmark_index}")
     inv_formula = run(
@@ -98,7 +101,7 @@ def run_benchmark(
         predicate_filtering=predicate_filtering,
         pipeline=pipeline,
         max_chat_interactions=max_chat_interactions,
-        log_level=log_level,
+        logger=logger,
         output_path=result_file_path
     )
     if inv_formula is None:
@@ -126,8 +129,8 @@ def run_benchmarks(
         bmc: BMC,
         pipeline: list[tuple[LLM, float]],
         max_chat_interactions: int,
-        log_level: str,
-        bounds:tuple[int, int]
+        bounds:tuple[int, int],
+        logger: logging.Logger
 ):
 
     for benchmark_index in range(bounds[0], bounds[1]+1):
@@ -137,8 +140,8 @@ def run_benchmarks(
             bmc=bmc,
             pipeline=pipeline,
             max_chat_interactions=max_chat_interactions,
-            log_level=log_level,
             benchmark_index=benchmark_index,
+            logger=logger
         )
 
 def get_llm(model:str) -> LLM:
@@ -180,7 +183,7 @@ def parse_range(input: str) -> tuple[int, int]:
 def main():
     parser = argparse.ArgumentParser(description="Run benchmarks")
 
-    parser.add_argument("--pipeline", type=parse_pipeline, default=f'{ChatGPTModel.GPT_5_MINI.value}, 300; {ChatGPTModel.GPT_5.value}, 600', help="Pipeline of LLM models with their timeouts in seconds, formatted as: model, timeout; model, timeout;... Example: gpt-4,120;deepseek,300")
+    parser.add_argument("--pipeline", type=parse_pipeline, default=f'{ChatGPTModel.GPT_4O.value}, 0; {ChatGPTModel.GPT_4O_MINI.value}, 40; {ChatGPTModel.O3_MINI.value}, 300', help="Pipeline of LLM models with their timeouts in seconds, formatted as: model, timeout; model, timeout;... Example: gpt-4,120;deepseek,300")
     parser.add_argument("--smt-timeout", type=int, default=50, help="Timeout for the SMT check")
     parser.add_argument("--bmc-timeout", type=float, default=5, help="Timeout for BMC")
     parser.add_argument("--bmc-max-steps", type=int, default=10, help="Maximum number of steps for BMC")
@@ -192,23 +195,26 @@ def main():
 
     args = parser.parse_args()
 
+    logger = logging.getLogger("main")
+    logger.setLevel(getattr(logging, args.log_level))
+
     pipeline = [(get_llm(model), threshold) for model, threshold in args.pipeline]
     z3_solver = Z3Solver(args.smt_timeout)
-    solc = Solc(config.solc_bin_path, args.bmc_timeout, args.bmc_max_steps)
+    solc = Solc(config.solc_bin_path, args.bmc_timeout, logger, args.bmc_max_steps)
     formula_handler = get_solidity_formula_handler()
-
+    
     if args.benchmarks:
-        run_benchmarks(z3_solver, formula_handler, solc, pipeline, args.max_chat_interactions, args.log_level, args.benchmarks)
+        run_benchmarks(z3_solver, formula_handler, solc, pipeline, args.max_chat_interactions, args.benchmarks, logger)
         return
 
     if args.file is None:
         parser.error("--file is required if --benchmarks is not provided")
 
     code_handler = get_solidity_code_handler(args.file)
-    vc_generator = get_solidity_vc_generator(args.file)
-    z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator)
+    vc_generator = get_solidity_vc_generator(args.file, logger)
+    z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator, logger)
     generator = Generator(code_handler)
-    predicate_filtering = PredicateFiltering(code_handler, formula_handler, solc)
+    predicate_filtering = PredicateFiltering(code_handler, formula_handler, solc, logger)
     run(
         code_handler=code_handler,
         formula_handler=formula_handler,
@@ -217,8 +223,8 @@ def main():
         predicate_filtering=predicate_filtering,
         pipeline=pipeline,
         max_chat_interactions=args.max_chat_interactions,
-        log_level=args.log_level,
-        output_path=args.output
+        output_path=args.output,
+        logger=logger
     )
 
 if __name__ == "__main__":

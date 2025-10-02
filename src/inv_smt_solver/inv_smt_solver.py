@@ -7,9 +7,9 @@ from inv_smt_solver.counter_example import CounterExample, CounterExampleKind
 from vc.generator import Generator
 
 class InvSMTSolver:
-    def __init__(self, solver: Solver, vc_generator: Generator):
+    def __init__(self, solver: Solver, vc_generator: Generator, logger: logging.Logger):
         self.solver = solver
-        self.logger = logging.getLogger(__name__)
+        self._logger = logger.getChild(self.__class__.__name__)
         self.vc_generator = vc_generator
 
     def _is_ignored_variable(self, variable: str) -> bool:
@@ -18,6 +18,9 @@ class InvSMTSolver:
 
     def _get_precondition_counter_example(self, inv: str) -> Optional[CounterExample]:
         formula, _, _ = self.vc_generator.generate(inv)
+        self._logger.debug("Generated precondition VC")
+        self._logger.debug(formula)
+
         res = self.solver.check(formula)
         if res == SatStatus.SAT:
             assignments = self.solver.get_assignments()
@@ -33,6 +36,9 @@ class InvSMTSolver:
             
     def _get_transition_counter_example(self, inv: str) -> Optional[CounterExample]:
         _, formula, _ = self.vc_generator.generate(inv)
+        self._logger.debug("Generated transition VC")
+        self._logger.debug(formula)
+
         res = self.solver.check(formula)
         if res == SatStatus.SAT:
             assignments = self.solver.get_assignments()
@@ -48,6 +54,9 @@ class InvSMTSolver:
 
     def _get_postcondition_counter_example(self, inv: str) -> Optional[CounterExample]:
         _, _, formula = self.vc_generator.generate(inv)
+        self._logger.debug("Generated postcondition VC")
+        self._logger.debug(formula)
+
         res = self.solver.check(formula)
         if res == SatStatus.SAT:
             assignments = self.solver.get_assignments()

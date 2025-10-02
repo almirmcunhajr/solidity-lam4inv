@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 from itertools import chain
@@ -34,9 +35,16 @@ class SolidityGenerator(Generator):
         UnaryType.BANG: Not
     }
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str, logger: logging.Logger):
+        self._logger = logger
         self.slither = Slither(file_path, disable_plugins=["solc-ast-exporter"])
-        
+
+        self._base_vars: list[tuple[str, str]]|None = None
+        self._state_vars: list[tuple[str, str]]|None = None
+        self._reachability_op: Op|None = None
+        self._inductive_op: Op|None = None
+        self._provability_op: Op|None = None
+
         self._type_map = {
             "bool": "Bool"
         }
@@ -72,48 +80,50 @@ class SolidityGenerator(Generator):
             raise LoopNotFound()
         loop_header, loop_latch = loops[0]
 
-        # Get all state variables and base variables in the function and contract
-        base_vars, state_vars = self._get_solidity_vars(function, contract)
+        if self._base_vars is None:
+            # Get all state variables and base variables in the function and contract
+            self._base_vars, self._state_vars = self._get_solidity_vars(function, contract)
 
-        # Get all temporary IR operations in the function
-        tmp_irs = self._get_solidity_tmp_irs(function) 
+        if self._reachability_op is None or self._inductive_op is None or self._provability_op is None:
+            # Get all temporary IR operations in the function
+            tmp_irs = self._get_solidity_tmp_irs(function) 
 
-        # Get the execution paths
-        pre_path, trans_path, post_path = self._get_solidity_paths(function, loop_header, loop_latch)
+            # Get the execution paths
+            pre_path, trans_path, post_path = self._get_solidity_paths(function, loop_header, loop_latch)
 
-        # Get the loop condition operation
-        loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
+            # Get the loop condition operation
+            loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
 
-        # Get the reachability verification condition op
-        reachability_op = self._get_pre_op(pre_path, tmp_irs)
+            # Get the reachability verification condition op
+            self._reachability_op = self._get_pre_op(pre_path, tmp_irs)
 
-        # Get the inductive verification condition op
-        inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
+            # Get the inductive verification condition op
+            self._inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
 
-        # Get the provability verification condition op
-        provability_op = self._get_post_op(loop_header, loop_condition_op, post_path, tmp_irs)
+            # Get the provability verification condition op
+            self._provability_op = self._get_post_op(loop_header, loop_condition_op, post_path, tmp_irs)
 
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
 
         template = Template(tpl_data)
         pre_vc = template.render(
-            base_vars=base_vars,
-            state_vars=state_vars,
+            base_vars=self._base_vars,
+            state_vars=self._state_vars,
             inv=inv,
-            reachability_vc=str(reachability_op),
+            reachability_vc=str(self._reachability_op),
         )
         trans_vc = template.render(
-            base_vars=base_vars,
-            state_vars=state_vars,
+            base_vars=self._base_vars,
+            state_vars=self._state_vars,
             inv=inv,
-            inductive_vc=str(inductive_op),
+            inductive_vc=str(self._inductive_op),
         )
         post_vc = template.render(
-            base_vars=base_vars,
-            state_vars=state_vars,
+            base_vars=self._base_vars,
+            state_vars=self._state_vars,
             inv=inv,
-            provability_vc=str(provability_op),
+            provability_vc=str(self._provability_op),
         )
 
         return pre_vc, trans_vc, post_vc
@@ -274,9 +284,10 @@ class SolidityGenerator(Generator):
         vars = []
         for node in path:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir) and not isinstance(ir, Phi):
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir):
                     vars.append(ir.lvalue)
-                self.set_read_vars(ir, vars, tmp_irs)
+                if not isinstance(ir, Phi):
+                    self.set_read_vars(ir, vars, tmp_irs)
                 
         for var in vars:
             var_base_name = self._get_solidity_var_base_name(var)
@@ -602,7 +613,7 @@ if __name__ == '__main__':
         sys.exit(1)
     test_file_name = args[1]
     
-    generator = SolidityGenerator(test_file_name)
+    generator = SolidityGenerator(test_file_name, logging.getLogger())
     pre_vc, trans_vc, post_vc = generator.generate('test')
 
     print(pre_vc)

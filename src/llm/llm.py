@@ -32,5 +32,3 @@ class LLM(ABC):
     def chat(self, chat: Chat, options: Optional[ChatOptions] = None) -> str:
         pass
 
-    def __str__(self) -> str:
-        return self.model.value

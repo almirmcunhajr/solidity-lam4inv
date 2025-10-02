@@ -24,8 +24,8 @@ class Runner:
         formula_handler: FormulaHandler,
         code_handler: CodeHandler,
         presence_penalty_scale: float,
+        logger: logging.Logger,
         max_chat_interactions = 0,
-        log_level:str = str(logging.INFO),
         output_path: Optional[str] = None
     ):
         self.inv_smt_solver = inv_smt_solver
@@ -38,21 +38,10 @@ class Runner:
         self.presence_penalty_scale = presence_penalty_scale
         self.max_chat_interactions = max_chat_interactions
         
-        self._logger = logging.getLogger(__name__)
-        self._logger.setLevel(logging.DEBUG)
-
-        console_log_handler = logging.StreamHandler()
-        console_log_handler.setLevel(log_level)
-
-        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-        console_log_handler.setFormatter(formatter)
-        
-        self._logger.addHandler(console_log_handler)
+        self._logger = logger.getChild(self.__class__.__name__)
 
         if output_path is not None:
             file_log_handler = logging.FileHandler(output_path)
-            file_log_handler.setLevel(logging.DEBUG)
-            file_log_handler.setFormatter(formatter)
             self._logger.addHandler(file_log_handler)
 
         self.reset()
@@ -77,7 +66,7 @@ class Runner:
         return solution if solution else ""
     
     def _next_pipeline_step(self) -> tuple[Optional[LLM], float]:
-        if self._curr_pipeline_step_index is None:
+        if self._curr_pipeline_step_index is None or self._curr_pipeline_step_activation_time is None:
             self._curr_pipeline_step_activation_time = time.time()
             self._curr_pipeline_step_index = 0
             return self.pipeline[0]
@@ -87,7 +76,7 @@ class Runner:
         if time_spent >= curr_step[1] and self._curr_pipeline_step_index == len(self.pipeline) - 1:
             return None, 0
         if time_spent >= curr_step[1]:
-            self._reset_generator()
+            self._fail_history_hit = 0
             self._curr_pipeline_step_index += 1
             self._curr_pipeline_step_activation_time = time.time()
         
@@ -101,7 +90,7 @@ class Runner:
         for candidate in candidates:
             self._logger.info(f'Filtering predicates for candidate {candidate}')
             formula = self.formula_handler.extract_formula(candidate)
-            filtered_predicates = self.predicate_filtering.filter(formula, self._logger)
+            filtered_predicates = self.predicate_filtering.filter(formula)
             for predicate in filtered_predicates:
                 if predicate not in self._predicate_filtering_verify_set:
                     verify = True
