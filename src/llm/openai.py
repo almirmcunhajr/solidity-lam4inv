@@ -1,7 +1,7 @@
 from enum import Enum
 from typing import Optional
 
-from openai import  OpenAI as OpenAIClient
+from openai import  Omit, OpenAI as OpenAIClient, omit
 from llm.llm import LLM, ChatOptions, Chat
 
 class OpenAIModel(Enum):
@@ -37,18 +37,18 @@ class OpenAI(LLM):
             for message in chat.messages
         ]
     
-    def _get_presence_penalty(self, options: Optional[ChatOptions]) -> float|None:
+    def _get_presence_penalty(self, options: Optional[ChatOptions]) -> float|Omit:
         if not options or options.presence_penalty is None:
-            return 
+            return omit
         if self.model in self._unsupported_params and 'presence_penalty' in self._unsupported_params[self.model]:
-            return
+            return omit
         return 2*options.presence_penalty
     
-    def _get_temperature(self, options: Optional[ChatOptions]) -> float|None:
+    def _get_temperature(self, options: Optional[ChatOptions]) -> float|Omit:
         if not options or options.temperature is None:
-            return 
+            return omit
         if self.model in self._unsupported_params and 'temperature' in self._unsupported_params[self.model]:
-            return 
+            return omit
         return 2*options.temperature
 
     def chat(self, chat: Chat, options: Optional[ChatOptions] = None) -> str:
