@@ -183,7 +183,7 @@ def parse_range(input: str) -> tuple[int, int]:
 def main():
     parser = argparse.ArgumentParser(description="Run benchmarks")
 
-    parser.add_argument("--pipeline", type=parse_pipeline, default=f'{ChatGPTModel.GPT_4O.value}, 0; {ChatGPTModel.GPT_4O_MINI.value}, 40; {ChatGPTModel.O3_MINI.value}, 300', help="Pipeline of LLM models with their timeouts in seconds, formatted as: model, timeout; model, timeout;... Example: gpt-4,120;deepseek,300")
+    parser.add_argument("--pipeline", type=parse_pipeline, default=f'{ChatGPTModel.GPT_5_NANO.value}, 0; {ChatGPTModel.GPT_5_MINI.value}, 120; {ChatGPTModel.GPT_5.value}, 300', help="Pipeline of LLM models with their timeouts in seconds, formatted as: model, timeout; model, timeout;... Example: gpt-4,120;deepseek,300")
     parser.add_argument("--smt-timeout", type=int, default=50, help="Timeout for the SMT check")
     parser.add_argument("--bmc-timeout", type=float, default=5, help="Timeout for BMC")
     parser.add_argument("--bmc-max-steps", type=int, default=10, help="Maximum number of steps for BMC")
