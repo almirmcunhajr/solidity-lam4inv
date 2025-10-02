@@ -26,6 +26,9 @@ class OpenAI(LLM):
         self._unsupported_params : dict[OpenAIModel, list[str]] = {
             ChatGPTModel.O1_MINI: ["presence_penalty"],
             ChatGPTModel.O3_MINI: ["presence_penalty"],
+            ChatGPTModel.GPT_5_NANO: ["presence_penalty"],
+            ChatGPTModel.GPT_5_MINI: ["presence_penalty"],
+            ChatGPTModel.GPT_5: ["presence_penalty"],
         }
 
     def _get_messages(self, chat: Chat) -> list:

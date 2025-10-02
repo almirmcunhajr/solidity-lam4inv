@@ -118,7 +118,7 @@ def run_benchmark(
 
     code2inv_ce = code2inv.check(inv, code2inv_vc_template)
     if code2inv_ce is not None:
-        print(f"Code2Inv VC found a counter example for the result of the benchmark {benchmark_index}: {code2inv_ce}")
+        raise Exception(f"Result for benchmark {benchmark_index} not validated by Code2Inv VCs. Counterexample: {code2inv_ce}")
     print(f"Result for benchmark {benchmark_index} validated by Code2Inv VCs")
 
     print(f"Benchmark {benchmark_index} finished")

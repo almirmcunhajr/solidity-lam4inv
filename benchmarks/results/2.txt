@@ -1,6 +1,0 @@
-Resetting generator
-Executing predicate filtering for preconditions
-Filtering predicates for candidate assert(x == 1)
-Filtering predicates for candidate assert(y == 0)
-Predicate filtering verify set: []
-Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
