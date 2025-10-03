@@ -47,8 +47,6 @@ class SolidityCodeHandler(CodeHandler):
                 for match in require_matches:
                     assertions.append(f'assert({match})')
 
-                print(assertions)
-
                 return assertions
         
         raise ValueError(f"Function '{self._function_name}' not found in the provided code.")

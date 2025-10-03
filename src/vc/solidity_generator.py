@@ -2,6 +2,7 @@ import logging
 import os
 import sys
 from itertools import chain
+from typing import Optional
 
 from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
@@ -213,10 +214,13 @@ class SolidityGenerator(Generator):
 
         # Ensures that variables are not trivially unchanged
         triviality_op = And()
-        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
+        vars_ssa_bounds: dict[str, Optional[tuple[str, str]]] = {}
         self._init_var_ssa_bounds(vars_ssa_bounds, [loop_header]+post_path, tmp_irs)
         for var in vars_ssa_bounds:
-            triviality_op.append(Equal(vars_ssa_bounds[var][0], var))
+            bounds = vars_ssa_bounds[var]
+            if not bounds:
+                continue
+            triviality_op.append(Equal(bounds[0], var))
 
         # Negating this ensures we don't accept "stuttering" executions where all variables are identical before and after.
         root_op.append(Not(triviality_op))
@@ -265,7 +269,7 @@ class SolidityGenerator(Generator):
             if isinstance(var, TemporaryVariable):
                 self.set_read_vars(tmp_irs[str(var)], vars, tmp_irs)
 
-    def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]):
+    def _update_var_ssa_bounds(self, var_ssa_bounds: dict[str, Optional[tuple[str, str]]], ir: OperationWithLValue, tmp_irs: dict[str, OperationWithLValue]):
         """ Updates the SSA bounds for the variables involved in the given IR operations
 
         Args:
@@ -279,13 +283,14 @@ class SolidityGenerator(Generator):
         if not ir.lvalue:
             raise Exception('Invalid operation {ir}')
         var_base_name = self._get_solidity_var_base_name(ir.lvalue)
-        if var_base_name not in var_ssa_bounds:
+        if var_base_name not in var_ssa_bounds or var_ssa_bounds[var_base_name] is None:
             var_ssa_bounds[var_base_name] = ("", str(ir.lvalue))
             return
-        if var_ssa_bounds[var_base_name][1] < str(ir.lvalue):
-            var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(ir.lvalue))
+        bounds = var_ssa_bounds[var_base_name]
+        if bounds[1] < str(ir.lvalue):
+            var_ssa_bounds[var_base_name] = (bounds[0], str(ir.lvalue))
 
-    def _init_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
+    def _init_var_ssa_bounds(self, var_ssa_bounds: dict[str, Optional[tuple[str, str]]], path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
         """ Initializes the SSA bounds for all variables in the given path
 
         Args:
@@ -294,18 +299,21 @@ class SolidityGenerator(Generator):
             tmp_irs (dict[str, OperationWithLValue]): A mapping of temporary variable names to their corresponding IR operations
         """
 
-        vars = []
         for node in path:
             for ir in node.irs_ssa:
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir):
+                    var_base_name = self._get_solidity_var_base_name(ir.lvalue)
+                    if var_base_name not in var_ssa_bounds:
+                        var_ssa_bounds[var_base_name] = None
                 if not isinstance(ir, Phi):
+                    vars = []
                     self.set_read_vars(ir, vars, tmp_irs)
-                
-        for var in vars:
-            var_base_name = self._get_solidity_var_base_name(var)
-            if var_base_name not in var_ssa_bounds:
-                var_ssa_bounds[var_base_name] = (str(var), str(var))
+                    for var in vars:
+                        var_base_name = self._get_solidity_var_base_name(var)
+                        if var_base_name not in var_ssa_bounds:
+                            var_ssa_bounds[var_base_name] = (str(var), str(var))
 
-    def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, tuple[str, str]]):
+    def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, Optional[tuple[str, str]]]):
         """ Adds bounds checks for all variables in the SSA bounds mapping to the given conditions list
 
         Args:
@@ -314,14 +322,25 @@ class SolidityGenerator(Generator):
         """
         
         for var, bounds in var_ssa_bounds.items():
+            if not bounds:
+                # Variable was never written, so it must be unchanged
+                op.append(Equal(var, f'{var}!'))
+                continue
             if bounds[0] != "":
                 op.append(Equal(bounds[0], var))
             op.append(Equal(bounds[1], f'{var}!'))
 
-    def _merge_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], branch_bounds: dict[str, tuple[str, str]]):
-        for var, (lb, ub) in branch_bounds.items():
+    def _merge_ssa_bounds(self, var_ssa_bounds: dict[str, Optional[tuple[str, str]]], branch_bounds: dict[str, Optional[tuple[str, str]]]):
+        for var, bounds in branch_bounds.items():
+            if not bounds:
+                continue
+            lb, ub = bounds
             if var in var_ssa_bounds:
-                old_lb, old_ub = var_ssa_bounds[var]
+                old_bounds = var_ssa_bounds[var]
+                if not old_bounds:
+                    var_ssa_bounds[var] = (lb, ub)
+                    continue
+                old_lb, old_ub = old_bounds
                 if old_lb == "":
                     old_lb = lb
                 var_ssa_bounds[var] = (min(lb, old_lb), max(ub, old_ub))
@@ -329,7 +348,7 @@ class SolidityGenerator(Generator):
 
             var_ssa_bounds[var] = (lb, ub)
 
-    def _compute_trans_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, tuple[str, str]], root_op: Or, branch_op: And):
+    def _compute_trans_op(self, node: Node, tmp_irs: dict[str, OperationWithLValue], var_ssa_bounds: dict[str, Optional[tuple[str, str]]], root_op: Or, branch_op: And):
         """ Recursively computes the execution conditions for the loop transition path
 
         Args:
@@ -392,7 +411,7 @@ class SolidityGenerator(Generator):
 
         branch_op = And()
         root_op = Or(branch_op)
-        var_ssa_bounds: dict[str, tuple[str, str]] = {}
+        var_ssa_bounds: dict[str, Optional[tuple[str, str]]] = {}
         self._init_var_ssa_bounds(var_ssa_bounds, trans_path, tmp_irs)
         self._compute_trans_op(trans_path[1], tmp_irs, var_ssa_bounds, root_op, branch_op)
 
@@ -421,7 +440,7 @@ class SolidityGenerator(Generator):
             Op: An Op object to check the loop invariant pre-conditions
         """
 
-        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
+        vars_ssa_bounds: dict[str, Optional[tuple[str, str]]] = {}
         self._init_var_ssa_bounds(vars_ssa_bounds, pre_path, tmp_irs)
         
         pre_conditions = []
@@ -436,11 +455,14 @@ class SolidityGenerator(Generator):
 
         guards = set()
         for var in vars_ssa_bounds:
-            # The guard transports the value of the base variable to the state variable
-            if vars_ssa_bounds[var][0] != "":
-                guards.add(Equal(vars_ssa_bounds[var][0], var))
+            bounds = vars_ssa_bounds[var]
+            if not bounds:
                 continue
-            guards.add(Equal(vars_ssa_bounds[var][1], var))
+            # The guard transports the value of the base variable to the state variable
+            if bounds[0] != "":
+                guards.add(Equal(bounds[0], var))
+                continue
+            guards.add(Equal(bounds[1], var))
         
         pre_conditions = list(guards) + pre_conditions 
 

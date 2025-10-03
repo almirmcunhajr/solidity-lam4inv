@@ -36,7 +36,7 @@
 (declare-const {{var[0]}} {{var[1]}})
 {%- endfor %}
 
-( define-fun inv-f( {{ base_parameters_def }} ) bool
+( define-fun inv-f( {{ base_parameters_def }} ) Bool
 {{ inv | indent(2, true) }}
 )
 
