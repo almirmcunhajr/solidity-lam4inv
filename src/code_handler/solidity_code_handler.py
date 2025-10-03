@@ -1,14 +1,18 @@
 import re
+from typing import LiteralString
 
 from code_handler.code_handler import CodeHandler, Language
 
 class SolidityCodeHandler(CodeHandler):
-    def __init__(self, code: str):
-        self.code = code
+    def __init__(self, code: str, contract_name: str, function_name: str):
+        self._code = code
+        self._contract_name = contract_name
+        self._function_name = function_name
+
         self.language = Language.Solidity
 
     def get_code(self) -> str:
-        return self.code
+        return self._code
 
     def get_language(self) -> Language:
         return self.language
@@ -20,7 +24,7 @@ class SolidityCodeHandler(CodeHandler):
         return r'assert\s*\(.*?\);'
     
     def get_preconditions(self) -> list[str]:
-        pre_loop_code = self.code.split('while')[0]
+        pre_loop_code = self._code.split('while')[0]
         assignments_pattern = re.compile(r'(\w+)\s*=\s*(\w+)')
         assertions = []
         assignments_matches = assignments_pattern.findall(pre_loop_code)
@@ -28,26 +32,49 @@ class SolidityCodeHandler(CodeHandler):
             assertions.append(f'assert({match[0]} == {match[1]})')
 
         return assertions
+
+    def _jump_scope(self, lines: list[str], start_index: int, balance = 0) -> tuple[str, int]:
+        content = ''
+        for i in range(start_index, len(lines)):
+            line = lines[i]
+            content += f'{line}\n'
+            if '{' in line:
+                balance += 1
+            elif '}' in line:
+                balance -= 1
+            if balance == 0:
+                return content, i
+        raise ValueError("No matching closing brace found.")
     
     def add_invariant_assertions(self, formula: str):
         assertion = f'assert({formula});'
         code = ''
-        loop_scope_balance = None
-        for line in self.code.splitlines():
-            if 'while' in line:
-                loop_scope_balance = 1
-                code += f'{assertion}\n{line}\n{assertion}\n'
-                continue
+        function_start_index = -1
+        contract_start_index = -1
+        
+        if self._function_name == 'constructor':
+            function_signature_pattern = re.compile(r'constructor\s*\(.*?\)\s*{')
+        else:
+            function_signature_pattern = re.compile(rf'function\s+{self._function_name}\s*\(.*?\)\s*.*?{{')
 
-            if loop_scope_balance and '{' in line:
-                loop_scope_balance += 1
-            if loop_scope_balance and '}' in line:
-                loop_scope_balance -= 1
+        contract_pattern = re.compile(rf'contract\s+{self._contract_name}\s*{{')
 
-            if loop_scope_balance == 0:
-                code += f'}}\n{assertion}\n}}}}'
-                break
+        lines = self._code.splitlines()
+        i = 0
+        while i < len(lines):
+            if contract_pattern.match(lines[i].strip()):
+                contract_start_index = i
 
-            code += f'{line}\n'
-            
+            if function_signature_pattern.match(lines[i].strip()) and contract_start_index != -1:
+                function_start_index = i
+
+            if 'while' in lines[i] and function_start_index != -1:
+                code += f'{assertion}\n{lines[i]}\n{assertion}\n'
+                jumped_code, i = self._jump_scope(lines, i+1, balance=1)
+                code += f'{jumped_code}{assertion}\n'
+                _, i = self._jump_scope(lines, function_start_index)
+
+            code += f'{lines[i]}\n'
+            i += 1
+
         return code

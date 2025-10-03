@@ -31,17 +31,10 @@ chatgpt_models = [model.value for model in list(ChatGPTModel)]
 deepseek_models = [model.value for model in list(DeepseekModel)]
 all_models = chatgpt_models + deepseek_models
 
-def get_solidity_code_handler(code_file_path: str) -> SolidityCodeHandler:
+def get_solidity_code_handler(code_file_path: str, contract_name: str, function_name: str) -> SolidityCodeHandler:
     with open(code_file_path, "r") as f:
         code = f.read()
-    return SolidityCodeHandler(code)
-
-def get_solidity_vc_generator(code_file_path: str, logger: logging.Logger) -> SolidityGenerator:
-    generator = SolidityGenerator(code_file_path, logger)
-    return generator
-
-def get_solidity_formula_handler() -> SolidityFormulaHandler:
-    return SolidityFormulaHandler()
+    return SolidityCodeHandler(code, contract_name, function_name)
 
 def run(
         code_handler: CodeHandler,
@@ -85,9 +78,12 @@ def run_benchmark(
 
     code_file_path = f"benchmarks/code/{benchmark_index}.sol"
     result_file_path = f"benchmarks/results/{benchmark_index}.txt"
+    
+    contract_name = "LoopExample"
+    function_name = "constructor"
 
-    code_handler = get_solidity_code_handler(code_file_path)
-    vc_generator = get_solidity_vc_generator(code_file_path, logger)
+    code_handler = get_solidity_code_handler(code_file_path, contract_name, function_name)
+    vc_generator = SolidityGenerator(code_file_path, logger, contract_name, function_name)
     z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator, logger)
     generator = Generator(code_handler)
     predicate_filtering = PredicateFiltering(code_handler, formula_handler, bmc, logger)
@@ -190,6 +186,8 @@ def main():
     parser.add_argument("--log-level", type=str, default="INFO", choices=["INFO", "CRITICAL", "ERROR", "WARNING", "DEBUG"], help="Logging level")
     parser.add_argument("--max-chat-interactions", type=int, default=-1, help="Max chat interactions with the LLM model")
     parser.add_argument("--file", type=str, help="Code file path")
+    parser.add_argument("--contract-name", type=str, default="LoopExample", help="Contract name in the Solidity file")
+    parser.add_argument("--function-name", type=str, default="constructor", help="Function name in the Solidity file")
     parser.add_argument("--output", type=str, default=None, help="Output file path")
     parser.add_argument("--benchmarks", type=parse_range, default=None, help="Optionally run a range of benchmarks, formatted as: start,end. Example: 1,10")
 
@@ -201,7 +199,7 @@ def main():
     pipeline = [(get_llm(model), threshold) for model, threshold in args.pipeline]
     z3_solver = Z3Solver(args.smt_timeout)
     solc = Solc(config.solc_bin_path, args.bmc_timeout, logger, args.bmc_max_steps)
-    formula_handler = get_solidity_formula_handler()
+    formula_handler = SolidityFormulaHandler()
     
     if args.benchmarks:
         run_benchmarks(z3_solver, formula_handler, solc, pipeline, args.max_chat_interactions, args.benchmarks, logger)
@@ -210,8 +208,8 @@ def main():
     if args.file is None:
         parser.error("--file is required if --benchmarks is not provided")
 
-    code_handler = get_solidity_code_handler(args.file)
-    vc_generator = get_solidity_vc_generator(args.file, logger)
+    code_handler = get_solidity_code_handler(args.file, args.contract_name, args.function_name)
+    vc_generator = SolidityGenerator(args.file, logger, args.contract_name, args.function_name)
     z3_inv_smt_solver = InvSMTSolver(z3_solver, vc_generator, logger)
     generator = Generator(code_handler)
     predicate_filtering = PredicateFiltering(code_handler, formula_handler, solc, logger)

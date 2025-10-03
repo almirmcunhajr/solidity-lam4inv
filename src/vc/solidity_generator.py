@@ -35,9 +35,11 @@ class SolidityGenerator(Generator):
         UnaryType.BANG: Not
     }
 
-    def __init__(self, file_path: str, logger: logging.Logger):
+    def __init__(self, file_path: str, logger: logging.Logger, contract_name: str, function_name: str):
         self._logger = logger
-        self.slither = Slither(file_path, disable_plugins=["solc-ast-exporter"])
+        self._slither = Slither(file_path, disable_plugins=["solc-ast-exporter"])
+        self._contract_name = contract_name
+        self._function_name = function_name
 
         self._base_vars: list[tuple[str, str]]|None = None
         self._state_vars: list[tuple[str, str]]|None = None
@@ -68,13 +70,13 @@ class SolidityGenerator(Generator):
         if self._generated:
             return self._render_vcs(inv)
 
-        if len(self.slither.contracts) == 0:
+        contract = next((c for c in self._slither.contracts if c.name == self._contract_name), None)
+        if contract is None:
             raise ContractNotFound()
-        contract = self.slither.contracts[0]
 
-        if len(contract.functions) == 0:
+        function = next((f for f in contract.functions if f.name == self._function_name), None)
+        if function is None:
             raise FunctionNotFound()
-        function = contract.functions[0]
 
         compute_dominators(function.nodes)
 
@@ -632,7 +634,7 @@ if __name__ == '__main__':
         sys.exit(1)
     test_file_name = args[1]
     
-    generator = SolidityGenerator(test_file_name, logging.getLogger())
+    generator = SolidityGenerator(test_file_name, logging.getLogger(), 'LoopExample', 'constructor')
     pre_vc, trans_vc, post_vc = generator.generate('test')
 
     print(pre_vc)

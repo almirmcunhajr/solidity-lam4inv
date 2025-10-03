@@ -13,6 +13,7 @@ class PredicateFiltering:
 
     def _verify(self, formula: str) -> bool:
         code = self.code_handler.add_invariant_assertions(formula)
+        self._logger.debug(f"Verifying code:\n{code}")
         return self.bmc.verify(code)
 
     def filter(self, formula: str) -> list[str]:
