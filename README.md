@@ -23,13 +23,13 @@ combines large-language-model guidance with symbolic reasoning tailored to the E
 
 ## Supported Solidity loop shape
 
-The tool analyses a single loop per benchmark: the `while` loop enclosed in the contract constructor targeted by the harness.
-Each supported contract must provide:
+The tool analyses a single loop per function: the `while` loop enclosed in the function targeted by the harness.
+The function must follow this shape:
 
-1. A constructor that initialises the scalar state tracked by the loop.
+1. All variables must be integers, local to the function, and declared either as parameters or as local variables.
 2. Assignments or `require` statements modelling the preconditions for entering the loop.
-3. A single `while` loop whose body mutates the constructor-local variables.
-4. An `assert` (possibly nested under conditionals) that the inferred loop invariant helps prove.
+3. A single `while` loop.
+4. An assert statement must appear immediately after the while loop (it may be nested under conditionals) and should express a property that the inferred loop invariant is intended to prove.
 
 ## Invariant synthesis pipeline
 
@@ -93,6 +93,8 @@ The CLI reads a `.env` file automatically, so the key can reside in `./.env` ins
 ```bash
 poetry run python src/main.py \
   --file example.sol \
+  --contract-name ExampleContract \
+  --function-name exampleFunction \
   --pipeline "gpt-5-mini, 300; gpt-5, 600" \
   --smt-timeout 50 \
   --bmc-timeout 5 \
@@ -102,6 +104,11 @@ poetry run python src/main.py \
 
 - `--file` – Solidity contract following the supported function-loop shape. The runner isolates its function loop and
   synthesises an invariant for that scope.
+- `--contract-name` – name of the contract containing the target function.
+- `--function-name` – name of the function containing the target `while` loop.
+- `--smt-timeout` – per-check timeout (in seconds) for the SMT solver.
+- `--bmc-timeout` – per-check timeout (in seconds) for the bounded model checker.
+- `--bmc-max-steps` – maximum number of loop unrollings performed by the bounded model checker.
 - `--pipeline` – semicolon-separated `model, timeout` pairs looked up in `ChatGPTModel` inside [`src/llm/openai.py`](src/llm/openai.py).
   Models share chat history, inherit failure statistics, and can, for example, start on an inexpensive model before escalating
   to a stronger option if you order them that way.

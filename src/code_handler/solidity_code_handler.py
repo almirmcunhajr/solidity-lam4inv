@@ -24,14 +24,34 @@ class SolidityCodeHandler(CodeHandler):
         return r'assert\s*\(.*?\);'
     
     def get_preconditions(self) -> list[str]:
-        pre_loop_code = self._code.split('while')[0]
-        assignments_pattern = re.compile(r'(\w+)\s*=\s*(\w+)')
-        assertions = []
-        assignments_matches = assignments_pattern.findall(pre_loop_code)
-        for match in assignments_matches:
-            assertions.append(f'assert({match[0]} == {match[1]})')
+        if self._function_name == 'constructor':
+            function_signature_pattern = re.compile(r'constructor\s*\(.*?\)\s*{')
+        else:
+            function_signature_pattern = re.compile(rf'function\s+{self._function_name}\s*\(.*?\)\s*.*?{{')
+        
+        for i in range(0, len(self._code.splitlines())):
+            line = self._code.splitlines()[i]
+            if function_signature_pattern.match(line.strip()):
+                function_code, _ = self._jump_scope(self._code.splitlines(), i)
 
-        return assertions
+                assertions = []
+                pre_loop_code = function_code.split('while')[0]
+
+                assignments_pattern = re.compile(r'(\w+)\s*=\s*(\w+)')
+                assignments_matches = assignments_pattern.findall(pre_loop_code)
+                for match in assignments_matches:
+                    assertions.append(f'assert({match[0]} == {match[1]})')
+
+                require_pattern = re.compile(r'require\s*\(\s*([^,)]*)')
+                require_matches = require_pattern.findall(pre_loop_code)
+                for match in require_matches:
+                    assertions.append(f'assert({match})')
+
+                print(assertions)
+
+                return assertions
+        
+        raise ValueError(f"Function '{self._function_name}' not found in the provided code.")
 
     def _jump_scope(self, lines: list[str], start_index: int, balance = 0) -> tuple[str, int]:
         content = ''
