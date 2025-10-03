@@ -44,6 +44,7 @@ class SolidityGenerator(Generator):
         self._reachability_op: Op|None = None
         self._inductive_op: Op|None = None
         self._provability_op: Op|None = None
+        self._generated = False
 
         self._type_map = {
             "bool": "Bool"
@@ -64,6 +65,9 @@ class SolidityGenerator(Generator):
             tuple[str, str, str]: The pre-condition, transition, and post-condition verification conditions in SMT-LIB2 format
         """
 
+        if self._generated:
+            return self._render_vcs(inv)
+
         if len(self.slither.contracts) == 0:
             raise ContractNotFound()
         contract = self.slither.contracts[0]
@@ -80,29 +84,41 @@ class SolidityGenerator(Generator):
             raise LoopNotFound()
         loop_header, loop_latch = loops[0]
 
-        if self._base_vars is None:
-            # Get all state variables and base variables in the function and contract
-            self._base_vars, self._state_vars = self._get_solidity_vars(function, contract)
+        # Get all state variables and base variables in the function and contract
+        self._base_vars, self._state_vars = self._get_solidity_vars(function, contract)
 
-        if self._reachability_op is None or self._inductive_op is None or self._provability_op is None:
-            # Get all temporary IR operations in the function
-            tmp_irs = self._get_solidity_tmp_irs(function) 
+        # Get all temporary IR operations in the function
+        tmp_irs = self._get_solidity_tmp_irs(function) 
 
-            # Get the execution paths
-            pre_path, trans_path, post_path = self._get_solidity_paths(function, loop_header, loop_latch)
+        # Get the execution paths
+        pre_path, trans_path, post_path = self._get_solidity_paths(function, loop_header, loop_latch)
 
-            # Get the loop condition operation
-            loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
+        # Get the loop condition operation
+        loop_condition_op = self._solidity_conditional_node_to_op(loop_header, tmp_irs)
 
-            # Get the reachability verification condition op
-            self._reachability_op = self._get_pre_op(pre_path, tmp_irs)
+        # Get the reachability verification condition op
+        self._reachability_op = self._get_pre_op(pre_path, tmp_irs)
 
-            # Get the inductive verification condition op
-            self._inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
+        # Get the inductive verification condition op
+        self._inductive_op = self._get_trans_op(loop_condition_op, trans_path, tmp_irs)
 
-            # Get the provability verification condition op
-            self._provability_op = self._get_post_op(loop_header, loop_condition_op, post_path, tmp_irs)
+        # Get the provability verification condition op
+        self._provability_op = self._get_post_op(loop_header, loop_condition_op, post_path, tmp_irs)
+        
+        # Mark as generated to avoid recomputation
+        self._generated = True
 
+        return self._render_vcs(inv)
+
+    def _render_vcs(self, inv) -> tuple[str, str, str]:
+        """ Generates the SMT-LIB2 verification conditions using a Jinja2 template
+
+        Args:
+            inv (str): The loop invariant in SMT-LIB2 format
+
+        Returns:
+            tuple[str, str, str]: The pre-condition, transition, and post-condition verification conditions in SMT-LIB2 format
+        """
         with open(os.path.join(os.path.dirname(__file__), 'templates/vc.tpl')) as tpl_file:
             tpl_data = tpl_file.read()
 
@@ -353,10 +369,14 @@ class SolidityGenerator(Generator):
         false_branch_var_ssa_bounds = var_ssa_bounds.copy()
 
         if node.son_true:
-            branch_op.append(self._solidity_conditional_node_to_op(node, tmp_irs))
+            op = self._solidity_conditional_node_to_op(node, tmp_irs)
+            if op != "":
+                branch_op.append(op)
             self._compute_trans_op(node.son_true, tmp_irs, true_branch_var_ssa_bounds, root_op, branch_op)
         if node.son_false:
-            new_branch_op.append(Not(self._solidity_conditional_node_to_op(node, tmp_irs)))
+            op = self._solidity_conditional_node_to_op(node, tmp_irs)
+            if op != "":
+                new_branch_op.append(Not(op))
             self._compute_trans_op(node.son_false, tmp_irs, false_branch_var_ssa_bounds, root_op, new_branch_op)
 
         self._merge_ssa_bounds(var_ssa_bounds, true_branch_var_ssa_bounds)
@@ -520,10 +540,9 @@ class SolidityGenerator(Generator):
         vars = set()
         for node in nodes:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and isinstance(ir, Variable) and not isinstance(ir.lvalue, Constant) and ir.lvalue:
-                    if not isinstance(ir.lvalue, TemporaryVariable):
-                        vars.add((str(ir.lvalue), str(ir.lvalue.type)))
-                if hasattr(ir, 'read') and ir.read:
+                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir):
+                    vars.add((str(ir.lvalue), str(ir.lvalue.type)))
+                if ir.read:
                     for var in ir.read:
                         if not isinstance(var, Constant) and not isinstance(var, TemporaryVariable):
                             vars.add((str(var), str(var.type)))
