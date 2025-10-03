@@ -310,7 +310,7 @@ class SolidityGenerator(Generator):
                     self.set_read_vars(ir, vars, tmp_irs)
                     for var in vars:
                         var_base_name = self._get_solidity_var_base_name(var)
-                        if var_base_name not in var_ssa_bounds:
+                        if var_base_name not in var_ssa_bounds or var_ssa_bounds[var_base_name] is None:
                             var_ssa_bounds[var_base_name] = (str(var), str(var))
 
     def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, Optional[tuple[str, str]]]):
