@@ -108,7 +108,7 @@ def run_benchmark(
 
     code2inv = Code2Inv(z3_solver)
 
-    code2inv_vc_template_path = f"benchmarks/code2inv-vc-templates/{benchmark_index}.txt"
+    code2inv_vc_template_path = f"benchmarks/cross-checks-templates/{benchmark_index}.txt"
     with open(code2inv_vc_template_path, "r") as f:
         code2inv_vc_template = f.read()
 

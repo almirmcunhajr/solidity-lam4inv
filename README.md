@@ -18,8 +18,8 @@ combines large-language-model guidance with symbolic reasoning tailored to the E
 - **EVM-aware predicate filtering** – invokes a Solidity bounded model checker during predicate filtering so blatantly spurious
   clauses are eliminated before the SMT-based verifier discharges the VC obligations, with counterexamples feeding back into
   later prompts.
-- **Benchmark parity** – automatically cross-checks every inferred invariant against the canonical Code2Inv templates bundled in
-  `benchmarks/code2inv-vc-templates/` to ensure compatibility with the upstream suite.
+- **Benchmark parity** – automatically cross-checks every inferred invariant against the canonical LaM4Inv templates bundled in
+  `benchmarks/cross-checks-templates/` to ensure compatibility with the upstream suite.
 
 ## Supported Solidity loop shape
 
@@ -47,7 +47,7 @@ The function must follow this shape:
 .
 ├── benchmarks/                 # Solidity benchmarks, expected results, and VC reference templates
 │   ├── code/                   # Solidity contracts evaluated by the harness
-│   ├── code2inv-vc-templates/  # Canonical Code2Inv templates used for mandatory cross-checks
+│   ├── cross-checks-templates/ # Canonical LaM4Inv VCs templates used for cross-checks
 │   └── results/                # Output directory populated by benchmark runs
 ├── src/
 │   ├── bmc/                    # Abstract BMC interface plus the solc-based EVM implementation
@@ -125,7 +125,7 @@ poetry run python src/main.py --benchmarks 1,10
 
 The runner executes each benchmark ID in the provided range, regenerates the Solidity VC obligations during the run, and writes
 successful invariants to `benchmarks/results/<id>.txt`. Every benchmark execution also cross-checks the freshly generated VC
-with the canonical template stored under `benchmarks/code2inv-vc-templates/`; mismatches or counterexamples are reported on the
+with the canonical template stored under `benchmarks/cross-checks-templates/`; mismatches or counterexamples are reported on the
 console.
 
 ## Development tips
@@ -134,7 +134,7 @@ console.
 - Adjust `--bmc-max-steps` when the bounded model checker requires deeper exploration to validate predicates.
 - Use `--log-level DEBUG` to inspect LLM prompts, solver exchanges, and counterexamples when debugging.
 - When adding benchmarks, mirror the folder structure under `benchmarks/code/` and supply the corresponding template under
-  `benchmarks/code2inv-vc-templates/` so the mandatory cross-check can run.
+  `benchmarks/cross-checks-templates/` so the mandatory cross-check can run.
 
 ## License
 
