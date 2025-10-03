@@ -1,10 +1,13 @@
 import logging
 import re
+import sys
 from typing import Optional
 
 from smt.solver import Solver, SatStatus
+from smt.z3_solver import Z3Solver
 from inv_smt_solver.counter_example import CounterExample, CounterExampleKind
 from vc.generator import Generator
+from vc.solidity_generator import SolidityGenerator
 
 class InvSMTSolver:
     def __init__(self, solver: Solver, vc_generator: Generator, logger: logging.Logger):
@@ -82,3 +85,32 @@ class InvSMTSolver:
         postcondition_ce = self._get_postcondition_counter_example(inv)
         if postcondition_ce:
             return postcondition_ce
+
+if __name__ == "__main__":
+    path = sys.argv[1]
+    contract_name = sys.argv[2]
+    function_name = sys.argv[3]
+    inv = sys.argv[4]
+
+    sol_vc_generator = SolidityGenerator(path, logging.getLogger(), contract_name, function_name)
+    smt_solver = Z3Solver(timeout=10)
+    inv_smt_solver = InvSMTSolver(smt_solver, sol_vc_generator, logging.getLogger())
+
+    ce = inv_smt_solver.get_counter_example(inv)
+    if ce is None:
+        print("No counter example found; the invariant may be valid.")
+        exit(0)
+
+    match ce.kind:
+        case CounterExampleKind.NOT_REACHABLE:
+            print("Counter example found: the invariant is not reachable.")
+            print(ce)
+        case CounterExampleKind.NOT_INDUCTIVE:
+            print("Counter example found: the invariant is not inductive.")
+            print(ce)
+        case CounterExampleKind.NOT_PROVABLE:
+            print("Counter example found: the invariant does not imply the postcondition.")
+            print(ce)
+
+    exit(1)
+

@@ -1,6 +1,8 @@
 import re
+import sys
 from typing import Optional
 from smt.solver import SatStatus, Solver
+from smt.z3_solver import Z3Solver
 from inv_smt_solver.counter_example import CounterExample, CounterExampleKind
 
 class Code2Inv():
@@ -62,4 +64,19 @@ class Code2Inv():
             raise TimeoutError(inv)
         
         assert res == SatStatus.UNSAT
+
+if __name__ == "__main__":
+    z3_solver = Z3Solver(timeout=10)
+    code2inv = Code2Inv(z3_solver)
+
+    inv = sys.argv[1]
+    tpl_path = sys.argv[2]
+    with open(tpl_path, 'r') as f:
+        template = f.read()
+
+    ce = code2inv.check(inv, template)
+    if ce:
+        print(ce)
+    else:
+        print("No counterexample found. Invariant holds.")
 
