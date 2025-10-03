@@ -1,0 +1,40 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 1)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(y + x == 11);
+Candidate failed verification
+Adding candidate to fail history: assert(y + x == 11);
+Verifying candidate: assert(x >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(x >= 1);
+Verifying candidate: assert(x <= 11);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= 11);
+Verifying candidate: assert(y >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(y >= 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(y + x == 11);
+Filtering predicates for candidate assert(x >= 1);
+Addind predicate x >= 1 to verify set
+Filtering predicates for candidate assert(x <= 11);
+Addind predicate x <= 11 to verify set
+Filtering predicates for candidate assert(y >= 0);
+Predicate filtering verify set: ['x >= 1', 'x <= 11']
+Verifying formula: ( and ( >= x 1 ) ( <= x 11 ) )
+For candidate: assert((x >= 1) && (x <= 11))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 1 candidates
+Verifying generated candidates
+Verifying candidate: assert(x == 1 || (y + x == 11 && x >= 2 && x <= 11 && y >= 0));
+# Result
+Solution found by the gpt-5-mini model: assert(x == 1 || (y + x == 11 && x >= 2 && x <= 11 && y >= 0));
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 26.389470100402832 seconds
+The total runtime was 68.3547899723053 seconds
+Resetting generator
+Resetting generator

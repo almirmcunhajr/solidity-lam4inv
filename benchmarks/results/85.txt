@@ -1,0 +1,20 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(x - y * (y - 1) / 2 < 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x - y * (y - 1) / 2 < 0);
+Verifying candidate: assert(x - y * (y - 1) / 2 <= -15000);
+Candidate failed verification
+Adding candidate to fail history: assert(x - y * (y - 1) / 2 <= -15000);
+Verifying candidate: assert(!(x >= 0) || (y > 0));
+# Result
+Solution found by the gpt-5-nano model: assert(!(x >= 0) || (y > 0));
+2 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 64.12137198448181 seconds
+The total runtime was 64.1214509010315 seconds
+Resetting generator
+Resetting generator

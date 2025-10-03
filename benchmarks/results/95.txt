@@ -1,0 +1,43 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert(i == 0)
+Filtering predicates for candidate assert(y == 1)
+Addind predicate y == 1 to verify set
+Predicate filtering verify set: ['y == 1']
+Verifying formula: ( = y 1 )
+For candidate: assert((y == 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(i == j);
+Candidate failed verification
+Adding candidate to fail history: assert(i == j);
+Verifying candidate: assert(i >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(i >= 0);
+Verifying candidate: assert(j >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(j >= 0);
+Verifying candidate: assert(y == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(y == 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(i == j);
+Addind predicate i == j to verify set
+Filtering predicates for candidate assert(i >= 0);
+Addind predicate i >= 0 to verify set
+Filtering predicates for candidate assert(j >= 0);
+Addind predicate j >= 0 to verify set
+Filtering predicates for candidate assert(y == 1);
+Predicate filtering verify set: ['y == 1', 'i == j', 'i >= 0', 'j >= 0']
+Verifying formula: ( and ( and ( and ( = y 1 ) ( = i j ) ) ( >= i 0 ) ) ( >= j 0 ) )
+For candidate: assert((y == 1) && (i == j) && (i >= 0) && (j >= 0))
+Predicate filtering found solution: assert((y == 1) && (i == j) && (i >= 0) && (j >= 0))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((y == 1) && (i == j) && (i >= 0) && (j >= 0))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 27.414743900299072 seconds
+The total runtime was 29.371010780334473 seconds
+Resetting generator
+Resetting generator

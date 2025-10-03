@@ -1,0 +1,18 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(c == 0)
+Filtering predicates for candidate assert(y >= 0)
+Addind predicate y >= 0 to verify set
+Filtering predicates for candidate assert(y <= 127)
+Addind predicate y <= 127 to verify set
+Predicate filtering verify set: ['y >= 0', 'y <= 127']
+Verifying formula: ( and ( >= y 0 ) ( <= y 127 ) )
+For candidate: assert((y >= 0) && (y <= 127))
+Predicate filtering found solution: assert((y >= 0) && (y <= 127))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((y >= 0) && (y <= 127))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 2.7977049350738525 seconds
+Resetting generator
+Resetting generator

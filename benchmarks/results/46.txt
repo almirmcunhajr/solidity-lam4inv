@@ -1,0 +1,33 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(c == 0)
+Filtering predicates for candidate assert(n > 0)
+Addind predicate n > 0 to verify set
+Predicate filtering verify set: ['n > 0']
+Verifying formula: ( > n 0 )
+For candidate: assert((n > 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(n > 0);
+Candidate failed verification
+Adding candidate to fail history: assert(n > 0);
+Verifying candidate: assert(0 <= c && c <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= c && c <= n);
+Executing predicate filtering
+Filtering predicates for candidate assert(n > 0);
+Filtering predicates for candidate assert(0 <= c && c <= n);
+Addind predicate 0 <= c to verify set
+Addind predicate c <= n to verify set
+Predicate filtering verify set: ['n > 0', '0 <= c', 'c <= n']
+Verifying formula: ( and ( and ( > n 0 ) ( <= 0 c ) ) ( <= c n ) )
+For candidate: assert((n > 0) && (0 <= c) && (c <= n))
+Predicate filtering found solution: assert((n > 0) && (0 <= c) && (c <= n))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((n > 0) && (0 <= c) && (c <= n))
+2 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 23.259402990341187 seconds
+The total runtime was 26.398086071014404 seconds
+Resetting generator
+Resetting generator

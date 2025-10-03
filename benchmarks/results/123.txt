@@ -1,0 +1,53 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(sn == 0)
+Filtering predicates for candidate assert(i == 1)
+Filtering predicates for candidate assert(size >= 1)
+Addind predicate size >= 1 to verify set
+Predicate filtering verify set: ['size >= 1']
+Verifying formula: ( >= size 1 )
+For candidate: assert((size >= 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(size >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(size >= 1);
+Verifying candidate: assert(i == sn + 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i == sn + 1);
+Verifying candidate: assert(0 <= sn);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= sn);
+Verifying candidate: assert(sn <= size);
+Candidate failed verification
+Adding candidate to fail history: assert(sn <= size);
+Verifying candidate: assert(1 <= i);
+Candidate failed verification
+Adding candidate to fail history: assert(1 <= i);
+Verifying candidate: assert(i <= size + 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i <= size + 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(size >= 1);
+Filtering predicates for candidate assert(i == sn + 1);
+Addind predicate i == sn + 1 to verify set
+Filtering predicates for candidate assert(0 <= sn);
+Addind predicate 0 <= sn to verify set
+Filtering predicates for candidate assert(sn <= size);
+Addind predicate sn <= size to verify set
+Filtering predicates for candidate assert(1 <= i);
+Addind predicate 1 <= i to verify set
+Filtering predicates for candidate assert(i <= size + 1);
+Addind predicate i <= size + 1 to verify set
+Predicate filtering verify set: ['size >= 1', 'i == sn + 1', '0 <= sn', 'sn <= size', '1 <= i', 'i <= size + 1']
+Verifying formula: ( and ( and ( and ( and ( and ( >= size 1 ) ( = i ( + sn 1 ) ) ) ( <= 0 sn ) ) ( <= sn size ) ) ( <= 1 i ) ) ( <= i ( + size 1 ) ) )
+For candidate: assert((size >= 1) && (i == sn + 1) && (0 <= sn) && (sn <= size) && (1 <= i) && (i <= size + 1))
+Predicate filtering found solution: assert((size >= 1) && (i == sn + 1) && (0 <= sn) && (sn <= size) && (1 <= i) && (i <= size + 1))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((size >= 1) && (i == sn + 1) && (0 <= sn) && (sn <= size) && (1 <= i) && (i <= size + 1))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 24.928078174591064 seconds
+The total runtime was 26.945532083511353 seconds
+Resetting generator
+Resetting generator

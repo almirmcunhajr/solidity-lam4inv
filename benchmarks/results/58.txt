@@ -7,16 +7,22 @@ Predicate filtering verify set: ['n > 0']
 Verifying formula: ( > n 0 )
 For candidate: assert((n > 0))
 Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
-Generated 3 candidates
+Generated 4 candidates
 Verifying generated candidates
 Verifying candidate: assert(n > 0);
 Candidate failed verification
 Adding candidate to fail history: assert(n > 0);
+Verifying candidate: assert(0 <= c && c <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= c && c <= n);
+Verifying candidate: assert(c == n || c < n);
+Candidate failed verification
+Adding candidate to fail history: assert(c == n || c < n);
 Verifying candidate: assert(c >= 0);
 # Result
 Solution found by the gpt-5-nano model: assert(c >= 0);
-1 counter examples were generated for the model proposals, with 0 repeated fails
-The model runtime was 17.046903133392334 seconds
-The total runtime was 20.250338077545166 seconds
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 32.02870202064514 seconds
+The total runtime was 35.46644902229309 seconds
 Resetting generator
 Resetting generator

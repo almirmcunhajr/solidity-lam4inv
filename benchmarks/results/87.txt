@@ -1,0 +1,17 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == y)
+Addind predicate x == y to verify set
+Filtering predicates for candidate assert(lock == 1)
+Addind predicate lock == 1 to verify set
+Predicate filtering verify set: ['x == y', 'lock == 1']
+Verifying formula: ( and ( = x y ) ( = lock 1 ) )
+For candidate: assert((x == y) && (lock == 1))
+Predicate filtering found solution: assert((x == y) && (lock == 1))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((x == y) && (lock == 1))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 2.426271915435791 seconds
+Resetting generator
+Resetting generator

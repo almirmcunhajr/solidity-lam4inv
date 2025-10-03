@@ -1,0 +1,53 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(sn == 0)
+Filtering predicates for candidate assert(i == 1)
+Filtering predicates for candidate assert(n >= 1)
+Addind predicate n >= 1 to verify set
+Predicate filtering verify set: ['n >= 1']
+Verifying formula: ( >= n 1 )
+For candidate: assert((n >= 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(i >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i >= 1);
+Verifying candidate: assert(i - 1 <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(i - 1 <= n);
+Verifying candidate: assert(sn == i - 1);
+Candidate failed verification
+Adding candidate to fail history: assert(sn == i - 1);
+Verifying candidate: assert(sn >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(sn >= 0);
+Verifying candidate: assert(sn <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(sn <= n);
+Verifying candidate: assert(n >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(n >= 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(i >= 1);
+Addind predicate i >= 1 to verify set
+Filtering predicates for candidate assert(i - 1 <= n);
+Addind predicate i - 1 <= n to verify set
+Filtering predicates for candidate assert(sn == i - 1);
+Addind predicate sn == i - 1 to verify set
+Filtering predicates for candidate assert(sn >= 0);
+Addind predicate sn >= 0 to verify set
+Filtering predicates for candidate assert(sn <= n);
+Addind predicate sn <= n to verify set
+Filtering predicates for candidate assert(n >= 1);
+Predicate filtering verify set: ['n >= 1', 'i >= 1', 'i - 1 <= n', 'sn == i - 1', 'sn >= 0', 'sn <= n']
+Verifying formula: ( and ( and ( and ( and ( and ( >= n 1 ) ( >= i 1 ) ) ( <= ( - i 1 ) n ) ) ( = sn ( - i 1 ) ) ) ( >= sn 0 ) ) ( <= sn n ) )
+For candidate: assert((n >= 1) && (i >= 1) && (i - 1 <= n) && (sn == i - 1) && (sn >= 0) && (sn <= n))
+Predicate filtering found solution: assert((n >= 1) && (i >= 1) && (i - 1 <= n) && (sn == i - 1) && (sn >= 0) && (sn <= n))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((n >= 1) && (i >= 1) && (i - 1 <= n) && (sn == i - 1) && (sn >= 0) && (sn <= n))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 29.338703155517578 seconds
+The total runtime was 31.40031409263611 seconds
+Resetting generator
+Resetting generator

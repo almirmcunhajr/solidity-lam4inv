@@ -1,0 +1,42 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(c == 0)
+Filtering predicates for candidate assert(z == 36)
+Filtering predicates for candidate assert(y >= 0)
+Addind predicate y >= 0 to verify set
+Filtering predicates for candidate assert(y <= 127)
+Addind predicate y <= 127 to verify set
+Predicate filtering verify set: ['y >= 0', 'y <= 127']
+Verifying formula: ( and ( >= y 0 ) ( <= y 127 ) )
+For candidate: assert((y >= 0) && (y <= 127))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= y && y <= 127);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= y && y <= 127);
+Verifying candidate: assert(0 <= c && c <= 36);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= c && c <= 36);
+Verifying candidate: assert(z == 36 * y + c);
+Candidate failed verification
+Adding candidate to fail history: assert(z == 36 * y + c);
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= y && y <= 127);
+Addind predicate 0 <= y to verify set
+Filtering predicates for candidate assert(0 <= c && c <= 36);
+Addind predicate 0 <= c to verify set
+Addind predicate c <= 36 to verify set
+Filtering predicates for candidate assert(z == 36 * y + c);
+Addind predicate z == 36 * y + c to verify set
+Predicate filtering verify set: ['y >= 0', 'y <= 127', '0 <= y', '0 <= c', 'c <= 36', 'z == 36 * y + c']
+Verifying formula: ( and ( and ( and ( and ( and ( >= y 0 ) ( <= y 127 ) ) ( <= 0 y ) ) ( <= 0 c ) ) ( <= c 36 ) ) ( = z ( + ( * 36 y ) c ) ) )
+For candidate: assert((y >= 0) && (y <= 127) && (0 <= y) && (0 <= c) && (c <= 36) && (z == 36 * y + c))
+Predicate filtering found solution: assert((y >= 0) && (y <= 127) && (0 <= y) && (0 <= c) && (c <= 36) && (z == 36 * y + c))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((y >= 0) && (y <= 127) && (0 <= y) && (0 <= c) && (c <= 36) && (z == 36 * y + c))
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 24.954859972000122 seconds
+The total runtime was 28.76297903060913 seconds
+Resetting generator
+Resetting generator

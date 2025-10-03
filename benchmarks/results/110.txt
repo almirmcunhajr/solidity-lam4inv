@@ -1,0 +1,64 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(sn == 0)
+Filtering predicates for candidate assert(i == 1)
+Filtering predicates for candidate assert(n >= 1)
+Addind predicate n >= 1 to verify set
+Predicate filtering verify set: ['n >= 1']
+Verifying formula: ( >= n 1 )
+For candidate: assert((n >= 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(n >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(n >= 1);
+Verifying candidate: assert(i == sn + 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i == sn + 1);
+Verifying candidate: assert(sn >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(sn >= 0);
+Verifying candidate: assert(sn < n);
+Candidate failed verification
+Adding candidate to fail history: assert(sn < n);
+Executing predicate filtering
+Filtering predicates for candidate assert(n >= 1);
+Filtering predicates for candidate assert(i == sn + 1);
+Addind predicate i == sn + 1 to verify set
+Filtering predicates for candidate assert(sn >= 0);
+Addind predicate sn >= 0 to verify set
+Filtering predicates for candidate assert(sn < n);
+Predicate filtering verify set: ['n >= 1', 'i == sn + 1', 'sn >= 0']
+Verifying formula: ( and ( and ( >= n 1 ) ( = i ( + sn 1 ) ) ) ( >= sn 0 ) )
+For candidate: assert((n >= 1) && (i == sn + 1) && (sn >= 0))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(n < 1 || (1 <= i && i <= n + 1));
+Candidate failed verification
+Adding candidate to fail history: assert(n < 1 || (1 <= i && i <= n + 1));
+Verifying candidate: assert(n < 1 || (0 <= sn && sn <= n));
+Candidate failed verification
+Adding candidate to fail history: assert(n < 1 || (0 <= sn && sn <= n));
+Verifying candidate: assert(n < 1 || (i == sn + 1));
+Candidate failed verification
+Adding candidate to fail history: assert(n < 1 || (i == sn + 1));
+Executing predicate filtering
+Filtering predicates for candidate assert(n < 1 || (1 <= i && i <= n + 1));
+Addind predicate ((1 <= i && i <= n + 1)) to verify set
+Filtering predicates for candidate assert(n < 1 || (0 <= sn && sn <= n));
+Addind predicate ((0 <= sn && sn <= n)) to verify set
+Filtering predicates for candidate assert(n < 1 || (i == sn + 1));
+Addind predicate ((i == sn + 1)) to verify set
+Predicate filtering verify set: ['n >= 1', 'i == sn + 1', 'sn >= 0', '((1 <= i && i <= n + 1))', '((0 <= sn && sn <= n))', '((i == sn + 1))']
+Verifying formula: ( and ( and ( and ( and ( and ( >= n 1 ) ( = i ( + sn 1 ) ) ) ( >= sn 0 ) ) ( and ( <= 1 i ) ( <= i ( + n 1 ) ) ) ) ( and ( <= 0 sn ) ( <= sn n ) ) ) ( = i ( + sn 1 ) ) )
+For candidate: assert((n >= 1) && (i == sn + 1) && (sn >= 0) && (((1 <= i && i <= n + 1))) && (((0 <= sn && sn <= n))) && (((i == sn + 1))))
+Predicate filtering found solution: assert((n >= 1) && (i == sn + 1) && (sn >= 0) && (((1 <= i && i <= n + 1))) && (((0 <= sn && sn <= n))) && (((i == sn + 1))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((n >= 1) && (i == sn + 1) && (sn >= 0) && (((1 <= i && i <= n + 1))) && (((0 <= sn && sn <= n))) && (((i == sn + 1))))
+7 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 34.487141847610474 seconds
+The total runtime was 62.84925389289856 seconds
+Resetting generator
+Resetting generator

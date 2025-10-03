@@ -1,0 +1,18 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(j == 0)
+Addind predicate j == 0 to verify set
+Filtering predicates for candidate assert(k == 0)
+Filtering predicates for candidate assert(a <= m)
+Addind predicate a <= m to verify set
+Predicate filtering verify set: ['j == 0', 'a <= m']
+Verifying formula: ( and ( = j 0 ) ( <= a m ) )
+For candidate: assert((j == 0) && (a <= m))
+Predicate filtering found solution: assert((j == 0) && (a <= m))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((j == 0) && (a <= m))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 2.0490050315856934 seconds
+Resetting generator
+Resetting generator

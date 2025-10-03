@@ -1,0 +1,57 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(sn == 0)
+Filtering predicates for candidate assert(i == 1)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(i >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i >= 1);
+Verifying candidate: assert(sn >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(sn >= 0);
+Verifying candidate: assert(i - sn == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i - sn == 1);
+Verifying candidate: assert(i <= 8);
+Candidate failed verification
+Adding candidate to fail history: assert(i <= 8);
+Executing predicate filtering
+Filtering predicates for candidate assert(i >= 1);
+Addind predicate i >= 1 to verify set
+Filtering predicates for candidate assert(sn >= 0);
+Addind predicate sn >= 0 to verify set
+Filtering predicates for candidate assert(i - sn == 1);
+Addind predicate i - sn == 1 to verify set
+Filtering predicates for candidate assert(i <= 8);
+Predicate filtering verify set: ['i >= 1', 'sn >= 0', 'i - sn == 1']
+Verifying formula: ( and ( and ( >= i 1 ) ( >= sn 0 ) ) ( = ( - i sn ) 1 ) )
+For candidate: assert((i >= 1) && (sn >= 0) && (i - sn == 1))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(1 <= i && i <= 9);
+Candidate failed verification
+Adding candidate to fail history: assert(1 <= i && i <= 9);
+Verifying candidate: assert(sn == i - 1);
+Candidate failed verification
+Adding candidate to fail history: assert(sn == i - 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(1 <= i && i <= 9);
+Addind predicate 1 <= i to verify set
+Addind predicate i <= 9 to verify set
+Filtering predicates for candidate assert(sn == i - 1);
+Addind predicate sn == i - 1 to verify set
+Predicate filtering verify set: ['i >= 1', 'sn >= 0', 'i - sn == 1', '1 <= i', 'i <= 9', 'sn == i - 1']
+Verifying formula: ( and ( and ( and ( and ( and ( >= i 1 ) ( >= sn 0 ) ) ( = ( - i sn ) 1 ) ) ( <= 1 i ) ) ( <= i 9 ) ) ( = sn ( - i 1 ) ) )
+For candidate: assert((i >= 1) && (sn >= 0) && (i - sn == 1) && (1 <= i) && (i <= 9) && (sn == i - 1))
+Predicate filtering found solution: assert((i >= 1) && (sn >= 0) && (i - sn == 1) && (1 <= i) && (i <= 9) && (sn == i - 1))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((i >= 1) && (sn >= 0) && (i - sn == 1) && (1 <= i) && (i <= 9) && (sn == i - 1))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 20.441410779953003 seconds
+The total runtime was 47.99356174468994 seconds
+Resetting generator
+Resetting generator

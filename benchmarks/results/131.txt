@@ -1,0 +1,54 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(d1 == 1)
+Addind predicate d1 == 1 to verify set
+Filtering predicates for candidate assert(d2 == 1)
+Addind predicate d2 == 1 to verify set
+Filtering predicates for candidate assert(d3 == 1)
+Addind predicate d3 == 1 to verify set
+Filtering predicates for candidate assert(x1 >= 1)
+Filtering predicates for candidate assert(x2 >= x1)
+Addind predicate x2 >= x1 to verify set
+Filtering predicates for candidate assert(x3 >= x1)
+Addind predicate x3 >= x1 to verify set
+Predicate filtering verify set: ['d1 == 1', 'd2 == 1', 'd3 == 1', 'x2 >= x1', 'x3 >= x1']
+Verifying formula: ( and ( and ( and ( and ( = d1 1 ) ( = d2 1 ) ) ( = d3 1 ) ) ( >= x2 x1 ) ) ( >= x3 x1 ) )
+For candidate: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (x2 >= x1) && (x3 >= x1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(x1 >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x1 >= 0);
+Verifying candidate: assert(x2 >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x2 >= 0);
+Verifying candidate: assert(x3 >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x3 >= 0);
+Verifying candidate: assert(x2 >= x1);
+Candidate failed verification
+Adding candidate to fail history: assert(x2 >= x1);
+Verifying candidate: assert(x3 >= x1);
+Candidate failed verification
+Adding candidate to fail history: assert(x3 >= x1);
+Executing predicate filtering
+Filtering predicates for candidate assert(x1 >= 0);
+Addind predicate x1 >= 0 to verify set
+Filtering predicates for candidate assert(x2 >= 0);
+Addind predicate x2 >= 0 to verify set
+Filtering predicates for candidate assert(x3 >= 0);
+Addind predicate x3 >= 0 to verify set
+Filtering predicates for candidate assert(x2 >= x1);
+Filtering predicates for candidate assert(x3 >= x1);
+Predicate filtering verify set: ['d1 == 1', 'd2 == 1', 'd3 == 1', 'x2 >= x1', 'x3 >= x1', 'x1 >= 0', 'x2 >= 0', 'x3 >= 0']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( = d1 1 ) ( = d2 1 ) ) ( = d3 1 ) ) ( >= x2 x1 ) ) ( >= x3 x1 ) ) ( >= x1 0 ) ) ( >= x2 0 ) ) ( >= x3 0 ) )
+For candidate: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (x2 >= x1) && (x3 >= x1) && (x1 >= 0) && (x2 >= 0) && (x3 >= 0))
+Predicate filtering found solution: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (x2 >= x1) && (x3 >= x1) && (x1 >= 0) && (x2 >= 0) && (x3 >= 0))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((d1 == 1) && (d2 == 1) && (d3 == 1) && (x2 >= x1) && (x3 >= x1) && (x1 >= 0) && (x2 >= 0) && (x3 >= 0))
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 25.274935007095337 seconds
+The total runtime was 29.751714944839478 seconds
+Resetting generator
+Resetting generator
