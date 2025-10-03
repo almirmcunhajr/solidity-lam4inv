@@ -1,0 +1,9 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(c == 0)
+Filtering predicates for candidate assert(n > 0)
+Addind predicate n > 0 to verify set
+Predicate filtering verify set: ['n > 0']
+Verifying formula: ( > n 0 )
+For candidate: assert((n > 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0

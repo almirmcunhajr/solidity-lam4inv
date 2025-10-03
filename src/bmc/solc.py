@@ -4,7 +4,7 @@ import logging
 from typing import Optional
 
 from bmc.bmc import BMC, InvalidCodeError
-from utils.utils import run_command_with_timeout
+from utils.utils import run_command
 
 class Solc(BMC):
     def __init__(self, bin_path: str, timeout: float, logger: logging.Logger, max_k_step: Optional[int] = None):
@@ -26,12 +26,12 @@ class Solc(BMC):
         if self.timeout:
             cmd.extend(['--model-checker-timeout', str(self.timeout*1000)])
         try:
-            _, stderr = run_command_with_timeout(cmd, self.timeout)
+            _, stderr = run_command(cmd)
             if 'Assertion violation' in stderr:
                 return False
             if 'proved safe!' in stderr: 
                 return True
             raise InvalidCodeError(stderr)
-        except TimeoutError:
-            self._logger.error("BMC checker timed out")
+        except TimeoutError as e:
+            self._logger.error("BMC checker timed out: %s", e)
             return False

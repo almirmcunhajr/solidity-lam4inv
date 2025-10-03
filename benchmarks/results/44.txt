@@ -1,0 +1,17 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(c == 0)
+Addind predicate c == 0 to verify set
+Filtering predicates for candidate assert(n > 0)
+Addind predicate n > 0 to verify set
+Predicate filtering verify set: ['c == 0', 'n > 0']
+Verifying formula: ( and ( = c 0 ) ( > n 0 ) )
+For candidate: assert((c == 0) && (n > 0))
+Predicate filtering found solution: assert((c == 0) && (n > 0))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((c == 0) && (n > 0))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 3.0789270401000977 seconds
+Resetting generator
+Resetting generator
