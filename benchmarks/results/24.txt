@@ -1,0 +1,57 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(i == 1)
+Filtering predicates for candidate assert(j == 10)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(i == 21 - 2*j);
+Candidate failed verification
+Adding candidate to fail history: assert(i == 21 - 2*j);
+Verifying candidate: assert(j <= 10);
+Candidate failed verification
+Adding candidate to fail history: assert(j <= 10);
+Verifying candidate: assert(i >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i >= 1);
+Verifying candidate: assert((j - i) % 3 == 0);
+Candidate failed verification
+Adding candidate to fail history: assert((j - i) % 3 == 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(i == 21 - 2*j);
+Addind predicate i == 21 - 2*j to verify set
+Filtering predicates for candidate assert(j <= 10);
+Addind predicate j <= 10 to verify set
+Filtering predicates for candidate assert(i >= 1);
+Addind predicate i >= 1 to verify set
+Filtering predicates for candidate assert((j - i) % 3 == 0);
+Addind predicate (j - i) % 3 == 0 to verify set
+Predicate filtering verify set: ['i == 21 - 2*j', 'j <= 10', 'i >= 1', '(j - i) % 3 == 0']
+Verifying formula: ( and ( and ( and ( = i ( - 21 ( * 2 j ) ) ) ( <= j 10 ) ) ( >= i 1 ) ) ( = ( mod ( - j i ) 3 ) 0 ) )
+For candidate: assert((i == 21 - 2*j) && (j <= 10) && (i >= 1) && ((j - i) % 3 == 0))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(i + 2 * j == 21);
+Candidate failed verification
+Adding candidate to fail history: assert(i + 2 * j == 21);
+Verifying candidate: assert(j >= 6);
+Candidate failed verification
+Adding candidate to fail history: assert(j >= 6);
+Executing predicate filtering
+Filtering predicates for candidate assert(i + 2 * j == 21);
+Addind predicate i + 2 * j == 21 to verify set
+Filtering predicates for candidate assert(j >= 6);
+Addind predicate j >= 6 to verify set
+Predicate filtering verify set: ['i == 21 - 2*j', 'j <= 10', 'i >= 1', '(j - i) % 3 == 0', 'i + 2 * j == 21', 'j >= 6']
+Verifying formula: ( and ( and ( and ( and ( and ( = i ( - 21 ( * 2 j ) ) ) ( <= j 10 ) ) ( >= i 1 ) ) ( = ( mod ( - j i ) 3 ) 0 ) ) ( = ( + i ( * 2 j ) ) 21 ) ) ( >= j 6 ) )
+For candidate: assert((i == 21 - 2*j) && (j <= 10) && (i >= 1) && ((j - i) % 3 == 0) && (i + 2 * j == 21) && (j >= 6))
+Predicate filtering found solution: assert((i == 21 - 2*j) && (j <= 10) && (i >= 1) && ((j - i) % 3 == 0) && (i + 2 * j == 21) && (j >= 6))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((i == 21 - 2*j) && (j <= 10) && (i >= 1) && ((j - i) % 3 == 0) && (i + 2 * j == 21) && (j >= 6))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 88.62266993522644 seconds
+The total runtime was 137.0945188999176 seconds
+Resetting generator
+Resetting generator

@@ -301,10 +301,6 @@ class SolidityGenerator(Generator):
 
         for node in path:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir):
-                    var_base_name = self._get_solidity_var_base_name(ir.lvalue)
-                    if var_base_name not in var_ssa_bounds:
-                        var_ssa_bounds[var_base_name] = None
                 if not isinstance(ir, Phi):
                     vars = []
                     self.set_read_vars(ir, vars, tmp_irs)
@@ -312,6 +308,13 @@ class SolidityGenerator(Generator):
                         var_base_name = self._get_solidity_var_base_name(var)
                         if var_base_name not in var_ssa_bounds or var_ssa_bounds[var_base_name] is None:
                             var_ssa_bounds[var_base_name] = (str(var), str(var))
+
+        if self._base_vars is None:
+            return
+        for var in self._base_vars:
+            var_base_name = var[0]
+            if var_base_name not in var_ssa_bounds:
+                var_ssa_bounds[var_base_name] = None
 
     def _add_bounds_checks(self, op: NaryOp, var_ssa_bounds: dict[str, Optional[tuple[str, str]]]):
         """ Adds bounds checks for all variables in the SSA bounds mapping to the given conditions list
