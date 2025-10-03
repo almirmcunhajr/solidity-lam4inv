@@ -102,7 +102,7 @@ contract Contract {{
                 token for token in re.findall(pattern, expression)
                 if token not in keywords
         }
-        return ''.join([f'uint256 {var};' for var in list(variables)])
+        return ''.join([f'int {var};' for var in list(variables)])
         
     def _rewrite_ternary(self, expression: str) -> str:
         pattern = r'([^?]+)\s*\?\s*([^:]+)\s*:\s*(.+)'
