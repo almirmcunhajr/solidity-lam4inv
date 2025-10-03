@@ -274,19 +274,14 @@ class SolidityGenerator(Generator):
             Exception: If the operation is invalid
         """
         
-        if not ir.lvalue or not ir.read:
+        if not ir.lvalue:
             raise Exception('Invalid operation {ir}')
-        vars = [ir.lvalue]
-        self.set_read_vars(ir, vars, tmp_irs)
-        for var in vars:
-            var_base_name = self._get_solidity_var_base_name(var)
-            if var_base_name not in var_ssa_bounds:
-                var_ssa_bounds[var_base_name] = (str(var), str(var))
-                continue
-            if var_ssa_bounds[var_base_name][0] > str(var):
-                var_ssa_bounds[var_base_name] = (str(var), var_ssa_bounds[var_base_name][1])
-            if var_ssa_bounds[var_base_name][1] < str(var):
-                var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(var))
+        var_base_name = self._get_solidity_var_base_name(ir.lvalue)
+        if var_base_name not in var_ssa_bounds:
+            var_ssa_bounds[var_base_name] = ("", str(ir.lvalue))
+            return
+        if var_ssa_bounds[var_base_name][1] < str(ir.lvalue):
+            var_ssa_bounds[var_base_name] = (var_ssa_bounds[var_base_name][0], str(ir.lvalue))
 
     def _init_var_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], path: list[Node], tmp_irs: dict[str, OperationWithLValue]):
         """ Initializes the SSA bounds for all variables in the given path
@@ -300,8 +295,6 @@ class SolidityGenerator(Generator):
         vars = []
         for node in path:
             for ir in node.irs_ssa:
-                if isinstance(ir, OperationWithLValue) and ir.lvalue and not self._is_solidity_tmp_assignment(ir):
-                    vars.append(ir.lvalue)
                 if not isinstance(ir, Phi):
                     self.set_read_vars(ir, vars, tmp_irs)
                 
@@ -319,13 +312,16 @@ class SolidityGenerator(Generator):
         """
         
         for var, bounds in var_ssa_bounds.items():
-            op.append(Equal(bounds[0], var))
+            if bounds[0] != "":
+                op.append(Equal(bounds[0], var))
             op.append(Equal(bounds[1], f'{var}!'))
 
     def _merge_ssa_bounds(self, var_ssa_bounds: dict[str, tuple[str, str]], branch_bounds: dict[str, tuple[str, str]]):
         for var, (lb, ub) in branch_bounds.items():
             if var in var_ssa_bounds:
                 old_lb, old_ub = var_ssa_bounds[var]
+                if old_lb == "":
+                    old_lb = lb
                 var_ssa_bounds[var] = (min(lb, old_lb), max(ub, old_ub))
                 continue
 
@@ -409,8 +405,7 @@ class SolidityGenerator(Generator):
         branch_op = And()
         root_op.append(branch_op)
         for var in var_ssa_bounds:
-            branch_op.append(Equal(var_ssa_bounds[var][0], var))
-            branch_op.append(Equal(var_ssa_bounds[var][0], f'{var}!'))
+            branch_op.append(Equal(var, var+'!'))
 
         return root_op
 
@@ -423,6 +418,9 @@ class SolidityGenerator(Generator):
         Returns:
             Op: An Op object to check the loop invariant pre-conditions
         """
+
+        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
+        self._init_var_ssa_bounds(vars_ssa_bounds, pre_path, tmp_irs)
         
         pre_conditions = []
         for node in pre_path:
@@ -432,13 +430,15 @@ class SolidityGenerator(Generator):
                     pre_conditions.append(self._solidity_op_to_op(ir, tmp_irs))
                 if isinstance(ir, OperationWithLValue) and ir.lvalue and not isinstance(ir, Phi) and not self._is_solidity_tmp_assignment(ir):
                     pre_conditions.append(self._solidity_lvalue_op_to_smt(ir, tmp_irs)) 
+                    self._update_var_ssa_bounds(vars_ssa_bounds, ir, tmp_irs)
 
-        vars_ssa_bounds: dict[str, tuple[str, str]] = {}
-        self._init_var_ssa_bounds(vars_ssa_bounds, pre_path, tmp_irs)
         guards = set()
         for var in vars_ssa_bounds:
             # The guard transports the value of the base variable to the state variable
-            guards.add(Equal(vars_ssa_bounds[var][0], var))
+            if vars_ssa_bounds[var][0] != "":
+                guards.add(Equal(vars_ssa_bounds[var][0], var))
+                continue
+            guards.add(Equal(vars_ssa_bounds[var][1], var))
         
         pre_conditions = list(guards) + pre_conditions 
 
