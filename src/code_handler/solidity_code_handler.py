@@ -52,16 +52,14 @@ class SolidityCodeHandler(CodeHandler):
         raise ValueError(f"Function '{self._function_name}' not found in the provided code.")
 
     def _jump_scope(self, lines: list[str], start_index: int, balance = 0) -> tuple[str, int]:
-        content = ''
         for i in range(start_index, len(lines)):
             line = lines[i]
-            content += f'{line}\n'
             if '{' in line:
                 balance += 1
-            elif '}' in line:
+            if '}' in line:
                 balance -= 1
             if balance == 0:
-                return content, i
+                return '\n'.join(lines[start_index:i+1]), i
         raise ValueError("No matching closing brace found.")
     
     def add_invariant_assertions(self, formula: str):
@@ -89,7 +87,7 @@ class SolidityCodeHandler(CodeHandler):
             if 'while' in lines[i] and function_start_index != -1:
                 code += f'{assertion}\n{lines[i]}\n{assertion}\n'
                 jumped_code, i = self._jump_scope(lines, i+1, balance=1)
-                code += f'{jumped_code}{assertion}\n'
+                code += f'{jumped_code}\n{assertion}\n'
                 _, i = self._jump_scope(lines, function_start_index)
 
             code += f'{lines[i]}\n'
