@@ -1,0 +1,17 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(m == 0)
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert((x + y) == k)
+Addind predicate (x + y) == k to verify set
+Predicate filtering verify set: ['(x + y) == k']
+Verifying formula: ( = ( + x y ) k )
+For candidate: assert(((x + y) == k))
+Predicate filtering found solution: assert(((x + y) == k))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert(((x + y) == k))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 9.421878814697266 seconds
+Resetting generator
+Resetting generator

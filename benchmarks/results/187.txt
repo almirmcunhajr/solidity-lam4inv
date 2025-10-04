@@ -1,0 +1,47 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(y == 0)
+Filtering predicates for candidate assert(z == 0)
+Filtering predicates for candidate assert(w == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(x == w);
+Candidate failed verification
+Adding candidate to fail history: assert(x == w);
+Verifying candidate: assert(z == 10 * w);
+Candidate failed verification
+Adding candidate to fail history: assert(z == 10 * w);
+Verifying candidate: assert((x <= 4 && y == 100 * x) || (x > 4));
+Candidate failed verification
+Adding candidate to fail history: assert((x <= 4 && y == 100 * x) || (x > 4));
+Verifying candidate: assert((x >= 4 && y >= 400) || (x < 4));
+Candidate failed verification
+Adding candidate to fail history: assert((x >= 4 && y >= 400) || (x < 4));
+Verifying candidate: assert((x >= 4 && y > 2) || (x < 4));
+Candidate failed verification
+Adding candidate to fail history: assert((x >= 4 && y > 2) || (x < 4));
+Executing predicate filtering
+Filtering predicates for candidate assert(x == w);
+Addind predicate x == w to verify set
+Filtering predicates for candidate assert(z == 10 * w);
+Addind predicate z == 10 * w to verify set
+Filtering predicates for candidate assert((x <= 4 && y == 100 * x) || (x > 4));
+Addind predicate ((x <= 4 && y == 100 * x)) || ((x > 4)) to verify set
+Filtering predicates for candidate assert((x >= 4 && y >= 400) || (x < 4));
+Addind predicate ((x >= 4 && y >= 400)) || ((x < 4)) to verify set
+Filtering predicates for candidate assert((x >= 4 && y > 2) || (x < 4));
+Addind predicate ((x >= 4 && y > 2)) || ((x < 4)) to verify set
+Predicate filtering verify set: ['x == w', 'z == 10 * w', '((x <= 4 && y == 100 * x)) || ((x > 4))', '((x >= 4 && y >= 400)) || ((x < 4))', '((x >= 4 && y > 2)) || ((x < 4))']
+Verifying formula: ( and ( and ( and ( and ( = x w ) ( = z ( * 10 w ) ) ) ( or ( and ( <= x 4 ) ( = y ( * 100 x ) ) ) ( > x 4 ) ) ) ( or ( and ( >= x 4 ) ( >= y 400 ) ) ( < x 4 ) ) ) ( or ( and ( >= x 4 ) ( > y 2 ) ) ( < x 4 ) ) )
+For candidate: assert((x == w) && (z == 10 * w) && (((x <= 4 && y == 100 * x)) || ((x > 4))) && (((x >= 4 && y >= 400)) || ((x < 4))) && (((x >= 4 && y > 2)) || ((x < 4))))
+Predicate filtering found solution: assert((x == w) && (z == 10 * w) && (((x <= 4 && y == 100 * x)) || ((x > 4))) && (((x >= 4 && y >= 400)) || ((x < 4))) && (((x >= 4 && y > 2)) || ((x < 4))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((x == w) && (z == 10 * w) && (((x <= 4 && y == 100 * x)) || ((x > 4))) && (((x >= 4 && y >= 400)) || ((x < 4))) && (((x >= 4 && y > 2)) || ((x < 4))))
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 64.50654292106628 seconds
+The total runtime was 70.26952505111694 seconds
+Resetting generator
+Resetting generator

@@ -1,0 +1,51 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(k == 0)
+Filtering predicates for candidate assert(i == 0)
+Filtering predicates for candidate assert(n > 0)
+Addind predicate n > 0 to verify set
+Filtering predicates for candidate assert(n < 10)
+Addind predicate n < 10 to verify set
+Predicate filtering verify set: ['n > 0', 'n < 10']
+Verifying formula: ( and ( > n 0 ) ( < n 10 ) )
+For candidate: assert((n > 0) && (n < 10))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= i && i <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= i && i <= n);
+Verifying candidate: assert(2000 * i <= k && k <= 4000 * i);
+Candidate failed verification
+Adding candidate to fail history: assert(2000 * i <= k && k <= 4000 * i);
+Verifying candidate: assert((k - 2000 * i) % 2000 == 0);
+Candidate failed verification
+Adding candidate to fail history: assert((k - 2000 * i) % 2000 == 0);
+Verifying candidate: assert(v == 0 || v == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(v == 0 || v == 1);
+Verifying candidate: assert(n > 0 && n < 10);
+Candidate failed verification
+Adding candidate to fail history: assert(n > 0 && n < 10);
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= i && i <= n);
+Addind predicate 0 <= i to verify set
+Addind predicate i <= n to verify set
+Filtering predicates for candidate assert(2000 * i <= k && k <= 4000 * i);
+Addind predicate 2000 * i <= k to verify set
+Addind predicate k <= 4000 * i to verify set
+Filtering predicates for candidate assert((k - 2000 * i) % 2000 == 0);
+Addind predicate (k - 2000 * i) % 2000 == 0 to verify set
+Filtering predicates for candidate assert(v == 0 || v == 1);
+Filtering predicates for candidate assert(n > 0 && n < 10);
+Predicate filtering verify set: ['n > 0', 'n < 10', '0 <= i', 'i <= n', '2000 * i <= k', 'k <= 4000 * i', '(k - 2000 * i) % 2000 == 0']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( > n 0 ) ( < n 10 ) ) ( <= 0 i ) ) ( <= i n ) ) ( <= ( * 2000 i ) k ) ) ( <= k ( * 4000 i ) ) ) ( = ( mod ( - k ( * 2000 i ) ) 2000 ) 0 ) )
+For candidate: assert((n > 0) && (n < 10) && (0 <= i) && (i <= n) && (2000 * i <= k) && (k <= 4000 * i) && ((k - 2000 * i) % 2000 == 0))
+Predicate filtering found solution: assert((n > 0) && (n < 10) && (0 <= i) && (i <= n) && (2000 * i <= k) && (k <= 4000 * i) && ((k - 2000 * i) % 2000 == 0))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((n > 0) && (n < 10) && (0 <= i) && (i <= n) && (2000 * i <= k) && (k <= 4000 * i) && ((k - 2000 * i) % 2000 == 0))
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 33.9659309387207 seconds
+The total runtime was 39.4190719127655 seconds
+Resetting generator
+Resetting generator

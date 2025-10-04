@@ -1,0 +1,43 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert(i == 0)
+Filtering predicates for candidate assert(x > 0)
+Addind predicate x > 0 to verify set
+Predicate filtering verify set: ['x > 0']
+Verifying formula: ( > x 0 )
+For candidate: assert((x > 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= i);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= i);
+Verifying candidate: assert(i <= x);
+Candidate failed verification
+Adding candidate to fail history: assert(i <= x);
+Verifying candidate: assert(j == 2 * i);
+Candidate failed verification
+Adding candidate to fail history: assert(j == 2 * i);
+Verifying candidate: assert(x > 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x > 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= i);
+Addind predicate 0 <= i to verify set
+Filtering predicates for candidate assert(i <= x);
+Addind predicate i <= x to verify set
+Filtering predicates for candidate assert(j == 2 * i);
+Addind predicate j == 2 * i to verify set
+Filtering predicates for candidate assert(x > 0);
+Predicate filtering verify set: ['x > 0', '0 <= i', 'i <= x', 'j == 2 * i']
+Verifying formula: ( and ( and ( and ( > x 0 ) ( <= 0 i ) ) ( <= i x ) ) ( = j ( * 2 i ) ) )
+For candidate: assert((x > 0) && (0 <= i) && (i <= x) && (j == 2 * i))
+Predicate filtering found solution: assert((x > 0) && (0 <= i) && (i <= x) && (j == 2 * i))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((x > 0) && (0 <= i) && (i <= x) && (j == 2 * i))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 25.326402187347412 seconds
+The total runtime was 27.439982175827026 seconds
+Resetting generator
+Resetting generator

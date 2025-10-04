@@ -1,0 +1,55 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(y == m)
+Filtering predicates for candidate assert(n >= 0)
+Addind predicate n >= 0 to verify set
+Filtering predicates for candidate assert(m >= 0)
+Addind predicate m >= 0 to verify set
+Filtering predicates for candidate assert(m < n)
+Addind predicate m < n to verify set
+Predicate filtering verify set: ['n >= 0', 'm >= 0', 'm < n']
+Verifying formula: ( and ( and ( >= n 0 ) ( >= m 0 ) ) ( < m n ) )
+For candidate: assert((n >= 0) && (m >= 0) && (m < n))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(n >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(n >= 0);
+Verifying candidate: assert(m >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(m >= 0);
+Verifying candidate: assert(m < n);
+Candidate failed verification
+Adding candidate to fail history: assert(m < n);
+Verifying candidate: assert(0 <= x);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= x);
+Verifying candidate: assert(x <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= n);
+Verifying candidate: assert((x <= m && y == m) || (x > m && y == x));
+Candidate failed verification
+Adding candidate to fail history: assert((x <= m && y == m) || (x > m && y == x));
+Executing predicate filtering
+Filtering predicates for candidate assert(n >= 0);
+Filtering predicates for candidate assert(m >= 0);
+Filtering predicates for candidate assert(m < n);
+Filtering predicates for candidate assert(0 <= x);
+Addind predicate 0 <= x to verify set
+Filtering predicates for candidate assert(x <= n);
+Addind predicate x <= n to verify set
+Filtering predicates for candidate assert((x <= m && y == m) || (x > m && y == x));
+Addind predicate ((x <= m && y == m)) || ((x > m && y == x)) to verify set
+Predicate filtering verify set: ['n >= 0', 'm >= 0', 'm < n', '0 <= x', 'x <= n', '((x <= m && y == m)) || ((x > m && y == x))']
+Verifying formula: ( and ( and ( and ( and ( and ( >= n 0 ) ( >= m 0 ) ) ( < m n ) ) ( <= 0 x ) ) ( <= x n ) ) ( or ( and ( <= x m ) ( = y m ) ) ( and ( > x m ) ( = y x ) ) ) )
+For candidate: assert((n >= 0) && (m >= 0) && (m < n) && (0 <= x) && (x <= n) && (((x <= m && y == m)) || ((x > m && y == x))))
+Predicate filtering found solution: assert((n >= 0) && (m >= 0) && (m < n) && (0 <= x) && (x <= n) && (((x <= m && y == m)) || ((x > m && y == x))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((n >= 0) && (m >= 0) && (m < n) && (0 <= x) && (x <= n) && (((x <= m && y == m)) || ((x > m && y == x))))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 45.197757959365845 seconds
+The total runtime was 49.29364776611328 seconds
+Resetting generator
+Resetting generator

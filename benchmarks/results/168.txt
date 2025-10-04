@@ -1,0 +1,44 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(m == 0)
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert((x + y) == k)
+Addind predicate (x + y) == k to verify set
+Predicate filtering verify set: ['(x + y) == k']
+Verifying formula: ( = ( + x y ) k )
+For candidate: assert(((x + y) == k))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= j);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= j);
+Verifying candidate: assert(0 <= m);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= m);
+Verifying candidate: assert(m <= j);
+Candidate failed verification
+Adding candidate to fail history: assert(m <= j);
+Verifying candidate: assert(x + y == k);
+Candidate failed verification
+Adding candidate to fail history: assert(x + y == k);
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= j);
+Addind predicate 0 <= j to verify set
+Filtering predicates for candidate assert(0 <= m);
+Addind predicate 0 <= m to verify set
+Filtering predicates for candidate assert(m <= j);
+Addind predicate m <= j to verify set
+Filtering predicates for candidate assert(x + y == k);
+Addind predicate x + y == k to verify set
+Predicate filtering verify set: ['(x + y) == k', '0 <= j', '0 <= m', 'm <= j', 'x + y == k']
+Verifying formula: ( and ( and ( and ( and ( = ( + x y ) k ) ( <= 0 j ) ) ( <= 0 m ) ) ( <= m j ) ) ( = ( + x y ) k ) )
+For candidate: assert(((x + y) == k) && (0 <= j) && (0 <= m) && (m <= j) && (x + y == k))
+Predicate filtering found solution: assert(((x + y) == k) && (0 <= j) && (0 <= m) && (m <= j) && (x + y == k))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert(((x + y) == k) && (0 <= j) && (0 <= m) && (m <= j) && (x + y == k))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 37.7803430557251 seconds
+The total runtime was 47.176021099090576 seconds
+Resetting generator
+Resetting generator
