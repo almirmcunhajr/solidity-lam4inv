@@ -1,0 +1,21 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(i == 0)
+Filtering predicates for candidate assert(k == 0)
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert(n <= 20000001)
+Addind predicate n <= 20000001 to verify set
+Predicate filtering verify set: ['n <= 20000001']
+Verifying formula: ( <= n 20000001 )
+For candidate: assert((n <= 20000001))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(i == j);
+# Result
+Solution found by the gpt-5-nano model: assert(i == j);
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 14.830674886703491 seconds
+The total runtime was 17.639859914779663 seconds
+Resetting generator
+Resetting generator
