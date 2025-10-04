@@ -1,0 +1,55 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(y == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x >= 0);
+Verifying candidate: assert(y >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(y >= 0);
+Verifying candidate: assert(y >= 100 * (x < 4 ? x : 4));
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0);
+Candidate already in fail history: assert(x >= 0);
+Verifying candidate: assert(y >= 0);
+Candidate already in fail history: assert(y >= 0);
+Verifying candidate: assert(y >= 100 * (x < 4 ? x : 4));
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.3799489622552249
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0);
+Candidate already in fail history: assert(x >= 0);
+Verifying candidate: assert(y >= 0);
+Candidate already in fail history: assert(y >= 0);
+Verifying candidate: assert(y >= (x < 4 ? 100 * x : x + 396));
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.664036770267849
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0);
+Candidate already in fail history: assert(x >= 0);
+Verifying candidate: assert((x < 4 && y >= 100 * x) || (x >= 4 && y >= x + 396));
+Candidate failed verification
+Adding candidate to fail history: assert((x < 4 && y >= 100 * x) || (x >= 4 && y >= x + 396));
+Executing predicate filtering
+Filtering predicates for candidate assert(x >= 0);
+Addind predicate x >= 0 to verify set
+Filtering predicates for candidate assert((x < 4 && y >= 100 * x) || (x >= 4 && y >= x + 396));
+Addind predicate ((x < 4 && y >= 100 * x)) || ((x >= 4 && y >= x + 396)) to verify set
+Predicate filtering verify set: ['x >= 0', '((x < 4 && y >= 100 * x)) || ((x >= 4 && y >= x + 396))']
+Verifying formula: ( and ( >= x 0 ) ( or ( and ( < x 4 ) ( >= y ( * 100 x ) ) ) ( and ( >= x 4 ) ( >= y ( + x 396 ) ) ) ) )
+For candidate: assert((x >= 0) && (((x < 4 && y >= 100 * x)) || ((x >= 4 && y >= x + 396))))
+Predicate filtering found solution: assert((x >= 0) && (((x < 4 && y >= 100 * x)) || ((x >= 4 && y >= x + 396))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((x >= 0) && (((x < 4 && y >= 100 * x)) || ((x >= 4 && y >= x + 396))))
+3 counter examples were generated for the model proposals, with 5 repeated fails
+The model runtime was 53.296695947647095 seconds
+The total runtime was 87.21526885032654 seconds
+Resetting generator
+Resetting generator

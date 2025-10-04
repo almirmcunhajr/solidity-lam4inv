@@ -1,0 +1,41 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(lo == 0)
+Filtering predicates for candidate assert(hi == 2)
+Filtering predicates for candidate assert(mid > 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert( lo >= 0 );
+Candidate failed verification
+Adding candidate to fail history: assert( lo >= 0 );
+Verifying candidate: assert( mid >= 0 );
+Candidate failed verification
+Adding candidate to fail history: assert( mid >= 0 );
+Verifying candidate: assert( hi - lo == 2 * mid );
+Candidate failed verification
+Adding candidate to fail history: assert( hi - lo == 2 * mid );
+Verifying candidate: assert( hi >= lo );
+Candidate failed verification
+Adding candidate to fail history: assert( hi >= lo );
+Executing predicate filtering
+Filtering predicates for candidate assert( lo >= 0 );
+Addind predicate lo >= 0 to verify set
+Filtering predicates for candidate assert( mid >= 0 );
+Addind predicate mid >= 0 to verify set
+Filtering predicates for candidate assert( hi - lo == 2 * mid );
+Addind predicate hi - lo == 2 * mid to verify set
+Filtering predicates for candidate assert( hi >= lo );
+Addind predicate hi >= lo to verify set
+Predicate filtering verify set: ['lo >= 0', 'mid >= 0', 'hi - lo == 2 * mid', 'hi >= lo']
+Verifying formula: ( and ( and ( and ( >= lo 0 ) ( >= mid 0 ) ) ( = ( - hi lo ) ( * 2 mid ) ) ) ( >= hi lo ) )
+For candidate: assert((lo >= 0) && (mid >= 0) && (hi - lo == 2 * mid) && (hi >= lo))
+Predicate filtering found solution: assert((lo >= 0) && (mid >= 0) && (hi - lo == 2 * mid) && (hi >= lo))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((lo >= 0) && (mid >= 0) && (hi - lo == 2 * mid) && (hi >= lo))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 28.581374168395996 seconds
+The total runtime was 30.533594131469727 seconds
+Resetting generator
+Resetting generator

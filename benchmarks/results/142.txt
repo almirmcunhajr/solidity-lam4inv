@@ -1,0 +1,44 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x1 == 100)
+Filtering predicates for candidate assert(x2 == 75)
+Filtering predicates for candidate assert(t == 0)
+Filtering predicates for candidate assert(v3 >= 0)
+Addind predicate v3 >= 0 to verify set
+Filtering predicates for candidate assert(v1 <= 5)
+Addind predicate v1 <= 5 to verify set
+Filtering predicates for candidate assert(v1 - v3 >= 0)
+Addind predicate v1 - v3 >= 0 to verify set
+Filtering predicates for candidate assert(v2 * 2 - v1 - v3 == 0)
+Filtering predicates for candidate assert(v2 + 5 >= 0)
+Filtering predicates for candidate assert(v2 <= 5)
+Addind predicate v2 <= 5 to verify set
+Predicate filtering verify set: ['v3 >= 0', 'v1 <= 5', 'v1 - v3 >= 0', 'v2 <= 5']
+Verifying formula: ( and ( and ( and ( >= v3 0 ) ( <= v1 5 ) ) ( >= ( - v1 v3 ) 0 ) ) ( <= v2 5 ) )
+For candidate: assert((v3 >= 0) && (v1 <= 5) && (v1 - v3 >= 0) && (v2 <= 5))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(-5 <= v2 && v2 <= 5);
+Candidate failed verification
+Adding candidate to fail history: assert(-5 <= v2 && v2 <= 5);
+Verifying candidate: assert(t >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(t >= 0);
+Verifying candidate: assert(x1 == 100 + t * v1);
+Candidate failed verification
+Adding candidate to fail history: assert(x1 == 100 + t * v1);
+Verifying candidate: assert(x3 == -50 + t * v3);
+Candidate failed verification
+Adding candidate to fail history: assert(x3 == -50 + t * v3);
+Verifying candidate: assert(((2 * v2 - v1 - v3) % 2) == 0);
+Candidate failed verification
+Adding candidate to fail history: assert(((2 * v2 - v1 - v3) % 2) == 0);
+Verifying candidate: assert(x2 + t * 5 >= 75);
+# Result
+Solution found by the gpt-5-nano model: assert(x2 + t * 5 >= 75);
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 44.5633499622345 seconds
+The total runtime was 56.433871269226074 seconds
+Resetting generator
+Resetting generator

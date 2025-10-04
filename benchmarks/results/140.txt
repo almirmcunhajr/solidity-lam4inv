@@ -7,16 +7,6 @@ Filtering predicates for candidate assert(v3 >= 0)
 Addind predicate v3 >= 0 to verify set
 Filtering predicates for candidate assert(v1 <= 5)
 Addind predicate v1 <= 5 to verify set
-Filtering predicates for candidate assert((v1 - v3)
-Resetting generator
-Executing predicate filtering for preconditions
-Filtering predicates for candidate assert(x1 == 100)
-Filtering predicates for candidate assert(x2 == 75)
-Filtering predicates for candidate assert(t == 0)
-Filtering predicates for candidate assert(v3 >= 0)
-Addind predicate v3 >= 0 to verify set
-Filtering predicates for candidate assert(v1 <= 5)
-Addind predicate v1 <= 5 to verify set
 Filtering predicates for candidate assert((v1 - v3) >= 0)
 Addind predicate (v1 - v3) >= 0 to verify set
 Filtering predicates for candidate assert(v2 * 2 - v1 - v3 == 0)
@@ -27,13 +17,13 @@ Predicate filtering verify set: ['v3 >= 0', 'v1 <= 5', '(v1 - v3) >= 0', 'v2 <= 
 Verifying formula: ( and ( and ( and ( >= v3 0 ) ( <= v1 5 ) ) ( >= ( - v1 v3 ) 0 ) ) ( <= v2 5 ) )
 For candidate: assert((v3 >= 0) && (v1 <= 5) && ((v1 - v3) >= 0) && (v2 <= 5))
 Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
-Generated 7 candidates
+Generated 6 candidates
 Verifying generated candidates
-Verifying candidate: assert(v1 <= 5);
+Verifying candidate: assert(v3 >= 0);
 # Result
-Solution found by the gpt-5-nano model: assert(v1 <= 5);
+Solution found by the gpt-5-nano model: assert(v3 >= 0);
 0 counter examples were generated for the model proposals, with 0 repeated fails
-The model runtime was 30.11344313621521 seconds
-The total runtime was 41.72745084762573 seconds
+The model runtime was 32.339004039764404 seconds
+The total runtime was 44.139370918273926 seconds
 Resetting generator
 Resetting generator
