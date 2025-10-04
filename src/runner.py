@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 import math
@@ -42,6 +43,9 @@ class Runner:
         self._logger.handlers.clear()
 
         if output_path is not None:
+            if os.path.exists(output_path):
+                with open(output_path, 'w'):
+                    pass
             file_log_handler = logging.FileHandler(output_path)
             self._logger.addHandler(file_log_handler)
 
