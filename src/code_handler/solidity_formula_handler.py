@@ -55,7 +55,6 @@ class SoliditySMTLIB2Translator:
                 return contract
 
     def translate_expression(self, expression: str) -> str:
-        expression = self._rewrite_ternary(expression)
         try:
             code = f"""
 pragma solidity ^0.8.0;
@@ -102,12 +101,7 @@ contract Contract {{
                 token for token in re.findall(pattern, expression)
                 if token not in keywords
         }
-        return '\n'.join([f'int {var};' for var in list(variables)])
-        
-    def _rewrite_ternary(self, expression: str) -> str:
-        pattern = r'([^?]+)\s*\?\s*([^:]+)\s*:\s*(.+)'
-        repl = r'((\1) && (\2)) || (!(\1) && (\3))' # https://en.wikipedia.org/wiki/Conditioned_disjunction
-        return re.sub(pattern, repl, expression)
+        return ''.join([f'int {var};' for var in list(variables)]) 
 
 class SolidityFormulaHandler(FormulaHandler):
     def __init__(self):
@@ -117,9 +111,19 @@ class SolidityFormulaHandler(FormulaHandler):
         match = re.search(r'assert\s*\((.*)\)', expression)
         if not match:
             raise InvalidCodeFormulaError(f'Solidity assertion "{expression}" does not match the expected format')
+
+        if self._is_ternary(expression):
+            raise InvalidCodeFormulaError(f'Solidity assertion "{expression}" contains a ternary operator, which is not allowed')
         
         formula = match.group(1).strip()
+        if not self._is_balanced_parentheses(formula):
+            raise InvalidCodeFormulaError(f'Solidity assertion "{expression}" has unbalanced parentheses')
+
         return formula
+
+    def _is_ternary(self, expression: str) -> bool:
+        pattern = r'([^?]+)\s*\?\s*([^:]+)\s*:\s*(.+)'
+        return re.match(pattern, expression) is not None
     
     def negate_formula(self, formula: str) -> str:
         return f"!({formula})"

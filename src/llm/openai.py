@@ -13,8 +13,8 @@ class ChatGPTModel(OpenAIModel):
     GPT_5_NANO="gpt-5-nano"
     GPT_4O = "gpt-4o"
     GPT_4O_MINI = "gpt-4o-mini"
-    O1_MINI = "o1-mini"
-    O3_MINI = "o3-mini"
+    O3 = "o3"
+    O4_MINI = "o4-mini"
 
 class DeepseekModel(OpenAIModel):
     DEEPSEEK_R1 = "deepseek-reasoner"
@@ -24,8 +24,8 @@ class OpenAI(LLM):
         self.model = model
         self.client = OpenAIClient(api_key=api_key, base_url=base_url)
         self._unsupported_params : dict[OpenAIModel, list[str]] = {
-            ChatGPTModel.O1_MINI: ["presence_penalty"],
-            ChatGPTModel.O3_MINI: ["presence_penalty"],
+            ChatGPTModel.O3: ["presence_penalty"],
+            ChatGPTModel.O4_MINI: ["presence_penalty"],
             ChatGPTModel.GPT_5_NANO: ["presence_penalty"],
             ChatGPTModel.GPT_5_MINI: ["presence_penalty"],
             ChatGPTModel.GPT_5: ["presence_penalty"],

@@ -21,6 +21,8 @@ In order to get a correct answer, You may want to consider both the situation of
 
 If some of the preconditions are also loop invariant, you need to add them to your answer as well.
 
+Substitute ternary by conditioned disjunctions.
+
 Use boolean operators if necessary. Don't explain. Your answer should contain only '{self.code_handler.get_assert_format()}' lines.
 """
     
