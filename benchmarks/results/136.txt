@@ -1,0 +1,29 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x1 == 100)
+Filtering predicates for candidate assert(x2 == 75)
+Filtering predicates for candidate assert(t == 0)
+Filtering predicates for candidate assert(v3 >= 0)
+Addind predicate v3 >= 0 to verify set
+Filtering predicates for candidate assert(v1 <= 5)
+Addind predicate v1 <= 5 to verify set
+Filtering predicates for candidate assert((v1 - v3)
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x1 == 100)
+Filtering predicates for candidate assert(x2 == 75)
+Filtering predicates for candidate assert(t == 0)
+Filtering predicates for candidate assert(v3 >= 0)
+Addind predicate v3 >= 0 to verify set
+Filtering predicates for candidate assert(v1 <= 5)
+Addind predicate v1 <= 5 to verify set
+Filtering predicates for candidate assert((v1 - v3) >= 0)
+Addind predicate (v1 - v3) >= 0 to verify set
+Filtering predicates for candidate assert(v2 * 2 - v1 - v3 == 0)
+Filtering predicates for candidate assert(v2 + 5 >= 0)
+Filtering predicates for candidate assert(v2 <= 5)
+Addind predicate v2 <= 5 to verify set
+Predicate filtering verify set: ['v3 >= 0', 'v1 <= 5', '(v1 - v3) >= 0', 'v2 <= 5']
+Verifying formula: ( and ( and ( and ( >= v3 0 ) ( <= v1 5 ) ) ( >= ( - v1 v3 ) 0 ) ) ( <= v2 5 ) )
+For candidate: assert((v3 >= 0) && (v1 <= 5) && ((v1 - v3) >= 0) && (v2 <= 5))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0

@@ -42,7 +42,7 @@ class SolidityCodeHandler(CodeHandler):
                 for match in assignments_matches:
                     assertions.append(f'assert({match[0]} == {match[1]})')
 
-                require_pattern = re.compile(r'require\s*\(\s*([^,)]*)')
+                require_pattern = re.compile(r'require\s*\(\s*([^,]*)')
                 require_matches = require_pattern.findall(pre_loop_code)
                 for match in require_matches:
                     assertions.append(f'assert({match})')
