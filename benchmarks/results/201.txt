@@ -1,0 +1,16 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x <= -2)
+Filtering predicates for candidate assert(x >= -3)
+Addind predicate x >= -3 to verify set
+Predicate filtering verify set: ['x >= -3']
+Verifying formula: ( >= x ( - 0 3 ) )
+For candidate: assert((x >= -3))
+Predicate filtering found solution: assert((x >= -3))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((x >= -3))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 2.042362928390503 seconds
+Resetting generator
+Resetting generator

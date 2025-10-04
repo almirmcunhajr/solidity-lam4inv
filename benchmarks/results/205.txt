@@ -1,0 +1,15 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(y == x)
+Addind predicate y == x to verify set
+Predicate filtering verify set: ['y == x']
+Verifying formula: ( = y x )
+For candidate: assert((y == x))
+Predicate filtering found solution: assert((y == x))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((y == x))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 0.7870619297027588 seconds
+Resetting generator
+Resetting generator

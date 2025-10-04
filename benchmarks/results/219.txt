@@ -1,0 +1,15 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(s == 0)
+Addind predicate s == 0 to verify set
+Predicate filtering verify set: ['s == 0']
+Verifying formula: ( = s 0 )
+For candidate: assert((s == 0))
+Predicate filtering found solution: assert((s == 0))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((s == 0))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 0.9119901657104492 seconds
+Resetting generator
+Resetting generator

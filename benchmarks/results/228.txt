@@ -1,0 +1,34 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(((y % 2) != 0) || ((x % 2) == 0));
+Candidate failed verification
+Adding candidate to fail history: assert(((y % 2) != 0) || ((x % 2) == 0));
+Verifying candidate: assert((x < 99) || ((x % 2) == (y % 2)));
+Candidate failed verification
+Adding candidate to fail history: assert((x < 99) || ((x % 2) == (y % 2)));
+Verifying candidate: assert(0 <= x);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= x);
+Executing predicate filtering
+Filtering predicates for candidate assert(((y % 2) != 0) || ((x % 2) == 0));
+Addind predicate (((y % 2) != 0)) || (((x % 2) == 0)) to verify set
+Filtering predicates for candidate assert((x < 99) || ((x % 2) == (y % 2)));
+Addind predicate ((x < 99)) || (((x % 2) == (y % 2))) to verify set
+Filtering predicates for candidate assert(0 <= x);
+Addind predicate 0 <= x to verify set
+Predicate filtering verify set: ['(((y % 2) != 0)) || (((x % 2) == 0))', '((x < 99)) || (((x % 2) == (y % 2)))', '0 <= x']
+Verifying formula: ( and ( and ( or ( distinct ( mod y 2 ) 0 ) ( = ( mod x 2 ) 0 ) ) ( or ( < x 99 ) ( = ( mod x 2 ) ( mod y 2 ) ) ) ) ( <= 0 x ) )
+For candidate: assert(((((y % 2) != 0)) || (((x % 2) == 0))) && (((x < 99)) || (((x % 2) == (y % 2)))) && (0 <= x))
+Predicate filtering found solution: assert(((((y % 2) != 0)) || (((x % 2) == 0))) && (((x < 99)) || (((x % 2) == (y % 2)))) && (0 <= x))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert(((((y % 2) != 0)) || (((x % 2) == 0))) && (((x < 99)) || (((x % 2) == (y % 2)))) && (0 <= x))
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 84.23670673370361 seconds
+The total runtime was 85.09096193313599 seconds
+Resetting generator
+Resetting generator

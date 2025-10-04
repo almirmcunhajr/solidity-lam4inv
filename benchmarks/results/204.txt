@@ -1,0 +1,22 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x <= 5)
+Addind predicate x <= 5 to verify set
+Filtering predicates for candidate assert(x >= 4)
+Filtering predicates for candidate assert(y <= 5)
+Addind predicate y <= 5 to verify set
+Filtering predicates for candidate assert(y >= 4)
+Predicate filtering verify set: ['x <= 5', 'y <= 5']
+Verifying formula: ( and ( <= x 5 ) ( <= y 5 ) )
+For candidate: assert((x <= 5) && (y <= 5))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(y <= 5);
+# Result
+Solution found by the gpt-5-nano model: assert(y <= 5);
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 24.149019956588745 seconds
+The total runtime was 29.35060405731201 seconds
+Resetting generator
+Resetting generator

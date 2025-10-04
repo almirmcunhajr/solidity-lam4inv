@@ -1,0 +1,41 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 2)
+Filtering predicates for candidate assert(y > 2)
+Addind predicate y > 2 to verify set
+Predicate filtering verify set: ['y > 2']
+Verifying formula: ( > y 2 )
+For candidate: assert((y > 2))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(y > 2);
+Candidate failed verification
+Adding candidate to fail history: assert(y > 2);
+Verifying candidate: assert(x >= 2);
+Candidate failed verification
+Adding candidate to fail history: assert(x >= 2);
+Verifying candidate: assert(x <= y);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= y);
+Verifying candidate: assert(x < y);
+Candidate failed verification
+Adding candidate to fail history: assert(x < y);
+Executing predicate filtering
+Filtering predicates for candidate assert(y > 2);
+Filtering predicates for candidate assert(x >= 2);
+Addind predicate x >= 2 to verify set
+Filtering predicates for candidate assert(x <= y);
+Addind predicate x <= y to verify set
+Filtering predicates for candidate assert(x < y);
+Predicate filtering verify set: ['y > 2', 'x >= 2', 'x <= y']
+Verifying formula: ( and ( and ( > y 2 ) ( >= x 2 ) ) ( <= x y ) )
+For candidate: assert((y > 2) && (x >= 2) && (x <= y))
+Predicate filtering found solution: assert((y > 2) && (x >= 2) && (x <= y))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((y > 2) && (x >= 2) && (x <= y))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 34.98773813247681 seconds
+The total runtime was 37.88399410247803 seconds
+Resetting generator
+Resetting generator

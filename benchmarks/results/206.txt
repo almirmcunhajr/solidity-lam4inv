@@ -1,0 +1,19 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x > -100)
+Filtering predicates for candidate assert(x < 200)
+Addind predicate x < 200 to verify set
+Filtering predicates for candidate assert(z > 100)
+Filtering predicates for candidate assert(z < 200)
+Addind predicate z < 200 to verify set
+Predicate filtering verify set: ['x < 200', 'z < 200']
+Verifying formula: ( and ( < x 200 ) ( < z 200 ) )
+For candidate: assert((x < 200) && (z < 200))
+Predicate filtering found solution: assert((x < 200) && (z < 200))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((x < 200) && (z < 200))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 6.203451156616211 seconds
+Resetting generator
+Resetting generator

@@ -1,0 +1,46 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(y == 50)
+Addind predicate y == 50 to verify set
+Predicate filtering verify set: ['y == 50']
+Verifying formula: ( = y 50 )
+For candidate: assert((y == 50))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert((x < 50 && y == 50) || (x >= 50 && y == x));
+Candidate failed verification
+Adding candidate to fail history: assert((x < 50 && y == 50) || (x >= 50 && y == x));
+Verifying candidate: assert((y == 50) || (y == x));
+Candidate failed verification
+Adding candidate to fail history: assert((y == 50) || (y == x));
+Verifying candidate: assert(x <= 100);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= 100);
+Verifying candidate: assert(y >= 50);
+Candidate failed verification
+Adding candidate to fail history: assert(y >= 50);
+Executing predicate filtering
+Filtering predicates for candidate assert((x < 50 && y == 50) || (x >= 50 && y == x));
+Addind predicate ((x < 50 && y == 50)) to verify set
+Filtering predicates for candidate assert((y == 50) || (y == x));
+Addind predicate ((y == 50)) to verify set
+Filtering predicates for candidate assert(x <= 100);
+Addind predicate x <= 100 to verify set
+Filtering predicates for candidate assert(y >= 50);
+Addind predicate y >= 50 to verify set
+Predicate filtering verify set: ['y == 50', '((x < 50 && y == 50))', '((y == 50))', 'x <= 100', 'y >= 50']
+Verifying formula: ( and ( and ( and ( and ( = y 50 ) ( and ( < x 50 ) ( = y 50 ) ) ) ( = y 50 ) ) ( <= x 100 ) ) ( >= y 50 ) )
+For candidate: assert((y == 50) && (((x < 50 && y == 50))) && (((y == 50))) && (x <= 100) && (y >= 50))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert((x < 50 && y == 50) || (x >= 50 && x <= 100 && y == x));
+# Result
+Solution found by the gpt-5-mini model: assert((x < 50 && y == 50) || (x >= 50 && x <= 100 && y == x));
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 51.57245898246765 seconds
+The total runtime was 84.77861309051514 seconds
+Resetting generator
+Resetting generator

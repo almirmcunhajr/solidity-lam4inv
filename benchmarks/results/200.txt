@@ -1,0 +1,18 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(d1 == 1)
+Addind predicate d1 == 1 to verify set
+Filtering predicates for candidate assert(d2 == 1)
+Addind predicate d2 == 1 to verify set
+Filtering predicates for candidate assert(d2 == 1)
+Predicate filtering verify set: ['d1 == 1', 'd2 == 1']
+Verifying formula: ( and ( = d1 1 ) ( = d2 1 ) )
+For candidate: assert((d1 == 1) && (d2 == 1))
+Predicate filtering found solution: assert((d1 == 1) && (d2 == 1))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((d1 == 1) && (d2 == 1))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 11.713236808776855 seconds
+Resetting generator
+Resetting generator

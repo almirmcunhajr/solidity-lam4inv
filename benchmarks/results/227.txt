@@ -1,0 +1,49 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert((x % 5) == 0);
+Candidate failed verification
+Adding candidate to fail history: assert((x % 5) == 0);
+Verifying candidate: assert((y % 2) != 0 || (x % 2) == 0);
+Candidate failed verification
+Adding candidate to fail history: assert((y % 2) != 0 || (x % 2) == 0);
+Verifying candidate: assert((y % 2) != 0 || (x % 10) == 0);
+Candidate failed verification
+Adding candidate to fail history: assert((y % 2) != 0 || (x % 10) == 0);
+Executing predicate filtering
+Filtering predicates for candidate assert((x % 5) == 0);
+Addind predicate (x % 5) == 0 to verify set
+Filtering predicates for candidate assert((y % 2) != 0 || (x % 2) == 0);
+Addind predicate ((y % 2) != 0) || ((x % 2) == 0) to verify set
+Filtering predicates for candidate assert((y % 2) != 0 || (x % 10) == 0);
+Addind predicate ((y % 2) != 0) || ((x % 10) == 0) to verify set
+Predicate filtering verify set: ['(x % 5) == 0', '((y % 2) != 0) || ((x % 2) == 0)', '((y % 2) != 0) || ((x % 10) == 0)']
+Verifying formula: ( and ( and ( = ( mod x 5 ) 0 ) ( or ( distinct ( mod y 2 ) 0 ) ( = ( mod x 2 ) 0 ) ) ) ( or ( distinct ( mod y 2 ) 0 ) ( = ( mod x 10 ) 0 ) ) )
+For candidate: assert(((x % 5) == 0) && (((y % 2) != 0) || ((x % 2) == 0)) && (((y % 2) != 0) || ((x % 10) == 0)))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert((y % 2) != 0 || (x % 10) == 0);
+Candidate already in fail history: assert((y % 2) != 0 || (x % 10) == 0);
+Verifying candidate: assert((y % 2) == 0 || x < 99);
+Candidate failed verification
+Adding candidate to fail history: assert((y % 2) == 0 || x < 99);
+Executing predicate filtering
+Filtering predicates for candidate assert((y % 2) != 0 || (x % 10) == 0);
+Filtering predicates for candidate assert((y % 2) == 0 || x < 99);
+Addind predicate ((y % 2) == 0) || (x < 99) to verify set
+Predicate filtering verify set: ['(x % 5) == 0', '((y % 2) != 0) || ((x % 2) == 0)', '((y % 2) != 0) || ((x % 10) == 0)', '((y % 2) == 0) || (x < 99)']
+Verifying formula: ( and ( and ( and ( = ( mod x 5 ) 0 ) ( or ( distinct ( mod y 2 ) 0 ) ( = ( mod x 2 ) 0 ) ) ) ( or ( distinct ( mod y 2 ) 0 ) ( = ( mod x 10 ) 0 ) ) ) ( or ( = ( mod y 2 ) 0 ) ( < x 99 ) ) )
+For candidate: assert(((x % 5) == 0) && (((y % 2) != 0) || ((x % 2) == 0)) && (((y % 2) != 0) || ((x % 10) == 0)) && (((y % 2) == 0) || (x < 99)))
+Predicate filtering found solution: assert(((x % 5) == 0) && (((y % 2) != 0) || ((x % 2) == 0)) && (((y % 2) != 0) || ((x % 10) == 0)) && (((y % 2) == 0) || (x < 99)))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert(((x % 5) == 0) && (((y % 2) != 0) || ((x % 2) == 0)) && (((y % 2) != 0) || ((x % 10) == 0)) && (((y % 2) == 0) || (x < 99)))
+4 counter examples were generated for the model proposals, with 1 repeated fails
+The model runtime was 44.49842715263367 seconds
+The total runtime was 92.26798796653748 seconds
+Resetting generator
+Resetting generator

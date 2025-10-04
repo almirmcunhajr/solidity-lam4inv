@@ -1,0 +1,15 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(y <= 1000000)
+Addind predicate y <= 1000000 to verify set
+Predicate filtering verify set: ['y <= 1000000']
+Verifying formula: ( <= y 1000000 )
+For candidate: assert((y <= 1000000))
+Predicate filtering found solution: assert((y <= 1000000))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((y <= 1000000))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 0.7707991600036621 seconds
+Resetting generator
+Resetting generator

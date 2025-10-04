@@ -1,0 +1,27 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(unowned == 0)
+Filtering predicates for candidate assert(nonexclusive == 0)
+Addind predicate nonexclusive == 0 to verify set
+Filtering predicates for candidate assert(exclusive == 0)
+Filtering predicates for candidate assert(invalid >= 1)
+Predicate filtering verify set: ['nonexclusive == 0']
+Verifying formula: ( = nonexclusive 0 )
+For candidate: assert((nonexclusive == 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(nonexclusive >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(nonexclusive >= 0);
+Verifying candidate: assert(unowned >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(unowned >= 0);
+Verifying candidate: assert(exclusive >= 0);
+# Result
+Solution found by the gpt-5-nano model: assert(exclusive >= 0);
+2 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 44.28683018684387 seconds
+The total runtime was 53.82433724403381 seconds
+Resetting generator
+Resetting generator

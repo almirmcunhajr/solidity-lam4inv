@@ -1,0 +1,92 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(unowned == 0)
+Filtering predicates for candidate assert(nonexclusive == 0)
+Addind predicate nonexclusive == 0 to verify set
+Filtering predicates for candidate assert(exclusive == 0)
+Filtering predicates for candidate assert(invalid >= 1)
+Predicate filtering verify set: ['nonexclusive == 0']
+Verifying formula: ( = nonexclusive 0 )
+For candidate: assert((nonexclusive == 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(invalid >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(invalid >= 0);
+Verifying candidate: assert(unowned >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(unowned >= 0);
+Verifying candidate: assert(nonexclusive >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(nonexclusive >= 0);
+Verifying candidate: assert(exclusive >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(exclusive >= 0);
+Verifying candidate: assert((nonexclusive + unowned) >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert((nonexclusive + unowned) >= 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(invalid >= 0);
+Addind predicate invalid >= 0 to verify set
+Filtering predicates for candidate assert(unowned >= 0);
+Addind predicate unowned >= 0 to verify set
+Filtering predicates for candidate assert(nonexclusive >= 0);
+Addind predicate nonexclusive >= 0 to verify set
+Filtering predicates for candidate assert(exclusive >= 0);
+Addind predicate exclusive >= 0 to verify set
+Filtering predicates for candidate assert((nonexclusive + unowned) >= 0);
+Addind predicate (nonexclusive + unowned) >= 0 to verify set
+Predicate filtering verify set: ['nonexclusive == 0', 'invalid >= 0', 'unowned >= 0', 'nonexclusive >= 0', 'exclusive >= 0', '(nonexclusive + unowned) >= 0']
+Verifying formula: ( and ( and ( and ( and ( and ( = nonexclusive 0 ) ( >= invalid 0 ) ) ( >= unowned 0 ) ) ( >= nonexclusive 0 ) ) ( >= exclusive 0 ) ) ( >= ( + nonexclusive unowned ) 0 ) )
+For candidate: assert((nonexclusive == 0) && (invalid >= 0) && (unowned >= 0) && (nonexclusive >= 0) && (exclusive >= 0) && ((nonexclusive + unowned) >= 0))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(invalid + nonexclusive + exclusive + unowned >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(invalid + nonexclusive + exclusive + unowned >= 1);
+Verifying candidate: assert(!((nonexclusive + unowned) >= 1 && invalid >= 1) || nonexclusive >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(!((nonexclusive + unowned) >= 1 && invalid >= 1) || nonexclusive >= 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(invalid + nonexclusive + exclusive + unowned >= 1);
+Addind predicate invalid + nonexclusive + exclusive + unowned >= 1 to verify set
+Filtering predicates for candidate assert(!((nonexclusive + unowned) >= 1 && invalid >= 1) || nonexclusive >= 0);
+Addind predicate (!((nonexclusive + unowned) >= 1 && invalid >= 1)) || (nonexclusive >= 0) to verify set
+Predicate filtering verify set: ['nonexclusive == 0', 'invalid >= 0', 'unowned >= 0', 'nonexclusive >= 0', 'exclusive >= 0', '(nonexclusive + unowned) >= 0', 'invalid + nonexclusive + exclusive + unowned >= 1', '(!((nonexclusive + unowned) >= 1 && invalid >= 1)) || (nonexclusive >= 0)']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( = nonexclusive 0 ) ( >= invalid 0 ) ) ( >= unowned 0 ) ) ( >= nonexclusive 0 ) ) ( >= exclusive 0 ) ) ( >= ( + nonexclusive unowned ) 0 ) ) ( >= ( + ( + ( + invalid nonexclusive ) exclusive ) unowned ) 1 ) ) ( or ( not ( and ( >= ( + nonexclusive unowned ) 1 ) ( >= invalid 1 ) ) ) ( >= nonexclusive 0 ) ) )
+For candidate: assert((nonexclusive == 0) && (invalid >= 0) && (unowned >= 0) && (nonexclusive >= 0) && (exclusive >= 0) && ((nonexclusive + unowned) >= 0) && (invalid + nonexclusive + exclusive + unowned >= 1) && ((!((nonexclusive + unowned) >= 1 && invalid >= 1)) || (nonexclusive >= 0)))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(nonexclusive >= 0 || invalid < 1 || (nonexclusive + unowned) < 1);
+Candidate failed verification
+Adding candidate to fail history: assert(nonexclusive >= 0 || invalid < 1 || (nonexclusive + unowned) < 1);
+Verifying candidate: assert(unowned >= 0 || nonexclusive >= 0 || invalid < 1);
+Candidate failed verification
+Adding candidate to fail history: assert(unowned >= 0 || nonexclusive >= 0 || invalid < 1);
+Verifying candidate: assert(exclusive >= 0 || nonexclusive >= 0 || invalid < 1);
+Candidate failed verification
+Adding candidate to fail history: assert(exclusive >= 0 || nonexclusive >= 0 || invalid < 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(nonexclusive >= 0 || invalid < 1 || (nonexclusive + unowned) < 1);
+Addind predicate (nonexclusive >= 0) || (invalid < 1) || ((nonexclusive + unowned) < 1) to verify set
+Filtering predicates for candidate assert(unowned >= 0 || nonexclusive >= 0 || invalid < 1);
+Addind predicate (unowned >= 0) || (nonexclusive >= 0) || (invalid < 1) to verify set
+Filtering predicates for candidate assert(exclusive >= 0 || nonexclusive >= 0 || invalid < 1);
+Addind predicate (exclusive >= 0) || (nonexclusive >= 0) || (invalid < 1) to verify set
+Predicate filtering verify set: ['nonexclusive == 0', 'invalid >= 0', 'unowned >= 0', 'nonexclusive >= 0', 'exclusive >= 0', '(nonexclusive + unowned) >= 0', 'invalid + nonexclusive + exclusive + unowned >= 1', '(!((nonexclusive + unowned) >= 1 && invalid >= 1)) || (nonexclusive >= 0)', '(nonexclusive >= 0) || (invalid < 1) || ((nonexclusive + unowned) < 1)', '(unowned >= 0) || (nonexclusive >= 0) || (invalid < 1)', '(exclusive >= 0) || (nonexclusive >= 0) || (invalid < 1)']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( = nonexclusive 0 ) ( >= invalid 0 ) ) ( >= unowned 0 ) ) ( >= nonexclusive 0 ) ) ( >= exclusive 0 ) ) ( >= ( + nonexclusive unowned ) 0 ) ) ( >= ( + ( + ( + invalid nonexclusive ) exclusive ) unowned ) 1 ) ) ( or ( not ( and ( >= ( + nonexclusive unowned ) 1 ) ( >= invalid 1 ) ) ) ( >= nonexclusive 0 ) ) ) ( or ( or ( >= nonexclusive 0 ) ( < invalid 1 ) ) ( < ( + nonexclusive unowned ) 1 ) ) ) ( or ( or ( >= unowned 0 ) ( >= nonexclusive 0 ) ) ( < invalid 1 ) ) ) ( or ( or ( >= exclusive 0 ) ( >= nonexclusive 0 ) ) ( < invalid 1 ) ) )
+For candidate: assert((nonexclusive == 0) && (invalid >= 0) && (unowned >= 0) && (nonexclusive >= 0) && (exclusive >= 0) && ((nonexclusive + unowned) >= 0) && (invalid + nonexclusive + exclusive + unowned >= 1) && ((!((nonexclusive + unowned) >= 1 && invalid >= 1)) || (nonexclusive >= 0)) && ((nonexclusive >= 0) || (invalid < 1) || ((nonexclusive + unowned) < 1)) && ((unowned >= 0) || (nonexclusive >= 0) || (invalid < 1)) && ((exclusive >= 0) || (nonexclusive >= 0) || (invalid < 1)))
+Generating loop invariants candidates with model gpt-5 and presence penalty 0.0
+Generated 1 candidates
+Verifying generated candidates
+Verifying candidate: assert(exclusive >= 0 && (invalid < 1 || nonexclusive >= 0));
+# Result
+Solution found by the gpt-5 model: assert(exclusive >= 0 && (invalid < 1 || nonexclusive >= 0));
+10 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 100.114590883255 seconds
+The total runtime was 310.9430956840515 seconds
+Resetting generator
+Resetting generator

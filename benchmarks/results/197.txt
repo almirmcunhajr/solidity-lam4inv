@@ -1,0 +1,48 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(m == 0)
+Filtering predicates for candidate assert(j == 0)
+Filtering predicates for candidate assert(k == x + y)
+Addind predicate k == x + y to verify set
+Predicate filtering verify set: ['k == x + y']
+Verifying formula: ( = k ( + x y ) )
+For candidate: assert((k == x + y))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(x + y == k);
+Candidate failed verification
+Adding candidate to fail history: assert(x + y == k);
+Verifying candidate: assert(m >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(m >= 0);
+Verifying candidate: assert(m == 0 || m < j);
+Candidate failed verification
+Adding candidate to fail history: assert(m == 0 || m < j);
+Verifying candidate: assert(0 <= j);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= j);
+Verifying candidate: assert(j < n);
+Candidate failed verification
+Adding candidate to fail history: assert(j < n);
+Executing predicate filtering
+Filtering predicates for candidate assert(x + y == k);
+Addind predicate x + y == k to verify set
+Filtering predicates for candidate assert(m >= 0);
+Addind predicate m >= 0 to verify set
+Filtering predicates for candidate assert(m == 0 || m < j);
+Addind predicate (m == 0) || (m < j) to verify set
+Filtering predicates for candidate assert(0 <= j);
+Addind predicate 0 <= j to verify set
+Filtering predicates for candidate assert(j < n);
+Predicate filtering verify set: ['k == x + y', 'x + y == k', 'm >= 0', '(m == 0) || (m < j)', '0 <= j']
+Verifying formula: ( and ( and ( and ( and ( = k ( + x y ) ) ( = ( + x y ) k ) ) ( >= m 0 ) ) ( or ( = m 0 ) ( < m j ) ) ) ( <= 0 j ) )
+For candidate: assert((k == x + y) && (x + y == k) && (m >= 0) && ((m == 0) || (m < j)) && (0 <= j))
+Predicate filtering found solution: assert((k == x + y) && (x + y == k) && (m >= 0) && ((m == 0) || (m < j)) && (0 <= j))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((k == x + y) && (x + y == k) && (m >= 0) && ((m == 0) || (m < j)) && (0 <= j))
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 45.36654496192932 seconds
+The total runtime was 50.590176820755005 seconds
+Resetting generator
+Resetting generator
