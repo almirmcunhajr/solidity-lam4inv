@@ -5,7 +5,7 @@ from smt.solver import SatStatus, Solver
 from smt.z3_solver import Z3Solver
 from inv_smt_solver.counter_example import CounterExample, CounterExampleKind
 
-class Code2Inv():
+class CrossCheck():
     def __init__(self, solver: Solver):
         self.solver = solver
 
@@ -67,16 +67,26 @@ class Code2Inv():
 
 if __name__ == "__main__":
     z3_solver = Z3Solver(timeout=10)
-    code2inv = Code2Inv(z3_solver)
+    crosscheck = CrossCheck(z3_solver)
 
     inv = sys.argv[1]
     tpl_path = sys.argv[2]
     with open(tpl_path, 'r') as f:
         template = f.read()
 
-    ce = code2inv.check(inv, template)
-    if ce:
-        print(ce)
-    else:
-        print("No counterexample found. Invariant holds.")
+    ce = crosscheck.check(inv, template)
+    if ce is None:
+        print("No counter example found; the invariant may be valid.")
+        exit(0)
+
+    match ce.kind:
+        case CounterExampleKind.NOT_REACHABLE:
+            print("Counter example found: the invariant is not reachable.")
+            print(ce)
+        case CounterExampleKind.NOT_INDUCTIVE:
+            print("Counter example found: the invariant is not inductive.")
+            print(ce)
+        case CounterExampleKind.NOT_PROVABLE:
+            print("Counter example found: the invariant does not imply the postcondition.")
+            print(ce)
 

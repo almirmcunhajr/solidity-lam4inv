@@ -5,7 +5,7 @@ import re
 from typing import Optional
 from dotenv import load_dotenv
 
-from code2inv.code2inv import Code2Inv
+from crosscheck.crosscheck import CrossCheck
 from code_handler.code_handler import CodeHandler
 from code_handler.formula_handler import FormulaHandler
 from runner import Runner
@@ -106,16 +106,16 @@ def run_benchmark(
     inv_formula = formula_handler.extract_formula(inv_formula)
     inv = formula_handler.to_smt_lib2(inv_formula)
 
-    code2inv = Code2Inv(z3_solver)
+    crosscheck = CrossCheck(z3_solver)
 
-    code2inv_vc_template_path = f"benchmarks/cross-checks-templates/{benchmark_index}.txt"
-    with open(code2inv_vc_template_path, "r") as f:
-        code2inv_vc_template = f.read()
+    crosscheck_vc_template_path = f"benchmarks/cross-checks-templates/{benchmark_index}.txt"
+    with open(crosscheck_vc_template_path, "r") as f:
+        crosscheck_vc_template = f.read()
 
-    code2inv_ce = code2inv.check(inv, code2inv_vc_template)
-    if code2inv_ce is not None:
-        raise Exception(f"Result for benchmark {benchmark_index} not validated by Code2Inv VCs. Counterexample: {code2inv_ce}")
-    print(f"Result for benchmark {benchmark_index} validated by Code2Inv VCs")
+    crosscheck_ce = crosscheck.check(inv, crosscheck_vc_template)
+    if crosscheck_ce is not None:
+        raise Exception(f"Cross check failed for the benchmark {benchmark_index}. Counterexample: {crosscheck_ce}")
+    print(f"Cross check succeeded for the benchmark {benchmark_index}")
 
     print(f"Benchmark {benchmark_index} finished")
 

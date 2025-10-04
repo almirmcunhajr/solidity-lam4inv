@@ -23,6 +23,8 @@ SPLIT_HERE_asdfghjklzxcvbnmqwertyuiop
 	( and
 		( = x x_0 )
 		( = x_0 1 )
+    ( = y y_0 )
+    ( = y_0 0 )
 	)
 )
 
