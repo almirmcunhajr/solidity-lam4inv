@@ -1,0 +1,34 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(v == 1)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(v >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(v >= 1);
+Verifying candidate: assert(v <= 51);
+Candidate failed verification
+Adding candidate to fail history: assert(v <= 51);
+Verifying candidate: assert(v % 2 == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(v % 2 == 1);
+Executing predicate filtering
+Filtering predicates for candidate assert(v >= 1);
+Addind predicate v >= 1 to verify set
+Filtering predicates for candidate assert(v <= 51);
+Addind predicate v <= 51 to verify set
+Filtering predicates for candidate assert(v % 2 == 1);
+Addind predicate v % 2 == 1 to verify set
+Predicate filtering verify set: ['v >= 1', 'v <= 51', 'v % 2 == 1']
+Verifying formula: ( and ( and ( >= v 1 ) ( <= v 51 ) ) ( = ( mod v 2 ) 1 ) )
+For candidate: assert((v >= 1) && (v <= 51) && (v % 2 == 1))
+Predicate filtering found solution: assert((v >= 1) && (v <= 51) && (v % 2 == 1))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((v >= 1) && (v <= 51) && (v % 2 == 1))
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 26.258032083511353 seconds
+The total runtime was 26.811965942382812 seconds
+Resetting generator
+Resetting generator

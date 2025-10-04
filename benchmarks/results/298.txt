@@ -1,0 +1,112 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(z == 5000000)
+Addind predicate z == 5000000 to verify set
+Predicate filtering verify set: ['z == 5000000']
+Verifying formula: ( = z 5000000 )
+For candidate: assert((z == 5000000))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= x);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= x);
+Verifying candidate: assert(x < 10000000);
+Candidate failed verification
+Adding candidate to fail history: assert(x < 10000000);
+Verifying candidate: assert(0 <= z);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= z);
+Verifying candidate: assert(z <= 5000000);
+Candidate failed verification
+Adding candidate to fail history: assert(z <= 5000000);
+Verifying candidate: assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z == 10000000 - x));
+Candidate failed verification
+Adding candidate to fail history: assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z == 10000000 - x));
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= x);
+Addind predicate 0 <= x to verify set
+Filtering predicates for candidate assert(x < 10000000);
+Addind predicate x < 10000000 to verify set
+Filtering predicates for candidate assert(0 <= z);
+Addind predicate 0 <= z to verify set
+Filtering predicates for candidate assert(z <= 5000000);
+Addind predicate z <= 5000000 to verify set
+Filtering predicates for candidate assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z == 10000000 - x));
+Addind predicate ((x <= 5000000 && z == 5000000)) to verify set
+Predicate filtering verify set: ['z == 5000000', '0 <= x', 'x < 10000000', '0 <= z', 'z <= 5000000', '((x <= 5000000 && z == 5000000))']
+Verifying formula: ( and ( and ( and ( and ( and ( = z 5000000 ) ( <= 0 x ) ) ( < x 10000000 ) ) ( <= 0 z ) ) ( <= z 5000000 ) ) ( and ( <= x 5000000 ) ( = z 5000000 ) ) )
+For candidate: assert((z == 5000000) && (0 <= x) && (x < 10000000) && (0 <= z) && (z <= 5000000) && (((x <= 5000000 && z == 5000000))))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= x && x <= 10000000);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= x && x <= 10000000);
+Verifying candidate: assert((x <= 5000000 && z == 5000000) || (x >= 5000000 && z == 10000000 - x));
+Candidate failed verification
+Adding candidate to fail history: assert((x <= 5000000 && z == 5000000) || (x >= 5000000 && z == 10000000 - x));
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= x && x <= 10000000);
+Addind predicate x <= 10000000 to verify set
+Filtering predicates for candidate assert((x <= 5000000 && z == 5000000) || (x >= 5000000 && z == 10000000 - x));
+Predicate filtering verify set: ['z == 5000000', '0 <= x', 'x < 10000000', '0 <= z', 'z <= 5000000', '((x <= 5000000 && z == 5000000))', 'x <= 10000000']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( = z 5000000 ) ( <= 0 x ) ) ( < x 10000000 ) ) ( <= 0 z ) ) ( <= z 5000000 ) ) ( and ( <= x 5000000 ) ( = z 5000000 ) ) ) ( <= x 10000000 ) )
+For candidate: assert((z == 5000000) && (0 <= x) && (x < 10000000) && (0 <= z) && (z <= 5000000) && (((x <= 5000000 && z == 5000000))) && (x <= 10000000))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(!(x < 0) && !(x > 10000000));
+Candidate failed verification
+Adding candidate to fail history: assert(!(x < 0) && !(x > 10000000));
+Verifying candidate: assert(!(z < 0) && !(z > 5000000));
+Candidate failed verification
+Adding candidate to fail history: assert(!(z < 0) && !(z > 5000000));
+Verifying candidate: assert(!(x <= 5000000) || z == 5000000);
+Candidate failed verification
+Adding candidate to fail history: assert(!(x <= 5000000) || z == 5000000);
+Verifying candidate: assert(!(x >= 5000000) || z + x - 5000000 == 5000000);
+Candidate failed verification
+Adding candidate to fail history: assert(!(x >= 5000000) || z + x - 5000000 == 5000000);
+Executing predicate filtering
+Filtering predicates for candidate assert(!(x < 0) && !(x > 10000000));
+Addind predicate !(x < 0) to verify set
+Addind predicate !(x > 10000000) to verify set
+Filtering predicates for candidate assert(!(z < 0) && !(z > 5000000));
+Addind predicate !(z < 0) to verify set
+Addind predicate !(z > 5000000) to verify set
+Filtering predicates for candidate assert(!(x <= 5000000) || z == 5000000);
+Addind predicate (z == 5000000) to verify set
+Filtering predicates for candidate assert(!(x >= 5000000) || z + x - 5000000 == 5000000);
+Addind predicate (!(x >= 5000000)) to verify set
+Predicate filtering verify set: ['z == 5000000', '0 <= x', 'x < 10000000', '0 <= z', 'z <= 5000000', '((x <= 5000000 && z == 5000000))', 'x <= 10000000', '!(x < 0)', '!(x > 10000000)', '!(z < 0)', '!(z > 5000000)', '(z == 5000000)', '(!(x >= 5000000))']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( = z 5000000 ) ( <= 0 x ) ) ( < x 10000000 ) ) ( <= 0 z ) ) ( <= z 5000000 ) ) ( and ( <= x 5000000 ) ( = z 5000000 ) ) ) ( <= x 10000000 ) ) ( not ( < x 0 ) ) ) ( not ( > x 10000000 ) ) ) ( not ( < z 0 ) ) ) ( not ( > z 5000000 ) ) ) ( = z 5000000 ) ) ( not ( >= x 5000000 ) ) )
+For candidate: assert((z == 5000000) && (0 <= x) && (x < 10000000) && (0 <= z) && (z <= 5000000) && (((x <= 5000000 && z == 5000000))) && (x <= 10000000) && (!(x < 0)) && (!(x > 10000000)) && (!(z < 0)) && (!(z > 5000000)) && ((z == 5000000)) && ((!(x >= 5000000))))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0 && x <= 10000000);
+Candidate failed verification
+Adding candidate to fail history: assert(x >= 0 && x <= 10000000);
+Verifying candidate: assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z + x == 10000000));
+Candidate failed verification
+Adding candidate to fail history: assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z + x == 10000000));
+Executing predicate filtering
+Filtering predicates for candidate assert(x >= 0 && x <= 10000000);
+Addind predicate x >= 0 to verify set
+Filtering predicates for candidate assert((x <= 5000000 && z == 5000000) || (x > 5000000 && z + x == 10000000));
+Predicate filtering verify set: ['z == 5000000', '0 <= x', 'x < 10000000', '0 <= z', 'z <= 5000000', '((x <= 5000000 && z == 5000000))', 'x <= 10000000', '!(x < 0)', '!(x > 10000000)', '!(z < 0)', '!(z > 5000000)', '(z == 5000000)', '(!(x >= 5000000))', 'x >= 0']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( and ( = z 5000000 ) ( <= 0 x ) ) ( < x 10000000 ) ) ( <= 0 z ) ) ( <= z 5000000 ) ) ( and ( <= x 5000000 ) ( = z 5000000 ) ) ) ( <= x 10000000 ) ) ( not ( < x 0 ) ) ) ( not ( > x 10000000 ) ) ) ( not ( < z 0 ) ) ) ( not ( > z 5000000 ) ) ) ( = z 5000000 ) ) ( not ( >= x 5000000 ) ) ) ( >= x 0 ) )
+For candidate: assert((z == 5000000) && (0 <= x) && (x < 10000000) && (0 <= z) && (z <= 5000000) && (((x <= 5000000 && z == 5000000))) && (x <= 10000000) && (!(x < 0)) && (!(x > 10000000)) && (!(z < 0)) && (!(z > 5000000)) && ((z == 5000000)) && ((!(x >= 5000000))) && (x >= 0))
+Generating loop invariants candidates with model gpt-5 and presence penalty 0.0
+Generated 1 candidates
+Verifying generated candidates
+Verifying candidate: assert(x <= 10000000 && ((x <= 5000000 && z == 5000000) || (x >= 5000000 && z + x == 10000000)));
+# Result
+Solution found by the gpt-5 model: assert(x <= 10000000 && ((x <= 5000000 && z == 5000000) || (x >= 5000000 && z + x == 10000000)));
+13 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 90.90282273292542 seconds
+The total runtime was 298.58186888694763 seconds
+Resetting generator
+Resetting generator

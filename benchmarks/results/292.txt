@@ -1,0 +1,16 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(i < j)
+Filtering predicates for candidate assert(k > 0)
+Addind predicate k > 0 to verify set
+Predicate filtering verify set: ['k > 0']
+Verifying formula: ( > k 0 )
+For candidate: assert((k > 0))
+Predicate filtering found solution: assert((k > 0))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((k > 0))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 1.499040126800537 seconds
+Resetting generator
+Resetting generator

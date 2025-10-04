@@ -1,0 +1,43 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 4)
+Filtering predicates for candidate assert(y >= 0)
+Addind predicate y >= 0 to verify set
+Filtering predicates for candidate assert(y <= 20000001)
+Addind predicate y <= 20000001 to verify set
+Predicate filtering verify set: ['y >= 0', 'y <= 20000001']
+Verifying formula: ( and ( >= y 0 ) ( <= y 20000001 ) )
+For candidate: assert((y >= 0) && (y <= 20000001))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(x == 4*y);
+Candidate failed verification
+Adding candidate to fail history: assert(x == 4*y);
+Verifying candidate: assert(y >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(y >= 0);
+Verifying candidate: assert(y <= 20000001);
+Candidate failed verification
+Adding candidate to fail history: assert(y <= 20000001);
+Verifying candidate: assert(!(x > 0) || (y > 0));
+Candidate failed verification
+Adding candidate to fail history: assert(!(x > 0) || (y > 0));
+Executing predicate filtering
+Filtering predicates for candidate assert(x == 4*y);
+Addind predicate x == 4*y to verify set
+Filtering predicates for candidate assert(y >= 0);
+Filtering predicates for candidate assert(y <= 20000001);
+Filtering predicates for candidate assert(!(x > 0) || (y > 0));
+Addind predicate (!(x > 0)) || ((y > 0)) to verify set
+Predicate filtering verify set: ['y >= 0', 'y <= 20000001', 'x == 4*y', '(!(x > 0)) || ((y > 0))']
+Verifying formula: ( and ( and ( and ( >= y 0 ) ( <= y 20000001 ) ) ( = x ( * 4 y ) ) ) ( or ( not ( > x 0 ) ) ( > y 0 ) ) )
+For candidate: assert((y >= 0) && (y <= 20000001) && (x == 4*y) && ((!(x > 0)) || ((y > 0))))
+Predicate filtering found solution: assert((y >= 0) && (y <= 20000001) && (x == 4*y) && ((!(x > 0)) || ((y > 0))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((y >= 0) && (y <= 20000001) && (x == 4*y) && ((!(x > 0)) || ((y > 0))))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 33.14271903038025 seconds
+The total runtime was 35.14721417427063 seconds
+Resetting generator
+Resetting generator

@@ -1,0 +1,44 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(a == 0)
+Filtering predicates for candidate assert(b == 0)
+Filtering predicates for candidate assert(c == 200000)
+Addind predicate c == 200000 to verify set
+Filtering predicates for candidate assert((st == 0 && last < c) || (st == 1 && last >= c))
+Addind predicate ((st == 0 && last < c)) || ((st == 1 && last >= c)) to verify set
+Predicate filtering verify set: ['c == 200000', '((st == 0 && last < c)) || ((st == 1 && last >= c))']
+Verifying formula: ( and ( = c 200000 ) ( or ( and ( = st 0 ) ( < last c ) ) ( and ( = st 1 ) ( >= last c ) ) ) )
+For candidate: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert((st == 0 && last < c) || (st == 1 && last >= c));
+Candidate failed verification
+Adding candidate to fail history: assert((st == 0 && last < c) || (st == 1 && last >= c));
+Verifying candidate: assert(c == 200000);
+Candidate failed verification
+Adding candidate to fail history: assert(c == 200000);
+Verifying candidate: assert(a == b);
+Candidate failed verification
+Adding candidate to fail history: assert(a == b);
+Verifying candidate: assert((st == 0) || (st == 1));
+Candidate failed verification
+Adding candidate to fail history: assert((st == 0) || (st == 1));
+Executing predicate filtering
+Filtering predicates for candidate assert((st == 0 && last < c) || (st == 1 && last >= c));
+Filtering predicates for candidate assert(c == 200000);
+Filtering predicates for candidate assert(a == b);
+Addind predicate a == b to verify set
+Filtering predicates for candidate assert((st == 0) || (st == 1));
+Addind predicate ((st == 0)) || ((st == 1)) to verify set
+Predicate filtering verify set: ['c == 200000', '((st == 0 && last < c)) || ((st == 1 && last >= c))', 'a == b', '((st == 0)) || ((st == 1))']
+Verifying formula: ( and ( and ( and ( = c 200000 ) ( or ( and ( = st 0 ) ( < last c ) ) ( and ( = st 1 ) ( >= last c ) ) ) ) ( = a b ) ) ( or ( = st 0 ) ( = st 1 ) ) )
+For candidate: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))) && (a == b) && (((st == 0)) || ((st == 1))))
+Predicate filtering found solution: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))) && (a == b) && (((st == 0)) || ((st == 1))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))) && (a == b) && (((st == 0)) || ((st == 1))))
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 37.44992423057556 seconds
+The total runtime was 45.46867299079895 seconds
+Resetting generator
+Resetting generator

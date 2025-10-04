@@ -1,0 +1,16 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(k > i - j)
+Addind predicate k > i - j to verify set
+Filtering predicates for candidate assert(i < j)
+Predicate filtering verify set: ['k > i - j']
+Verifying formula: ( > k ( - i j ) )
+For candidate: assert((k > i - j))
+Predicate filtering found solution: assert((k > i - j))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((k > i - j))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 1.5038080215454102 seconds
+Resetting generator
+Resetting generator

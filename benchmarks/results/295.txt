@@ -1,0 +1,29 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 2 candidates
+Verifying generated candidates
+Verifying candidate: assert(x <= 100000000);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= 100000000);
+Verifying candidate: assert((x < 10000000) || (x % 2 == 0));
+Candidate failed verification
+Adding candidate to fail history: assert((x < 10000000) || (x % 2 == 0));
+Executing predicate filtering
+Filtering predicates for candidate assert(x <= 100000000);
+Addind predicate x <= 100000000 to verify set
+Filtering predicates for candidate assert((x < 10000000) || (x % 2 == 0));
+Addind predicate ((x < 10000000)) || ((x % 2 == 0)) to verify set
+Predicate filtering verify set: ['x <= 100000000', '((x < 10000000)) || ((x % 2 == 0))']
+Verifying formula: ( and ( <= x 100000000 ) ( or ( < x 10000000 ) ( = ( mod x 2 ) 0 ) ) )
+For candidate: assert((x <= 100000000) && (((x < 10000000)) || ((x % 2 == 0))))
+Predicate filtering found solution: assert((x <= 100000000) && (((x < 10000000)) || ((x % 2 == 0))))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((x <= 100000000) && (((x < 10000000)) || ((x % 2 == 0))))
+2 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 37.56684064865112 seconds
+The total runtime was 38.13357090950012 seconds
+Resetting generator
+Resetting generator

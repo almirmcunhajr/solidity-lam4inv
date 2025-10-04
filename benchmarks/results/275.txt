@@ -1,0 +1,15 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(y > 0 || x > 0)
+Addind predicate (y > 0) || (x > 0) to verify set
+Predicate filtering verify set: ['(y > 0) || (x > 0)']
+Verifying formula: ( or ( > y 0 ) ( > x 0 ) )
+For candidate: assert(((y > 0) || (x > 0)))
+Predicate filtering found solution: assert(((y > 0) || (x > 0)))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert(((y > 0) || (x > 0)))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 1.422590970993042 seconds
+Resetting generator
+Resetting generator

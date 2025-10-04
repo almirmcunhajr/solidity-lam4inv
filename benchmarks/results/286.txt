@@ -1,0 +1,19 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x == y)
+Addind predicate x == y to verify set
+Filtering predicates for candidate assert(x >= 0)
+Addind predicate x >= 0 to verify set
+Filtering predicates for candidate assert(x + y + z == 0)
+Addind predicate x + y + z == 0 to verify set
+Predicate filtering verify set: ['x == y', 'x >= 0', 'x + y + z == 0']
+Verifying formula: ( and ( and ( = x y ) ( >= x 0 ) ) ( = ( + ( + x y ) z ) 0 ) )
+For candidate: assert((x == y) && (x >= 0) && (x + y + z == 0))
+Predicate filtering found solution: assert((x == y) && (x >= 0) && (x + y + z == 0))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((x == y) && (x >= 0) && (x + y + z == 0))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 2.142390012741089 seconds
+Resetting generator
+Resetting generator

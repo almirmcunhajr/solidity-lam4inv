@@ -1,0 +1,25 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x < 100)
+Filtering predicates for candidate assert(y < 100)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(x <= 100);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= 100);
+Verifying candidate: assert(y <= 100);
+Candidate failed verification
+Adding candidate to fail history: assert(y <= 100);
+Verifying candidate: assert(((x < 100) && (y < 100) && (x + 1 <= 100) && (y + 1 <= 100)) || (!((x < 100) && (y < 100))));
+Candidate failed verification
+Adding candidate to fail history: assert(((x < 100) && (y < 100) && (x + 1 <= 100) && (y + 1 <= 100)) || (!((x < 100) && (y < 100))));
+Verifying candidate: assert((((x >= 100) || (y >= 100)) && ((x == 100) || (y == 100))) || (!((x >= 100) || (y >= 100))));
+# Result
+Solution found by the gpt-5-nano model: assert((((x >= 100) || (y >= 100)) && ((x == 100) || (y == 100))) || (!((x >= 100) || (y >= 100))));
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 54.89935302734375 seconds
+The total runtime was 56.13782501220703 seconds
+Resetting generator
+Resetting generator

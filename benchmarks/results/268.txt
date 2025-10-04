@@ -1,0 +1,48 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(x >= 0)
+Addind predicate x >= 0 to verify set
+Filtering predicates for candidate assert(x <= y)
+Addind predicate x <= y to verify set
+Filtering predicates for candidate assert(y < n)
+Predicate filtering verify set: ['x >= 0', 'x <= y']
+Verifying formula: ( and ( >= x 0 ) ( <= x y ) )
+For candidate: assert((x >= 0) && (x <= y))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(x >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x >= 0);
+Verifying candidate: assert(x <= y);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= y);
+Verifying candidate: assert(y <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(y <= n);
+Verifying candidate: assert(x <= n);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= n);
+Verifying candidate: assert(y >= x);
+Candidate failed verification
+Adding candidate to fail history: assert(y >= x);
+Executing predicate filtering
+Filtering predicates for candidate assert(x >= 0);
+Filtering predicates for candidate assert(x <= y);
+Filtering predicates for candidate assert(y <= n);
+Addind predicate y <= n to verify set
+Filtering predicates for candidate assert(x <= n);
+Addind predicate x <= n to verify set
+Filtering predicates for candidate assert(y >= x);
+Addind predicate y >= x to verify set
+Predicate filtering verify set: ['x >= 0', 'x <= y', 'y <= n', 'x <= n', 'y >= x']
+Verifying formula: ( and ( and ( and ( and ( >= x 0 ) ( <= x y ) ) ( <= y n ) ) ( <= x n ) ) ( >= y x ) )
+For candidate: assert((x >= 0) && (x <= y) && (y <= n) && (x <= n) && (y >= x))
+Predicate filtering found solution: assert((x >= 0) && (x <= y) && (y <= n) && (x <= n) && (y >= x))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((x >= 0) && (x <= y) && (y <= n) && (x <= n) && (y >= x))
+5 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 38.06363487243652 seconds
+The total runtime was 40.41351509094238 seconds
+Resetting generator
+Resetting generator

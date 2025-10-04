@@ -1,0 +1,64 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(a == 0)
+Filtering predicates for candidate assert(b == 0)
+Filtering predicates for candidate assert(j == 1)
+Filtering predicates for candidate assert(i == 1)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(i == 2*a + 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i == 2*a + 1);
+Verifying candidate: assert(j == a + 1);
+Candidate failed verification
+Adding candidate to fail history: assert(j == a + 1);
+Verifying candidate: assert(b == - (a * (a - 1)) / 2);
+Candidate failed verification
+Adding candidate to fail history: assert(b == - (a * (a - 1)) / 2);
+Executing predicate filtering
+Filtering predicates for candidate assert(i == 2*a + 1);
+Addind predicate i == 2*a + 1 to verify set
+Filtering predicates for candidate assert(j == a + 1);
+Addind predicate j == a + 1 to verify set
+Filtering predicates for candidate assert(b == - (a * (a - 1)) / 2);
+Addind predicate b == - (a * (a - 1)) / 2 to verify set
+Predicate filtering verify set: ['i == 2*a + 1', 'j == a + 1', 'b == - (a * (a - 1)) / 2']
+Verifying formula: ( and ( and ( = i ( + ( * 2 a ) 1 ) ) ( = j ( + a 1 ) ) ) ( = b ( div ( - 0 ( * a ( - a 1 ) ) ) 2 ) ) )
+For candidate: assert((i == 2*a + 1) && (j == a + 1) && (b == - (a * (a - 1)) / 2))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(a >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(a >= 0);
+Verifying candidate: assert(j - i <= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(j - i <= 0);
+Verifying candidate: assert(b <= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(b <= 0);
+Verifying candidate: assert(a == 0 || b < a);
+Candidate failed verification
+Adding candidate to fail history: assert(a == 0 || b < a);
+Executing predicate filtering
+Filtering predicates for candidate assert(a >= 0);
+Addind predicate a >= 0 to verify set
+Filtering predicates for candidate assert(j - i <= 0);
+Addind predicate j - i <= 0 to verify set
+Filtering predicates for candidate assert(b <= 0);
+Addind predicate b <= 0 to verify set
+Filtering predicates for candidate assert(a == 0 || b < a);
+Addind predicate (a == 0) || (b < a) to verify set
+Predicate filtering verify set: ['i == 2*a + 1', 'j == a + 1', 'b == - (a * (a - 1)) / 2', 'a >= 0', 'j - i <= 0', 'b <= 0', '(a == 0) || (b < a)']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( = i ( + ( * 2 a ) 1 ) ) ( = j ( + a 1 ) ) ) ( = b ( div ( - 0 ( * a ( - a 1 ) ) ) 2 ) ) ) ( >= a 0 ) ) ( <= ( - j i ) 0 ) ) ( <= b 0 ) ) ( or ( = a 0 ) ( < b a ) ) )
+For candidate: assert((i == 2*a + 1) && (j == a + 1) && (b == - (a * (a - 1)) / 2) && (a >= 0) && (j - i <= 0) && (b <= 0) && ((a == 0) || (b < a)))
+Predicate filtering found solution: assert((i == 2*a + 1) && (j == a + 1) && (b == - (a * (a - 1)) / 2) && (a >= 0) && (j - i <= 0) && (b <= 0) && ((a == 0) || (b < a)))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-mini model: assert((i == 2*a + 1) && (j == a + 1) && (b == - (a * (a - 1)) / 2) && (a >= 0) && (j - i <= 0) && (b <= 0) && ((a == 0) || (b < a)))
+7 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 115.47707986831665 seconds
+The total runtime was 147.3937668800354 seconds
+Resetting generator
+Resetting generator

@@ -1,0 +1,19 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(a == 0)
+Filtering predicates for candidate assert(b == 0)
+Filtering predicates for candidate assert(c == 200000)
+Addind predicate c == 200000 to verify set
+Filtering predicates for candidate assert((st == 0 && last < c) || (st == 1 && last >= c))
+Addind predicate ((st == 0 && last < c)) || ((st == 1 && last >= c)) to verify set
+Predicate filtering verify set: ['c == 200000', '((st == 0 && last < c)) || ((st == 1 && last >= c))']
+Verifying formula: ( and ( = c 200000 ) ( or ( and ( = st 0 ) ( < last c ) ) ( and ( = st 1 ) ( >= last c ) ) ) )
+For candidate: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))))
+Predicate filtering found solution: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))))
+# Result
+Solution found by the predicate filtering mechanism using the None model: assert((c == 200000) && (((st == 0 && last < c)) || ((st == 1 && last >= c))))
+0 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 0.0 seconds
+The total runtime was 8.112758159637451 seconds
+Resetting generator
+Resetting generator

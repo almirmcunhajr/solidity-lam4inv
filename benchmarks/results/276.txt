@@ -1,0 +1,35 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(i == 0)
+Filtering predicates for candidate assert(j == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(0 <= i);
+Candidate failed verification
+Adding candidate to fail history: assert(0 <= i);
+Verifying candidate: assert(i <= 100);
+Candidate failed verification
+Adding candidate to fail history: assert(i <= 100);
+Verifying candidate: assert(j == 2*i);
+Candidate failed verification
+Adding candidate to fail history: assert(j == 2*i);
+Executing predicate filtering
+Filtering predicates for candidate assert(0 <= i);
+Addind predicate 0 <= i to verify set
+Filtering predicates for candidate assert(i <= 100);
+Addind predicate i <= 100 to verify set
+Filtering predicates for candidate assert(j == 2*i);
+Addind predicate j == 2*i to verify set
+Predicate filtering verify set: ['0 <= i', 'i <= 100', 'j == 2*i']
+Verifying formula: ( and ( and ( <= 0 i ) ( <= i 100 ) ) ( = j ( * 2 i ) ) )
+For candidate: assert((0 <= i) && (i <= 100) && (j == 2*i))
+Predicate filtering found solution: assert((0 <= i) && (i <= 100) && (j == 2*i))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((0 <= i) && (i <= 100) && (j == 2*i))
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 18.758454084396362 seconds
+The total runtime was 19.844841957092285 seconds
+Resetting generator
+Resetting generator

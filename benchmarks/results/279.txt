@@ -1,0 +1,27 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(i >= 1)
+Addind predicate i >= 1 to verify set
+Filtering predicates for candidate assert(j >= 1)
+Addind predicate j >= 1 to verify set
+Filtering predicates for candidate assert(i * i < j * j)
+Predicate filtering verify set: ['i >= 1', 'j >= 1']
+Verifying formula: ( and ( >= i 1 ) ( >= j 1 ) )
+For candidate: assert((i >= 1) && (j >= 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(i >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(i >= 1);
+Verifying candidate: assert(j >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(j >= 1);
+Verifying candidate: assert(i <= j);
+# Result
+Solution found by the gpt-5-nano model: assert(i <= j);
+2 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 28.603628158569336 seconds
+The total runtime was 32.02106714248657 seconds
+Resetting generator
+Resetting generator
