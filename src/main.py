@@ -73,7 +73,7 @@ def run_results_analysis(bounds: tuple[int, int], logger: logging.Logger):
         logger.error(f"Results directory {results_dir} does not exist")
         return
 
-    solutions_found_regex = re.compile(r'Solution found by (.*):')
+    solutions_found_regex = re.compile(r'Solution found by the (.*):')
     solutions_by_model: dict[str, int] = {}
     for benchmark_index in range(bounds[0], bounds[1]+1):
         result_file_path = f"{results_dir}/{benchmark_index}.txt"
@@ -95,7 +95,7 @@ def run_results_analysis(bounds: tuple[int, int], logger: logging.Logger):
 
     logger.info("Results analysis:")
     for model, count in solutions_by_model.items():
-        logger.info(f"Model {model} found {count} solutions")
+        logger.info(f"{model} found {count} solutions")
     logger.info(f"Total solutions found: {sum(solutions_by_model.values())} out of {bounds[1] - bounds[0] + 1} benchmarks")
 
 def run_benchmark(
