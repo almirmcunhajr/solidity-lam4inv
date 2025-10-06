@@ -22,6 +22,8 @@ from bmc.solc import Solc
 from bmc.bmc import BMC
 from predicate_filtering.predicate_filtering import PredicateFiltering
 
+results_dir = "benchmarks/results"
+
 load_dotenv()
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
@@ -65,6 +67,36 @@ def run(
     runner.reset()
 
     return invariant
+
+def run_results_analysis(bounds: tuple[int, int], logger: logging.Logger):
+    if not os.path.exists(results_dir):
+        logger.error(f"Results directory {results_dir} does not exist")
+        return
+
+    solutions_found_regex = re.compile(r'Solution found by (.*):')
+    solutions_by_model: dict[str, int] = {}
+    for benchmark_index in range(bounds[0], bounds[1]+1):
+        result_file_path = f"{results_dir}/{benchmark_index}.txt"
+        if not os.path.exists(result_file_path):
+            logger.warning(f"Result file {result_file_path} does not exist")
+            continue
+        with open(result_file_path, "r") as f:
+            result = f.read()
+
+        match = solutions_found_regex.search(result)
+        if match:
+            model = match.group(1)
+            if model not in solutions_by_model:
+                solutions_by_model[model] = 0
+            solutions_by_model[model] += 1
+            continue
+
+        logger.warning(f"No solution found in the result file {result_file_path}")
+
+    logger.info("Results analysis:")
+    for model, count in solutions_by_model.items():
+        logger.info(f"Model {model} found {count} solutions")
+    logger.info(f"Total solutions found: {sum(solutions_by_model.values())} out of {bounds[1] - bounds[0] + 1} benchmarks")
 
 def run_benchmark(
         z3_solver: Z3Solver,
@@ -151,6 +183,8 @@ def run_benchmarks(
             logger=logger
         )
 
+    run_results_analysis(bounds, logger)
+
 def get_llm(model:str) -> LLM:
     if model in chatgpt_models:
         if OPENAI_API_KEY is None:
@@ -188,7 +222,7 @@ def parse_range(input: str) -> tuple[int, int]:
     return (start, end)
 
 def main():
-    parser = argparse.ArgumentParser(description="Run benchmarks")
+    parser = argparse.ArgumentParser(description="Invariant Generation Tool for Solidity Smart Contracts")
 
     parser.add_argument("--pipeline", type=parse_pipeline, default=f'{ChatGPTModel.GPT_5_NANO.value}, 0; {ChatGPTModel.GPT_5_MINI.value}, 120; {ChatGPTModel.GPT_5.value}, 300; {ChatGPTModel.GPT_4O.value}, 0; {ChatGPTModel.GPT_4O_MINI.value}, 40', help="Pipeline of LLM models with their timeouts in seconds, formatted as: model, timeout; model, timeout;... Example: gpt-4,120;deepseek,300")
     parser.add_argument("--smt-timeout", type=int, default=50, help="Timeout for the SMT check")
@@ -200,12 +234,17 @@ def main():
     parser.add_argument("--contract-name", type=str, default="LoopExample", help="Contract name in the Solidity file")
     parser.add_argument("--function-name", type=str, default="constructor", help="Function name in the Solidity file")
     parser.add_argument("--output", type=str, default=None, help="Output file path")
-    parser.add_argument("--benchmarks", type=parse_range, default=None, help="Optionally run a range of benchmarks, formatted as: start,end. Example: 1,10")
+    parser.add_argument("--benchmarks", type=parse_range, default=None, help="Run a range of benchmarks, formatted as: start,end. Example: 1,10")
+    parser.add_argument("--analysis", type=parse_range, default=None, help="If provided, runs only the results analysis for the given range of benchmarks, formatted as: start,end. Example: 1,10")
 
     args = parser.parse_args()
 
     logger = logging.getLogger("main")
     logger.setLevel(getattr(logging, args.log_level))
+
+    if args.analysis:
+        run_results_analysis(args.analysis, logger)
+        return
 
     pipeline = [(get_llm(model), threshold) for model, threshold in args.pipeline]
     z3_solver = Z3Solver(args.smt_timeout)
