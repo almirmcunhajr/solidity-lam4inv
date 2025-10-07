@@ -212,6 +212,7 @@ class SolidityGenerator(Generator):
         def visit_function(node: Node, *args, **kwargs):
             # If there are extra conditions in the post-path (e.g. if-statements, asserts), we append them to the assertion.
             if node.contains_if():
+                assertion_op.append(self._solidity_conditional_node_to_op(node))
                 return
             for ir in node.irs_ssa:
                 # If the node contains an assert, we capture its IR and negate it.
