@@ -228,6 +228,7 @@ class SolidityGenerator(Generator):
         triviality_op = And()
         vars_ssa_bounds: dict[str, Optional[tuple[str, str]]] = {}
         self._init_bounds(start_node, end_node, vars_ssa_bounds)
+        self._init_bounds(self.loop_header, self.loop_header, vars_ssa_bounds)
         for var in vars_ssa_bounds:
             bounds = vars_ssa_bounds[var]
             if not bounds:
