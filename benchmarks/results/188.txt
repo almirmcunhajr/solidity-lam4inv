@@ -1,0 +1,68 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 5 candidates
+Verifying generated candidates
+Verifying candidate: assert(z == 10 * w);
+Candidate failed verification
+Adding candidate to fail history: assert(z == 10 * w);
+Verifying candidate: assert(x <= w);
+Candidate failed verification
+Adding candidate to fail history: assert(x <= w);
+Verifying candidate: assert(w >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(w >= 0);
+Verifying candidate: assert(z >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(z >= 0);
+Verifying candidate: assert(y % 2 == 0);
+Candidate failed verification
+Adding candidate to fail history: assert(y % 2 == 0);
+Executing predicate filtering
+Filtering predicates for candidate assert(z == 10 * w);
+Addind predicate z == 10 * w to verify set
+Filtering predicates for candidate assert(x <= w);
+Addind predicate x <= w to verify set
+Filtering predicates for candidate assert(w >= 0);
+Addind predicate w >= 0 to verify set
+Filtering predicates for candidate assert(z >= 0);
+Addind predicate z >= 0 to verify set
+Filtering predicates for candidate assert(y % 2 == 0);
+Addind predicate y % 2 == 0 to verify set
+Predicate filtering verify set: ['z == 10 * w', 'x <= w', 'w >= 0', 'z >= 0', 'y % 2 == 0']
+Verifying formula: ( and ( and ( and ( and ( = z ( * 10 w ) ) ( <= x w ) ) ( >= w 0 ) ) ( >= z 0 ) ) ( = ( mod y 2 ) 0 ) )
+For candidate: assert((z == 10 * w) && (x <= w) && (w >= 0) && (z >= 0) && (y % 2 == 0))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 3 candidates
+Verifying generated candidates
+Verifying candidate: assert(!(y <= 2) || x < 4);
+Candidate failed verification
+Adding candidate to fail history: assert(!(y <= 2) || x < 4);
+Verifying candidate: assert(w != 0 || x == 0);
+Candidate failed verification
+Adding candidate to fail history: assert(w != 0 || x == 0);
+Verifying candidate: assert(w == 0 || y >= 100);
+Candidate failed verification
+Adding candidate to fail history: assert(w == 0 || y >= 100);
+Executing predicate filtering
+Filtering predicates for candidate assert(!(y <= 2) || x < 4);
+Addind predicate (!(y <= 2)) || (x < 4) to verify set
+Filtering predicates for candidate assert(w != 0 || x == 0);
+Addind predicate (w != 0) || (x == 0) to verify set
+Filtering predicates for candidate assert(w == 0 || y >= 100);
+Addind predicate (w == 0) || (y >= 100) to verify set
+Predicate filtering verify set: ['z == 10 * w', 'x <= w', 'w >= 0', 'z >= 0', 'y % 2 == 0', '(!(y <= 2)) || (x < 4)', '(w != 0) || (x == 0)', '(w == 0) || (y >= 100)']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( = z ( * 10 w ) ) ( <= x w ) ) ( >= w 0 ) ) ( >= z 0 ) ) ( = ( mod y 2 ) 0 ) ) ( or ( not ( <= y 2 ) ) ( < x 4 ) ) ) ( or ( distinct w 0 ) ( = x 0 ) ) ) ( or ( = w 0 ) ( >= y 100 ) ) )
+For candidate: assert((z == 10 * w) && (x <= w) && (w >= 0) && (z >= 0) && (y % 2 == 0) && ((!(y <= 2)) || (x < 4)) && ((w != 0) || (x == 0)) && ((w == 0) || (y >= 100)))
+Generating loop invariants candidates with model gpt-5 and presence penalty 0.0
+Generated 1 candidates
+Verifying generated candidates
+Verifying candidate: assert(((x <= 3) && (w == x) && (z == 10 * x) && (y == 100 * x)) || ((x >= 4) && (y >= 4)));
+# Result
+Solution found by the gpt-5 model: assert(((x <= 3) && (w == x) && (z == 10 * x) && (y == 100 * x)) || ((x >= 4) && (y >= 4)));
+8 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 216.7074842453003 seconds
+The total runtime was 440.14382910728455 seconds
+Resetting generator
+Resetting generator
