@@ -4,7 +4,7 @@ from typing import Optional
 
 from slither.core.cfg.node import OperationWithLValue, TemporaryVariable
 from slither.core.declarations import Contract
-from slither.slithir.convert import Assignment
+from slither.slithir.convert import Assignment, TypeConversion
 
 from code_handler.formula_handler import FormulaHandler, FormulaForm, InvalidCodeFormulaError
 
@@ -45,9 +45,13 @@ class SoliditySMTLIB2Translator:
         if isinstance(ir, Assignment):
             if isinstance(ir.read[0], TemporaryVariable):
                 return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
-            return f'({ir.read[0]})'
+            return f'{ir.read[0]}'
+        if isinstance(ir, TypeConversion):
+            if isinstance(ir.read[0], TemporaryVariable):
+                return self._op_to_smt(tmp_irs[str(ir.read[0])], tmp_irs)
+            return f'{ir.read[0]}'
 
-        raise Exception('Invaid operation')
+        raise Exception(f'Invalid operation: {ir}')
 
     def _get_contract(self, slither: Slither, contract_name: str) -> Optional[Contract]:
         for contract in slither.contracts:
@@ -95,7 +99,7 @@ contract Contract {{
             raise InvalidCodeFormulaError(str(e))
         
     def _get_variables_declarations(self, expression: str) -> str:
-        keywords = {'true', 'false'}
+        keywords = {'true', 'false', 'int256', 'uint256', 'int', 'uint', 'bool'}
         pattern = r'\b[a-zA-Z_][a-zA-Z0-9_]*\b'
         variables = {
                 token for token in re.findall(pattern, expression)

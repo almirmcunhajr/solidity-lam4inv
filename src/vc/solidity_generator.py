@@ -9,7 +9,7 @@ from slither.core.solidity_types.elementary_type import Int, Uint
 from slither.slither import Slither
 from slither.core.cfg.node import Constant, InternalCall, Node, Operation, Phi, TemporaryVariable, Variable
 from slither.core.dominators.utils import compute_dominators
-from slither.slithir.convert import Unary
+from slither.slithir.convert import TypeConversion, Unary
 from slither.slithir.variables.variable import Variable
 from slither.slithir.operations import Assignment, Binary, BinaryType, OperationWithLValue, UnaryType, SolidityCall
 
@@ -540,6 +540,10 @@ class SolidityGenerator(Generator):
                 read = self._solidity_op_to_op(self.tmp_irs[str(ir.read[0])])
             return self.op_map[ir.type](read)
         if isinstance(ir, Assignment):
+            if isinstance(ir.read[0], TemporaryVariable):
+                return self._solidity_op_to_op(self.tmp_irs[str(ir.read[0])])
+            return str(ir.read[0])
+        if isinstance(ir, TypeConversion):
             if isinstance(ir.read[0], TemporaryVariable):
                 return self._solidity_op_to_op(self.tmp_irs[str(ir.read[0])])
             return str(ir.read[0])
