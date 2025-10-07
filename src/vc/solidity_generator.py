@@ -148,9 +148,6 @@ class SolidityGenerator(Generator):
     def _get_solidity_tmp_irs(self) -> dict[str, OperationWithLValue]:
         """Returns a mapping of temporary variable names to their corresponding IR operations in the functions
 
-        Args:
-            function (Function): The function to analyze
-
         Returns:
             dict[str, OperationWithLValue]: A dictionary mapping temporary variable names to their corresponding IR operations
         """
@@ -183,6 +180,8 @@ class SolidityGenerator(Generator):
             limiter (Node): The node at which to stop the traversal
             visited (set[Node]): A set of visited nodes to avoid cycles
             visit_function (callable): A function to call on each visited node
+            *args: Additional arguments to pass to the visit_function
+            **kwargs: Additional keyword arguments to pass to the visit_function
         """
 
         if node in visited:
@@ -245,6 +244,7 @@ class SolidityGenerator(Generator):
 
         Args:
             node (Node): The conditional node to convert
+
         Raises:
             Exception: If the node is not conditional
 
@@ -266,6 +266,7 @@ class SolidityGenerator(Generator):
 
     def _retrieve_read_vars(self, ir: Operation, vars: list[Variable]):
         """ Recursively retrieves all variables read by the given IR operation, including those read by temporary variables
+
         Args:
             ir (OperationWithLValue): The IR operation to analyze
             vars (list[Variable]): The list to populate with read variables

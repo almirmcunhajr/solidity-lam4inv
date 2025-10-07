@@ -1,0 +1,45 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(w == 1)
+Filtering predicates for candidate assert(z == 0)
+Filtering predicates for candidate assert(x == 0)
+Filtering predicates for candidate assert(y == 0)
+Predicate filtering verify set: []
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 4 candidates
+Verifying generated candidates
+Verifying candidate: assert(x == y);
+Candidate failed verification
+Adding candidate to fail history: assert(x == y);
+Verifying candidate: assert(z == 0 || z == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(z == 0 || z == 1);
+Verifying candidate: assert(w == 1 || w == 0);
+Candidate failed verification
+Adding candidate to fail history: assert(w == 1 || w == 0);
+Verifying candidate: assert((z != 0) || (w == 1 && x == 0 && y == 0));
+Candidate failed verification
+Adding candidate to fail history: assert((z != 0) || (w == 1 && x == 0 && y == 0));
+Executing predicate filtering
+Filtering predicates for candidate assert(x == y);
+Addind predicate x == y to verify set
+Filtering predicates for candidate assert(z == 0 || z == 1);
+Addind predicate (z == 0) || (z == 1) to verify set
+Filtering predicates for candidate assert(w == 1 || w == 0);
+Addind predicate (w == 1) || (w == 0) to verify set
+Filtering predicates for candidate assert((z != 0) || (w == 1 && x == 0 && y == 0));
+Addind predicate ((z != 0)) || ((w == 1 && x == 0 && y == 0)) to verify set
+Predicate filtering verify set: ['x == y', '(z == 0) || (z == 1)', '(w == 1) || (w == 0)', '((z != 0)) || ((w == 1 && x == 0 && y == 0))']
+Verifying formula: ( and ( and ( and ( = x y ) ( or ( = z 0 ) ( = z 1 ) ) ) ( or ( = w 1 ) ( = w 0 ) ) ) ( or ( distinct z 0 ) ( and ( and ( = w 1 ) ( = x 0 ) ) ( = y 0 ) ) ) )
+For candidate: assert((x == y) && ((z == 0) || (z == 1)) && ((w == 1) || (w == 0)) && (((z != 0)) || ((w == 1 && x == 0 && y == 0))))
+Generating loop invariants candidates with model gpt-5-mini and presence penalty 0.0
+Generated 1 candidates
+Verifying generated candidates
+Verifying candidate: assert((z != 0 && w == 0 && x == y) || (z == 0 && w == 1 && x == 0 && y == 0));
+# Result
+Solution found by the gpt-5-mini model: assert((z != 0 && w == 0 && x == y) || (z == 0 && w == 1 && x == 0 && y == 0));
+4 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 54.67440605163574 seconds
+The total runtime was 106.35380411148071 seconds
+Resetting generator
+Resetting generator
