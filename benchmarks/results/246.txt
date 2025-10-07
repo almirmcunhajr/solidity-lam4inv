@@ -1,0 +1,31 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(nlen == idBitLength / 32)
+Addind predicate nlen == idBitLength / 32 to verify set
+Filtering predicates for candidate assert(idBitLength >= 0)
+Addind predicate idBitLength >= 0 to verify set
+Filtering predicates for candidate assert(materialLength >= 0)
+Addind predicate materialLength >= 0 to verify set
+Predicate filtering verify set: ['nlen == idBitLength / 32', 'idBitLength >= 0', 'materialLength >= 0']
+Verifying formula: ( and ( and ( = nlen ( div idBitLength 32 ) ) ( >= idBitLength 0 ) ) ( >= materialLength 0 ) )
+For candidate: assert((nlen == idBitLength / 32) && (idBitLength >= 0) && (materialLength >= 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(nlen == idBitLength / 32);
+Candidate failed verification
+Adding candidate to fail history: assert(nlen == idBitLength / 32);
+Verifying candidate: assert(idBitLength >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(idBitLength >= 0);
+Verifying candidate: assert(materialLength >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(materialLength >= 0);
+Verifying candidate: assert(0 <= j);
+# Result
+Solution found by the gpt-5-nano model: assert(0 <= j);
+3 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 23.630489826202393 seconds
+The total runtime was 26.47812795639038 seconds
+Resetting generator
+Resetting generator
