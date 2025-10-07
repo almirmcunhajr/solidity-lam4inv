@@ -1,0 +1,58 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(nlen == idBitLength / 32)
+Addind predicate nlen == idBitLength / 32 to verify set
+Filtering predicates for candidate assert(idBitLength >= 0)
+Addind predicate idBitLength >= 0 to verify set
+Filtering predicates for candidate assert(materialLength >= 0)
+Addind predicate materialLength >= 0 to verify set
+Predicate filtering verify set: ['nlen == idBitLength / 32', 'idBitLength >= 0', 'materialLength >= 0']
+Verifying formula: ( and ( and ( = nlen ( div idBitLength 32 ) ) ( >= idBitLength 0 ) ) ( >= materialLength 0 ) )
+For candidate: assert((nlen == idBitLength / 32) && (idBitLength >= 0) && (materialLength >= 0))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 7 candidates
+Verifying generated candidates
+Verifying candidate: assert(idBitLength >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(idBitLength >= 0);
+Verifying candidate: assert(materialLength >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(materialLength >= 0);
+Verifying candidate: assert(nlen == idBitLength / 32);
+Candidate failed verification
+Adding candidate to fail history: assert(nlen == idBitLength / 32);
+Verifying candidate: assert(j >= 0);
+Candidate failed verification
+Adding candidate to fail history: assert(j >= 0);
+Verifying candidate: assert(j <= idBitLength / 8);
+Candidate failed verification
+Adding candidate to fail history: assert(j <= idBitLength / 8);
+Verifying candidate: assert(j <= materialLength);
+Candidate failed verification
+Adding candidate to fail history: assert(j <= materialLength);
+Verifying candidate: assert((j / 4) <= nlen);
+Candidate failed verification
+Adding candidate to fail history: assert((j / 4) <= nlen);
+Executing predicate filtering
+Filtering predicates for candidate assert(idBitLength >= 0);
+Filtering predicates for candidate assert(materialLength >= 0);
+Filtering predicates for candidate assert(nlen == idBitLength / 32);
+Filtering predicates for candidate assert(j >= 0);
+Addind predicate j >= 0 to verify set
+Filtering predicates for candidate assert(j <= idBitLength / 8);
+Addind predicate j <= idBitLength / 8 to verify set
+Filtering predicates for candidate assert(j <= materialLength);
+Addind predicate j <= materialLength to verify set
+Filtering predicates for candidate assert((j / 4) <= nlen);
+Addind predicate (j / 4) <= nlen to verify set
+Predicate filtering verify set: ['nlen == idBitLength / 32', 'idBitLength >= 0', 'materialLength >= 0', 'j >= 0', 'j <= idBitLength / 8', 'j <= materialLength', '(j / 4) <= nlen']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( = nlen ( div idBitLength 32 ) ) ( >= idBitLength 0 ) ) ( >= materialLength 0 ) ) ( >= j 0 ) ) ( <= j ( div idBitLength 8 ) ) ) ( <= j materialLength ) ) ( <= ( div j 4 ) nlen ) )
+For candidate: assert((nlen == idBitLength / 32) && (idBitLength >= 0) && (materialLength >= 0) && (j >= 0) && (j <= idBitLength / 8) && (j <= materialLength) && ((j / 4) <= nlen))
+Predicate filtering found solution: assert((nlen == idBitLength / 32) && (idBitLength >= 0) && (materialLength >= 0) && (j >= 0) && (j <= idBitLength / 8) && (j <= materialLength) && ((j / 4) <= nlen))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((nlen == idBitLength / 32) && (idBitLength >= 0) && (materialLength >= 0) && (j >= 0) && (j <= idBitLength / 8) && (j <= materialLength) && ((j / 4) <= nlen))
+7 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 49.01664090156555 seconds
+The total runtime was 51.73400282859802 seconds
+Resetting generator
+Resetting generator
