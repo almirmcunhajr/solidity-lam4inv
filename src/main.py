@@ -131,25 +131,19 @@ def run_benchmark(
     predicate_filtering = PredicateFiltering(code_handler, formula_handler, bmc, logger)
 
     print(f"Running benchmark for benchmark {benchmark_index}")
-    try:
-        inv_formula = run(
-            code_handler=code_handler,
-            formula_handler=formula_handler,
-            z3_inv_smt_solver=z3_inv_smt_solver,
-            generator=generator,
-            predicate_filtering=predicate_filtering,
-            pipeline=pipeline,
-            max_chat_interactions=max_chat_interactions,
-            logger=logger,
-            output_path=result_file_path
-        )
-        if inv_formula is None:
-            logger.error(f"Benchmark {benchmark_index} failed to find an invariant")
-            if os.path.exists(result_file_path):
-                os.remove(result_file_path)
-            return
-    except Exception as e:
-        logger.error(f"Benchmark {benchmark_index} failed with error: {e}")
+    inv_formula = run(
+        code_handler=code_handler,
+        formula_handler=formula_handler,
+        z3_inv_smt_solver=z3_inv_smt_solver,
+        generator=generator,
+        predicate_filtering=predicate_filtering,
+        pipeline=pipeline,
+        max_chat_interactions=max_chat_interactions,
+        logger=logger,
+        output_path=result_file_path
+    )
+    if inv_formula is None:
+        logger.error(f"Benchmark {benchmark_index} failed to find an invariant")
         if os.path.exists(result_file_path):
             os.remove(result_file_path)
         return
@@ -165,8 +159,7 @@ def run_benchmark(
 
     crosscheck_ce = crosscheck.check(inv, crosscheck_vc_template)
     if crosscheck_ce is not None:
-        logger.error(f"Cross check failed for the benchmark {benchmark_index}")
-        os.remove(result_file_path)
+        raise ValueError(f"Cross check failed for the benchmark {benchmark_index}, counterexample: {crosscheck_ce}")
 
     print(f"Cross check succeeded for the benchmark {benchmark_index}")
 
