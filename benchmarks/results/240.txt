@@ -1,0 +1,58 @@
+Resetting generator
+Executing predicate filtering for preconditions
+Filtering predicates for candidate assert(exp == 1)
+Addind predicate exp == 1 to verify set
+Filtering predicates for candidate assert(term == 1)
+Filtering predicates for candidate assert(count == 1)
+Filtering predicates for candidate assert(result == 2)
+Addind predicate result == 2 to verify set
+Filtering predicates for candidate assert(x > -1)
+Addind predicate x > -1 to verify set
+Filtering predicates for candidate assert(x < 1)
+Addind predicate x < 1 to verify set
+Predicate filtering verify set: ['exp == 1', 'result == 2', 'x > -1', 'x < 1']
+Verifying formula: ( and ( and ( and ( = exp 1 ) ( = result 2 ) ) ( > x ( - 0 1 ) ) ) ( < x 1 ) )
+For candidate: assert((exp == 1) && (result == 2) && (x > -1) && (x < 1))
+Generating loop invariants candidates with model gpt-5-nano and presence penalty 0.0
+Generated 6 candidates
+Verifying generated candidates
+Verifying candidate: assert(x == 0);
+Candidate failed verification
+Adding candidate to fail history: assert(x == 0);
+Verifying candidate: assert(result == 2);
+Candidate failed verification
+Adding candidate to fail history: assert(result == 2);
+Verifying candidate: assert(exp == 1);
+Candidate failed verification
+Adding candidate to fail history: assert(exp == 1);
+Verifying candidate: assert(count >= 1);
+Candidate failed verification
+Adding candidate to fail history: assert(count >= 1);
+Verifying candidate: assert((term == 0) || (term == 1));
+Candidate failed verification
+Adding candidate to fail history: assert((term == 0) || (term == 1));
+Verifying candidate: assert(exp <= result);
+Candidate failed verification
+Adding candidate to fail history: assert(exp <= result);
+Executing predicate filtering
+Filtering predicates for candidate assert(x == 0);
+Addind predicate x == 0 to verify set
+Filtering predicates for candidate assert(result == 2);
+Filtering predicates for candidate assert(exp == 1);
+Filtering predicates for candidate assert(count >= 1);
+Addind predicate count >= 1 to verify set
+Filtering predicates for candidate assert((term == 0) || (term == 1));
+Addind predicate ((term == 0)) || ((term == 1)) to verify set
+Filtering predicates for candidate assert(exp <= result);
+Addind predicate exp <= result to verify set
+Predicate filtering verify set: ['exp == 1', 'result == 2', 'x > -1', 'x < 1', 'x == 0', 'count >= 1', '((term == 0)) || ((term == 1))', 'exp <= result']
+Verifying formula: ( and ( and ( and ( and ( and ( and ( and ( = exp 1 ) ( = result 2 ) ) ( > x ( - 0 1 ) ) ) ( < x 1 ) ) ( = x 0 ) ) ( >= count 1 ) ) ( or ( = term 0 ) ( = term 1 ) ) ) ( <= exp result ) )
+For candidate: assert((exp == 1) && (result == 2) && (x > -1) && (x < 1) && (x == 0) && (count >= 1) && (((term == 0)) || ((term == 1))) && (exp <= result))
+Predicate filtering found solution: assert((exp == 1) && (result == 2) && (x > -1) && (x < 1) && (x == 0) && (count >= 1) && (((term == 0)) || ((term == 1))) && (exp <= result))
+# Result
+Solution found by the predicate filtering mechanism using the gpt-5-nano model: assert((exp == 1) && (result == 2) && (x > -1) && (x < 1) && (x == 0) && (count >= 1) && (((term == 0)) || ((term == 1))) && (exp <= result))
+6 counter examples were generated for the model proposals, with 0 repeated fails
+The model runtime was 40.491799116134644 seconds
+The total runtime was 48.58604693412781 seconds
+Resetting generator
+Resetting generator
