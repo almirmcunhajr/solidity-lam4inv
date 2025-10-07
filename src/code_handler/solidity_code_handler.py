@@ -1,5 +1,4 @@
 import re
-from typing import LiteralString
 
 from code_handler.code_handler import CodeHandler, Language
 
@@ -37,7 +36,7 @@ class SolidityCodeHandler(CodeHandler):
                 assertions = []
                 pre_loop_code = function_code.split('while')[0]
 
-                assignments_pattern = re.compile(r'(\w+)\s*=\s*(\w+)')
+                assignments_pattern = re.compile(r'^\s*(\w+)\s*=\s*([^;]+)')
                 assignments_matches = assignments_pattern.findall(pre_loop_code)
                 for match in assignments_matches:
                     assertions.append(f'assert({match[0]} == {match[1]})')
