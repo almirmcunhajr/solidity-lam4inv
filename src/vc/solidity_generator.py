@@ -464,7 +464,7 @@ class SolidityGenerator(Generator):
         """
 
         start_node = self.function.nodes[0]
-        end_node = self.loop_header
+        end_node = self.loop_header.fathers[0]
 
         vars_ssa_bounds: dict[str, Optional[tuple[str, str]]] = {}
         self._init_bounds(start_node, end_node, vars_ssa_bounds)
