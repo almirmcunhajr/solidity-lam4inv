@@ -23,6 +23,7 @@ from bmc.bmc import BMC
 from predicate_filtering.predicate_filtering import PredicateFiltering
 
 results_dir = "benchmarks/results"
+code_dir = "benchmarks/code"
 
 load_dotenv()
 
@@ -75,7 +76,14 @@ def run_results_analysis(bounds: tuple[int, int], logger: logging.Logger):
 
     solutions_found_regex = re.compile(r'Solution found by the (.*):')
     solutions_by_model: dict[str, int] = {}
+    missing_code_files = 0
     for benchmark_index in range(bounds[0], bounds[1]+1):
+        code_file_path = f"{code_dir}/{benchmark_index}.sol"
+        if not os.path.exists(code_file_path):
+            logger.warning(f"Code file {code_file_path} does not exist")
+            missing_code_files += 1
+            continue
+
         result_file_path = f"{results_dir}/{benchmark_index}.txt"
         if not os.path.exists(result_file_path):
             logger.warning(f"Result file {result_file_path} does not exist")
@@ -94,9 +102,11 @@ def run_results_analysis(bounds: tuple[int, int], logger: logging.Logger):
         logger.warning(f"No solution found in the result file {result_file_path}")
 
     logger.info("Results analysis:")
+    total_benchmarks = bounds[1] - bounds[0] + 1 - missing_code_files
+    total_solutions = sum(solutions_by_model.values())
     for model, count in solutions_by_model.items():
         logger.info(f"{model} found {count} solutions")
-    logger.info(f"Total solutions found: {sum(solutions_by_model.values())} out of {bounds[1] - bounds[0] + 1} benchmarks")
+    logger.info(f"Total solutions found: {total_solutions} out of {total_benchmarks} benchmarks")
 
 def run_benchmark(
         z3_solver: Z3Solver,
