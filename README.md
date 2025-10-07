@@ -26,7 +26,7 @@ combines large-language-model guidance with symbolic reasoning tailored to the E
 The tool analyses a single loop per function: the `while` loop enclosed in the function targeted by the harness.
 The function must follow this shape:
 
-1. All variables must be integers, local to the function, and declared either as parameters or as local variables.
+1. All variables must be integers, written in cammelCase, local to the function, and declared either as parameters or as local variables.
 2. Assignments or `require` statements modelling the preconditions for entering the loop.
 3. A single `while` loop.
 4. An assert statement must appear immediately after the while loop (it may be nested under conditionals) and should express a property that the inferred loop invariant is intended to prove.
