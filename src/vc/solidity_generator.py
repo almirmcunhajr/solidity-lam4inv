@@ -301,7 +301,7 @@ class SolidityGenerator(Generator):
             var_ssa_bounds[var_base_name] = ("", str(ir.lvalue))
             return
         bounds = var_ssa_bounds[var_base_name]
-        if bounds[1] < str(ir.lvalue):
+        if self._get_solidity_ssa_var_version(bounds[1]) < self._get_solidity_ssa_var_version(ir.lvalue):
             var_ssa_bounds[var_base_name] = (bounds[0], str(ir.lvalue))
 
     def _init_bounds(self, node: Node, limiter: Node, var_ssa_bounds: dict[str, Optional[tuple[str, str]]]):
@@ -563,6 +563,22 @@ class SolidityGenerator(Generator):
         """
 
         return str(var).split('_')[0]
+
+    def _get_solidity_ssa_var_version(self, var: Variable) -> int:
+        """ Returns the SSA version number of a variable
+
+        Args:
+            var (Variable): The variable to process
+
+        Returns:
+            int: The SSA version number of the variable
+        """
+
+        parts = str(var).split('_')
+        try:
+            return int(parts[-1])
+        except ValueError:
+            return 0
 
     def _get_solidity_vars(self) -> tuple[list[tuple[str, str]], list[tuple[str, str]]]:
         """Finds all state variables (SSA) and base variables (non-SSA) in the function and contract
